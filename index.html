@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="es-AR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, maximum-scale=1.0">
+<meta name="theme-color" content="#FAF6EF">
+<meta name="description" content="Libro de Caja — organizá tus gastos e ingresos todos los días">
+<title>Libro de Caja</title>
+<link rel="manifest" href="manifest.json">
+<link rel="icon" href="icon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="icon-192.png">
+<link rel="stylesheet" href="styles.css">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,400;8..60,500;8..60,600;8..60,700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+</head>
+<body>
+
+<div id="app">
+
+  <!-- ===== HEADER ===== -->
+  <header class="top-bar">
+    <div class="top-bar-title">
+      <span class="ledger-mark">§</span>
+      <h1>Libro de caja</h1>
+    </div>
+    <button class="icon-btn" id="btn-open-stats" aria-label="Ver reportes">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M4 19V10M12 19V5M20 19v-7"/></svg>
+    </button>
+  </header>
+
+  <!-- ===== STREAK / HABIT BAR ===== -->
+  <section class="streak-bar" id="streak-bar">
+    <div class="streak-info">
+      <span class="streak-flame" id="streak-flame">🔥</span>
+      <span class="streak-text"><strong id="streak-count">0</strong> días seguidos anotando</span>
+    </div>
+    <div class="streak-today" id="streak-today-badge">hoy: pendiente</div>
+  </section>
+
+  <!-- ===== MONTH SUMMARY ===== -->
+  <section class="summary-card">
+    <div class="summary-row">
+      <div class="summary-month-nav">
+        <button class="nav-arrow" id="prev-month" aria-label="Mes anterior">‹</button>
+        <span class="summary-month" id="current-month-label">junio 2026</span>
+        <button class="nav-arrow" id="next-month" aria-label="Mes siguiente">›</button>
+      </div>
+    </div>
+    <div class="summary-balance">
+      <span class="summary-balance-label">saldo del mes</span>
+      <span class="summary-balance-amount" id="month-balance">$ 0</span>
+    </div>
+    <div class="summary-split">
+      <div class="split-item split-income">
+        <span class="split-label">ingresos</span>
+        <span class="split-amount" id="month-income">$ 0</span>
+      </div>
+      <div class="split-divider"></div>
+      <div class="split-item split-expense">
+        <span class="split-label">gastos</span>
+        <span class="split-amount" id="month-expense">$ 0</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== SUGGESTION BANNER (dynamic) ===== -->
+  <section class="suggestion-banner" id="suggestion-banner" hidden>
+    <span class="suggestion-icon">◆</span>
+    <p id="suggestion-text"></p>
+  </section>
+
+  <!-- ===== MOVEMENTS LIST ===== -->
+  <section class="ledger-section">
+    <div class="ledger-section-head">
+      <h2>movimientos</h2>
+      <div class="filter-pills" id="filter-pills">
+        <button class="pill active" data-filter="all">todos</button>
+        <button class="pill" data-filter="income">ingresos</button>
+        <button class="pill" data-filter="expense">gastos</button>
+      </div>
+    </div>
+    <div id="ledger-list" class="ledger-list">
+      <!-- entries injected here -->
+    </div>
+    <div class="empty-state" id="empty-state" hidden>
+      <p class="empty-state-title">todavía no anotaste nada este mes</p>
+      <p class="empty-state-sub">tocá el botón + para cargar tu primer movimiento</p>
+    </div>
+  </section>
+
+</div>
+
+<!-- ===== FLOATING ADD BUTTON ===== -->
+<button class="fab" id="btn-add" aria-label="Agregar movimiento">
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>
+</button>
+
+<!-- ===== BOTTOM NAV ===== -->
+<nav class="bottom-nav">
+  <button class="nav-item active" data-view="ledger">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M4 6h16M4 12h16M4 18h10"/></svg>
+    <span>libro</span>
+  </button>
+  <button class="nav-item" data-view="stats">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M4 19V10M12 19V5M20 19v-7"/></svg>
+    <span>reportes</span>
+  </button>
+  <button class="nav-item" data-view="goals">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="3"/></svg>
+    <span>metas</span>
+  </button>
+  <button class="nav-item" data-view="settings">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 11-2.83 2.83l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 11-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 11-2.83-2.83l.06-.06a1.65 1.65 0 00.33-1.82 1.65 1.65 0 00-1.51-1H3a2 2 0 110-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 112.83-2.83l.06.06a1.65 1.65 0 001.82.33H9a1.65 1.65 0 001-1.51V3a2 2 0 114 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 112.83 2.83l-.06.06a1.65 1.65 0 00-.33 1.82V9a1.65 1.65 0 001.51 1H21a2 2 0 110 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg>
+    <span>ajustes</span>
+  </button>
+</nav>
+
+<!-- ===== VIEW: STATS (full screen overlay) ===== -->
+<div class="view-overlay" id="view-stats" hidden>
+  <header class="view-header">
+    <button class="icon-btn" id="stats-back" aria-label="Volver">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M15 18l-6-6 6-6"/></svg>
+    </button>
+    <h2>reportes</h2>
+    <div style="width:36px"></div>
+  </header>
+  <div class="view-body">
+    <div class="stats-month-label" id="stats-month-label">junio 2026</div>
+
+    <div class="metric-grid">
+      <div class="metric-card">
+        <span class="metric-label">promedio diario</span>
+        <span class="metric-value" id="metric-avg-daily">$ 0</span>
+      </div>
+      <div class="metric-card">
+        <span class="metric-label">tasa de ahorro</span>
+        <span class="metric-value" id="metric-savings-rate">0%</span>
+      </div>
+      <div class="metric-card">
+        <span class="metric-label">vs mes anterior</span>
+        <span class="metric-value" id="metric-vs-last">—</span>
+      </div>
+      <div class="metric-card">
+        <span class="metric-label">días anotados</span>
+        <span class="metric-value" id="metric-days-logged">0/30</span>
+      </div>
+    </div>
+
+    <h3 class="section-label">gastos por categoría</h3>
+    <div id="category-bars" class="category-bars"></div>
+
+    <h3 class="section-label">últimos 6 meses</h3>
+    <div class="trend-chart" id="trend-chart"></div>
+
+  </div>
+</div>
+
+<!-- ===== VIEW: GOALS ===== -->
+<div class="view-overlay" id="view-goals" hidden>
+  <header class="view-header">
+    <button class="icon-btn" id="goals-back" aria-label="Volver">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M15 18l-6-6 6-6"/></svg>
+    </button>
+    <h2>metas de ahorro</h2>
+    <button class="icon-btn" id="btn-add-goal" aria-label="Nueva meta">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>
+    </button>
+  </header>
+  <div class="view-body" id="goals-body">
+    <!-- goals injected here -->
+  </div>
+</div>
+
+<!-- ===== VIEW: SETTINGS ===== -->
+<div class="view-overlay" id="view-settings" hidden>
+  <header class="view-header">
+    <button class="icon-btn" id="settings-back" aria-label="Volver">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M15 18l-6-6 6-6"/></svg>
+    </button>
+    <h2>ajustes</h2>
+    <div style="width:36px"></div>
+  </header>
+  <div class="view-body">
+    <h3 class="section-label">categorías de gasto</h3>
+    <div id="category-manager" class="category-manager"></div>
+    <button class="text-btn" id="btn-add-category">+ agregar categoría</button>
+
+    <h3 class="section-label">datos</h3>
+    <button class="settings-row" id="btn-export">
+      <span>exportar datos (.json)</span>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" width="18" height="18"><path d="M12 15V3M7 10l5 5 5-5M5 21h14"/></svg>
+    </button>
+    <button class="settings-row danger" id="btn-clear-data">
+      <span>borrar todos los datos</span>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" width="18" height="18"><path d="M3 6h18M8 6V4a2 2 0 012-2h4a2 2 0 012 2v2m3 0v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6h14z"/></svg>
+    </button>
+
+    <p class="app-version">Libro de caja · v1.0 · tus datos viven solo en este dispositivo</p>
+  </div>
+</div>
+
+<!-- ===== MODAL: ADD MOVEMENT ===== -->
+<div class="modal-backdrop" id="modal-backdrop" hidden>
+  <div class="modal-sheet" id="modal-sheet">
+    <div class="modal-handle"></div>
+    <div class="modal-type-toggle">
+      <button class="type-btn expense active" id="type-expense" data-type="expense">gasto</button>
+      <button class="type-btn income" id="type-income" data-type="income">ingreso</button>
+    </div>
+
+    <div class="amount-input-wrap">
+      <span class="amount-currency">$</span>
+      <input type="number" inputmode="decimal" id="input-amount" class="amount-input" placeholder="0" autocomplete="off">
+    </div>
+
+    <div class="field-group">
+      <label class="field-label">categoría</label>
+      <div class="category-grid" id="category-grid"></div>
+    </div>
+
+    <div class="field-group">
+      <label class="field-label" for="input-note">nota (opcional)</label>
+      <input type="text" id="input-note" class="text-input" placeholder="ej: nafta, supermercado, sueldo...">
+    </div>
+
+    <div class="field-group">
+      <label class="field-label" for="input-date">fecha</label>
+      <input type="date" id="input-date" class="text-input">
+    </div>
+
+    <button class="btn-save" id="btn-save-entry">anotar movimiento</button>
+    <button class="btn-cancel" id="btn-cancel-entry">cancelar</button>
+  </div>
+</div>
+
+<!-- ===== MODAL: ADD/EDIT GOAL ===== -->
+<div class="modal-backdrop" id="goal-modal-backdrop" hidden>
+  <div class="modal-sheet">
+    <div class="modal-handle"></div>
+    <h3 class="modal-title">nueva meta de ahorro</h3>
+    <div class="field-group">
+      <label class="field-label" for="goal-name">nombre</label>
+      <input type="text" id="goal-name" class="text-input" placeholder="ej: vacaciones, notebook nueva...">
+    </div>
+    <div class="field-group">
+      <label class="field-label" for="goal-target">monto objetivo</label>
+      <input type="number" inputmode="decimal" id="goal-target" class="text-input" placeholder="0">
+    </div>
+    <div class="field-group">
+      <label class="field-label" for="goal-current">ya tenés ahorrado</label>
+      <input type="number" inputmode="decimal" id="goal-current" class="text-input" placeholder="0">
+    </div>
+    <button class="btn-save" id="btn-save-goal">crear meta</button>
+    <button class="btn-cancel" id="btn-cancel-goal">cancelar</button>
+  </div>
+</div>
+
+<!-- ===== MODAL: ADD CATEGORY ===== -->
+<div class="modal-backdrop" id="cat-modal-backdrop" hidden>
+  <div class="modal-sheet">
+    <div class="modal-handle"></div>
+    <h3 class="modal-title">nueva categoría</h3>
+    <div class="field-group">
+      <label class="field-label" for="new-cat-name">nombre</label>
+      <input type="text" id="new-cat-name" class="text-input" placeholder="ej: mascotas">
+    </div>
+    <div class="field-group">
+      <label class="field-label">ícono</label>
+      <div class="icon-picker" id="icon-picker"></div>
+    </div>
+    <button class="btn-save" id="btn-save-category">agregar</button>
+    <button class="btn-cancel" id="btn-cancel-category">cancelar</button>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script src="app.js"></script>
+<script>
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('sw.js').catch(() => {});
+  });
+}
+</script>
+</body>
+</html>
