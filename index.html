@@ -62,6 +62,7 @@
         <span class="split-amount" id="month-expense">$ 0</span>
       </div>
     </div>
+    <div class="account-breakdown" id="account-breakdown" hidden></div>
   </section>
 
   <!-- ===== SUGGESTION BANNER (dynamic) ===== -->
@@ -186,6 +187,10 @@
     <div id="category-manager" class="category-manager"></div>
     <button class="text-btn" id="btn-add-category">+ agregar categoría</button>
 
+    <h3 class="section-label">cuentas</h3>
+    <div id="account-manager" class="category-manager"></div>
+    <button class="text-btn" id="btn-add-account">+ agregar cuenta</button>
+
     <h3 class="section-label">datos</h3>
     <button class="settings-row" id="btn-export">
       <span>exportar datos (.json)</span>
@@ -217,6 +222,11 @@
     <div class="field-group">
       <label class="field-label">categoría</label>
       <div class="category-grid" id="category-grid"></div>
+    </div>
+
+    <div class="field-group">
+      <label class="field-label">cuenta</label>
+      <div class="account-grid" id="account-grid"></div>
     </div>
 
     <div class="field-group">
@@ -271,6 +281,32 @@
     </div>
     <button class="btn-save" id="btn-save-category">agregar</button>
     <button class="btn-cancel" id="btn-cancel-category">cancelar</button>
+  </div>
+</div>
+
+<!-- ===== MODAL: ADD ACCOUNT ===== -->
+<div class="modal-backdrop" id="account-modal-backdrop" hidden>
+  <div class="modal-sheet">
+    <div class="modal-handle"></div>
+    <h3 class="modal-title">nueva cuenta</h3>
+    <div class="field-group">
+      <label class="field-label" for="new-account-name">nombre</label>
+      <input type="text" id="new-account-name" class="text-input" placeholder="ej: BBVA, Ualá, MODO...">
+    </div>
+    <div class="field-group">
+      <label class="field-label">tipo</label>
+      <div class="account-type-selector" id="account-type-selector">
+        <button class="account-type-btn selected" data-type="cash">💵 efectivo</button>
+        <button class="account-type-btn" data-type="bank">🏦 banco</button>
+        <button class="account-type-btn" data-type="digital">📲 digital</button>
+      </div>
+    </div>
+    <div class="field-group">
+      <label class="field-label">ícono</label>
+      <div class="icon-picker" id="account-icon-picker"></div>
+    </div>
+    <button class="btn-save" id="btn-save-account">agregar cuenta</button>
+    <button class="btn-cancel" id="btn-cancel-account">cancelar</button>
   </div>
 </div>
 

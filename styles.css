@@ -259,6 +259,33 @@ input { font-family: inherit; }
   background: var(--paper-line);
 }
 
+/* account breakdown in summary card */
+.account-breakdown {
+  border-top: 1px dashed var(--paper-line);
+  padding-top: 10px;
+  margin-top: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.account-balance-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.account-balance-name {
+  font-size: 12px;
+  color: var(--ink-soft);
+}
+.account-balance-amount {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  color: var(--ink);
+}
+.account-balance-amount.negative { color: var(--expense); }
+
 /* ============================================
    SUGGESTION BANNER
    ============================================ */
@@ -926,6 +953,33 @@ input { font-family: inherit; }
   font-size: 13px;
   color: var(--ink-faint);
   margin-top: 4px;
+}
+
+.account-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+}
+
+.account-type-selector {
+  display: flex;
+  gap: 8px;
+}
+.account-type-btn {
+  flex: 1;
+  padding: 9px 4px;
+  font-size: 12px;
+  font-weight: 600;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--paper-line);
+  background: var(--paper-raised);
+  color: var(--ink-soft);
+  text-align: center;
+}
+.account-type-btn.selected {
+  border-color: var(--ink);
+  background: var(--ink);
+  color: var(--paper);
 }
 
 .icon-picker {

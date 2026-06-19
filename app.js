@@ -27,16 +27,25 @@ const DEFAULT_INCOME_CATEGORIES = [
 
 const ICON_OPTIONS = ['🍴','🚌','💡','🎮','💊','🏠','👕','📚','◆','🐾','✈️','📱','🎓','🛒','⚽','🎵','🔧','💼','💻','🎁','🏷️','💰','📦','☕'];
 
+const DEFAULT_ACCOUNTS = [
+  { id: 'cash',    name: 'Efectivo',     icon: '💵', type: 'cash' },
+  { id: 'bank',    name: 'Banco',        icon: '🏦', type: 'bank' },
+  { id: 'digital', name: 'Mercado Pago', icon: '📲', type: 'digital' },
+];
+
+const ACCOUNT_ICON_OPTIONS = ['💵','🏦','📲','💳','🏧','💰','💼','📱','🪙','💎','🔑','⭐'];
+
 const MONTH_NAMES = ['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
 const DAY_NAMES_SHORT = ['dom','lun','mar','mié','jue','vie','sáb'];
 
 /* ---------- State ---------- */
 
 let state = {
-  entries: [],            // {id, type, amount, categoryId, note, date}
+  entries: [],            // {id, type, amount, categoryId, accountId, note, date}
   categories: DEFAULT_CATEGORIES,
   incomeCategories: DEFAULT_INCOME_CATEGORIES,
   goals: [],               // {id, name, target, current}
+  accounts: [...DEFAULT_ACCOUNTS],
   streak: { count: 0, lastDate: null },
 };
 
@@ -44,7 +53,10 @@ let viewDate = new Date();        // month currently shown in ledger
 let currentFilter = 'all';
 let currentEntryType = 'expense';
 let selectedCategoryId = null;
+let selectedAccountId = null;
 let selectedIconForNewCategory = ICON_OPTIONS[0];
+let selectedIconForNewAccount = ACCOUNT_ICON_OPTIONS[0];
+let selectedAccountType = 'cash';
 
 /* ---------- Persistence ---------- */
 
@@ -54,6 +66,16 @@ function loadState() {
     if (raw) {
       const parsed = JSON.parse(raw);
       state = Object.assign(state, parsed);
+    }
+    if (!state.accounts || state.accounts.length === 0) {
+      state.accounts = [...DEFAULT_ACCOUNTS];
+    }
+    const needsMigration = state.entries.some(e => !e.accountId);
+    if (needsMigration) {
+      if (!state.accounts.find(a => a.id === 'general')) {
+        state.accounts = [{ id: 'general', name: 'General', icon: '◆', type: 'cash' }, ...state.accounts];
+      }
+      state.entries = state.entries.map(e => e.accountId ? e : { ...e, accountId: 'general' });
     }
   } catch (e) {
     console.error('No se pudo cargar el estado guardado', e);
@@ -111,6 +133,10 @@ function getCategoryById(id, type) {
   return list.find(c => c.id === id) || { id, name: id, icon: '◆' };
 }
 
+function getAccountById(id) {
+  return state.accounts.find(a => a.id === id) || { id, name: 'General', icon: '◆', type: 'cash' };
+}
+
 function showToast(msg) {
   const toast = document.getElementById('toast');
   toast.textContent = msg;
@@ -124,7 +150,7 @@ function showToast(msg) {
    ============================================ */
 
 const VIEW_OVERLAY_IDS = ['view-stats', 'view-goals', 'view-settings'];
-const MODAL_OVERLAY_IDS = ['modal-backdrop', 'goal-modal-backdrop', 'cat-modal-backdrop'];
+const MODAL_OVERLAY_IDS = ['modal-backdrop', 'goal-modal-backdrop', 'cat-modal-backdrop', 'account-modal-backdrop'];
 
 function updateNavForLedger() {
   document.querySelectorAll('.nav-item').forEach(item => {
@@ -186,6 +212,35 @@ function renderSummary() {
 
   document.getElementById('month-income').textContent = formatMoney(income);
   document.getElementById('month-expense').textContent = formatMoney(expense);
+  renderAccountBreakdown(monthEntries);
+}
+
+function renderAccountBreakdown(monthEntries) {
+  const container = document.getElementById('account-breakdown');
+  if (!container) return;
+
+  const byAccount = {};
+  monthEntries.forEach(e => {
+    const key = e.accountId || 'general';
+    byAccount[key] = (byAccount[key] || 0) + (e.type === 'income' ? e.amount : -e.amount);
+  });
+
+  const accountsUsed = Object.keys(byAccount);
+  if (accountsUsed.length <= 1) { container.hidden = true; return; }
+
+  container.hidden = false;
+  container.innerHTML = '';
+  accountsUsed.forEach(accId => {
+    const acc = getAccountById(accId);
+    const balance = byAccount[accId];
+    const row = document.createElement('div');
+    row.className = 'account-balance-row';
+    row.innerHTML = `
+      <span class="account-balance-name">${acc.icon} ${escapeHtml(acc.name)}</span>
+      <span class="account-balance-amount${balance < 0 ? ' negative' : ''}">${formatMoney(balance)}</span>
+    `;
+    container.appendChild(row);
+  });
 }
 
 /* ============================================
@@ -357,13 +412,18 @@ function formatDayLabel(iso) {
 
 function renderEntryRow(entry) {
   const cat = getCategoryById(entry.categoryId, entry.type);
+  const acc = getAccountById(entry.accountId);
   const row = document.createElement('div');
   row.className = 'ledger-entry';
+  const subtitleParts = [];
+  if (entry.note) subtitleParts.push(escapeHtml(entry.note));
+  if (state.accounts.length > 1) subtitleParts.push(`${acc.icon} ${escapeHtml(acc.name)}`);
+  const subtitle = subtitleParts.join(' · ');
   row.innerHTML = `
     <div class="entry-icon ${entry.type}">${cat.icon}</div>
     <div class="entry-detail">
       <p class="entry-category">${escapeHtml(cat.name)}</p>
-      ${entry.note ? `<p class="entry-note">${escapeHtml(entry.note)}</p>` : ''}
+      ${subtitle ? `<p class="entry-note">${subtitle}</p>` : ''}
     </div>
     <div class="entry-amount ${entry.type}">${entry.type === 'expense' ? '−' : '+'}${formatMoney(entry.amount)}</div>
   `;
@@ -407,11 +467,13 @@ function openAddModal() {
   closeAllOverlaysAndModals();
   currentEntryType = 'expense';
   selectedCategoryId = null;
+  selectedAccountId = state.accounts.length > 0 ? state.accounts[0].id : null;
   document.getElementById('input-amount').value = '';
   document.getElementById('input-note').value = '';
   document.getElementById('input-date').value = todayISO();
   setEntryType('expense');
   renderCategoryGrid();
+  renderAccountGrid();
   document.getElementById('modal-backdrop').hidden = false;
   history.pushState({ overlay: true }, '');
   setTimeout(() => document.getElementById('input-amount').focus(), 200);
@@ -427,6 +489,23 @@ function setEntryType(type) {
   document.getElementById('type-expense').classList.toggle('active', type === 'expense');
   document.getElementById('type-income').classList.toggle('active', type === 'income');
   renderCategoryGrid();
+}
+
+function renderAccountGrid() {
+  const grid = document.getElementById('account-grid');
+  if (!grid) return;
+  grid.innerHTML = '';
+  state.accounts.forEach(acc => {
+    const chip = document.createElement('button');
+    chip.type = 'button';
+    chip.className = 'category-chip' + (selectedAccountId === acc.id ? ' selected' : '');
+    chip.innerHTML = `<span class="chip-icon">${acc.icon}</span><span>${escapeHtml(acc.name)}</span>`;
+    chip.addEventListener('click', () => {
+      selectedAccountId = acc.id;
+      renderAccountGrid();
+    });
+    grid.appendChild(chip);
+  });
 }
 
 function renderCategoryGrid() {
@@ -460,12 +539,17 @@ function saveEntry() {
     showToast('Elegí una categoría');
     return;
   }
+  if (!selectedAccountId) {
+    showToast('Elegí una cuenta');
+    return;
+  }
 
   state.entries.push({
     id: uid(),
     type: currentEntryType,
     amount: amount,
     categoryId: selectedCategoryId,
+    accountId: selectedAccountId,
     note: note,
     date: date,
     createdAt: Date.now(),
@@ -749,6 +833,83 @@ function saveCategory() {
   showToast('Categoría agregada');
 }
 
+/* ============================================
+   VIEW: ACCOUNTS (within Settings)
+   ============================================ */
+
+function renderAccountManager() {
+  const container = document.getElementById('account-manager');
+  if (!container) return;
+  container.innerHTML = '';
+  state.accounts.forEach(acc => {
+    const row = document.createElement('div');
+    row.className = 'category-manager-row';
+    row.innerHTML = `
+      <span><span>${acc.icon}</span>${escapeHtml(acc.name)}</span>
+      <button class="cat-remove" data-acc-id="${acc.id}">quitar</button>
+    `;
+    container.appendChild(row);
+  });
+  container.querySelectorAll('.cat-remove').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const id = btn.dataset.accId;
+      const inUse = state.entries.some(e => e.accountId === id);
+      if (inUse) { showToast('No se puede quitar: tiene movimientos cargados'); return; }
+      state.accounts = state.accounts.filter(a => a.id !== id);
+      saveState();
+      renderAccountManager();
+    });
+  });
+}
+
+function openAccountModal() {
+  closeAllModals();
+  document.getElementById('new-account-name').value = '';
+  selectedIconForNewAccount = ACCOUNT_ICON_OPTIONS[0];
+  selectedAccountType = 'cash';
+  renderAccountIconPicker();
+  updateAccountTypeSelector();
+  document.getElementById('account-modal-backdrop').hidden = false;
+  history.pushState({ overlay: true }, '');
+}
+
+function closeAccountModal() {
+  document.getElementById('account-modal-backdrop').hidden = true;
+}
+
+function renderAccountIconPicker() {
+  const picker = document.getElementById('account-icon-picker');
+  if (!picker) return;
+  picker.innerHTML = '';
+  ACCOUNT_ICON_OPTIONS.forEach(icon => {
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'icon-picker-item' + (selectedIconForNewAccount === icon ? ' selected' : '');
+    btn.textContent = icon;
+    btn.addEventListener('click', () => {
+      selectedIconForNewAccount = icon;
+      renderAccountIconPicker();
+    });
+    picker.appendChild(btn);
+  });
+}
+
+function updateAccountTypeSelector() {
+  document.querySelectorAll('#account-type-selector .account-type-btn').forEach(btn => {
+    btn.classList.toggle('selected', btn.dataset.type === selectedAccountType);
+  });
+}
+
+function saveAccount() {
+  const name = document.getElementById('new-account-name').value.trim();
+  if (!name) { showToast('Ponele un nombre a la cuenta'); return; }
+  state.accounts.push({ id: uid(), name, icon: selectedIconForNewAccount, type: selectedAccountType });
+  saveState();
+  closeAccountModal();
+  renderAccountManager();
+  showToast('Cuenta agregada');
+}
+
 function exportData() {
   const dataStr = JSON.stringify(state, null, 2);
   const blob = new Blob([dataStr], { type: 'application/json' });
@@ -771,11 +932,13 @@ function clearAllData() {
     categories: DEFAULT_CATEGORIES,
     incomeCategories: DEFAULT_INCOME_CATEGORIES,
     goals: [],
+    accounts: [...DEFAULT_ACCOUNTS],
     streak: { count: 0, lastDate: null },
   };
   saveState();
   renderAll();
   renderCategoryManager();
+  renderAccountManager();
   showToast('Todos los datos fueron borrados');
 }
 
@@ -795,7 +958,7 @@ function showView(viewName) {
 
   if (viewName === 'stats') renderStats();
   if (viewName === 'goals') renderGoals();
-  if (viewName === 'settings') renderCategoryManager();
+  if (viewName === 'settings') { renderCategoryManager(); renderAccountManager(); }
   history.pushState({ overlay: true }, '');
 }
 
@@ -867,6 +1030,20 @@ function attachEventListeners() {
     if (e.target.id === 'cat-modal-backdrop') closeCategoryModal();
   });
   document.getElementById('btn-save-category').addEventListener('click', saveCategory);
+
+  // Settings: accounts
+  document.getElementById('btn-add-account').addEventListener('click', openAccountModal);
+  document.getElementById('btn-cancel-account').addEventListener('click', closeAccountModal);
+  document.getElementById('account-modal-backdrop').addEventListener('click', (e) => {
+    if (e.target.id === 'account-modal-backdrop') closeAccountModal();
+  });
+  document.getElementById('btn-save-account').addEventListener('click', saveAccount);
+  document.querySelectorAll('#account-type-selector .account-type-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      selectedAccountType = btn.dataset.type;
+      updateAccountTypeSelector();
+    });
+  });
 
   // Settings: data
   document.getElementById('btn-export').addEventListener('click', exportData);
