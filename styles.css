@@ -3,6 +3,11 @@
    Paper ledger aesthetic, warm & functional
    ============================================ */
 
+/* Needed: author CSS (e.g. display:flex on .modal-backdrop) has same specificity
+   as UA stylesheet [hidden]{display:none}, so author wins and hidden elements
+   stay visible. !important forces [hidden] to always win. */
+[hidden] { display: none !important; }
+
 :root {
   /* paper & ink */
   --paper: #FAF6EF;
