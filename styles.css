@@ -961,6 +961,66 @@ input { font-family: inherit; }
   gap: 8px;
 }
 
+/* recurring expenses manager */
+.recurring-manager {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.recurring-empty {
+  font-size: 13px;
+  color: var(--ink-faint);
+  padding: 10px 2px;
+}
+.recurring-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 2px;
+  border-bottom: 1px solid var(--paper-line);
+}
+.recurring-row-info {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  min-width: 0;
+}
+.recurring-row-name {
+  font-size: 14px;
+  font-weight: 500;
+}
+.recurring-row-detail {
+  font-size: 12px;
+  color: var(--ink-soft);
+  font-family: var(--font-mono);
+}
+.recurring-row-actions {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  flex-shrink: 0;
+  margin-left: 8px;
+}
+.recurring-toggle {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--ink-faint);
+  padding: 4px 8px;
+  border: 1px solid var(--paper-line);
+  border-radius: 12px;
+}
+.recurring-toggle.active {
+  color: var(--income);
+  border-color: var(--income-soft);
+  background: var(--income-soft);
+}
+
+/* recurring modal — amount + day side by side */
+.recurring-amount-day {
+  display: flex;
+  gap: 12px;
+}
+
 .account-type-selector {
   display: flex;
   gap: 8px;

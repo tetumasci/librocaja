@@ -191,6 +191,10 @@
     <div id="account-manager" class="category-manager"></div>
     <button class="text-btn" id="btn-add-account">+ agregar cuenta</button>
 
+    <h3 class="section-label">gastos fijos</h3>
+    <div id="recurring-manager" class="recurring-manager"></div>
+    <button class="text-btn" id="btn-add-recurring">+ agregar gasto fijo</button>
+
     <h3 class="section-label">datos</h3>
     <button class="settings-row" id="btn-export">
       <span>exportar datos (.json)</span>
@@ -281,6 +285,38 @@
     </div>
     <button class="btn-save" id="btn-save-category">agregar</button>
     <button class="btn-cancel" id="btn-cancel-category">cancelar</button>
+  </div>
+</div>
+
+<!-- ===== MODAL: ADD RECURRING EXPENSE ===== -->
+<div class="modal-backdrop" id="recurring-modal-backdrop" hidden>
+  <div class="modal-sheet">
+    <div class="modal-handle"></div>
+    <h3 class="modal-title">nuevo gasto fijo</h3>
+    <div class="field-group">
+      <label class="field-label" for="recurring-name">nombre</label>
+      <input type="text" id="recurring-name" class="text-input" placeholder="ej: Netflix, gimnasio, alquiler...">
+    </div>
+    <div class="recurring-amount-day">
+      <div class="field-group" style="flex:1">
+        <label class="field-label" for="recurring-amount">monto</label>
+        <input type="number" inputmode="decimal" id="recurring-amount" class="text-input" placeholder="0">
+      </div>
+      <div class="field-group" style="flex:0 0 100px">
+        <label class="field-label" for="recurring-day">día del mes</label>
+        <input type="number" inputmode="numeric" id="recurring-day" class="text-input" placeholder="ej: 10" min="1" max="28">
+      </div>
+    </div>
+    <div class="field-group">
+      <label class="field-label">categoría</label>
+      <div class="category-grid" id="recurring-category-grid"></div>
+    </div>
+    <div class="field-group">
+      <label class="field-label">cuenta</label>
+      <div class="account-grid" id="recurring-account-grid"></div>
+    </div>
+    <button class="btn-save" id="btn-save-recurring">guardar gasto fijo</button>
+    <button class="btn-cancel" id="btn-cancel-recurring">cancelar</button>
   </div>
 </div>
 
