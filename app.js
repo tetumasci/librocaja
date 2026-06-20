@@ -160,7 +160,7 @@ function showToast(msg) {
    OVERLAY / MODAL COORDINATION
    ============================================ */
 
-const VIEW_OVERLAY_IDS = ['view-stats', 'view-goals', 'view-settings'];
+const VIEW_OVERLAY_IDS = ['view-stats', 'view-goals', 'view-settings', 'view-streak'];
 const MODAL_OVERLAY_IDS = ['modal-backdrop', 'goal-modal-backdrop', 'cat-modal-backdrop', 'account-modal-backdrop', 'recurring-modal-backdrop', 'budget-modal-backdrop'];
 
 function updateNavForLedger() {
@@ -287,6 +287,20 @@ function renderStreak() {
 
   const flame = document.getElementById('streak-flame');
   flame.style.opacity = streak > 0 ? '1' : '0.35';
+}
+
+function computeBestStreak() {
+  if (state.entries.length === 0) return 0;
+  const dates = [...new Set(state.entries.map(e => e.date))].sort();
+  let best = 1, current = 1;
+  for (let i = 1; i < dates.length; i++) {
+    const diff = Math.round(
+      (dateFromISO(dates[i]) - dateFromISO(dates[i - 1])) / 86400000
+    );
+    current = diff === 1 ? current + 1 : 1;
+    if (current > best) best = current;
+  }
+  return best;
 }
 
 /* ============================================
@@ -1256,6 +1270,92 @@ function clearAllData() {
 }
 
 /* ============================================
+   VIEW: STREAK CALENDAR
+   ============================================ */
+
+function openStreakView() {
+  closeAllOverlaysAndModals();
+  document.getElementById('view-streak').hidden = false;
+  renderStreakCalendar();
+  history.pushState({ overlay: true }, '');
+}
+
+function renderStreakCalendar() {
+  const grid = document.getElementById('streak-cal-grid');
+  const monthsEl = document.getElementById('streak-cal-months');
+  if (!grid || !monthsEl) return;
+
+  document.getElementById('streak-hero-count').textContent = computeStreak();
+
+  // date → entry count map
+  const countByDate = {};
+  state.entries.forEach(e => {
+    countByDate[e.date] = (countByDate[e.date] || 0) + 1;
+  });
+
+  const today = new Date();
+  const todayStr = isoFromDate(today);
+
+  // Find Monday of current week, then go back 15 weeks → 16 weeks total
+  const dow = today.getDay();
+  const daysToMon = dow === 0 ? 6 : dow - 1;
+  const startDate = new Date(today);
+  startDate.setDate(today.getDate() - daysToMon - 15 * 7);
+
+  const WEEKS = 16;
+  const CELL = 12, GAP = 3, COL_W = CELL + GAP;
+
+  // Month labels
+  monthsEl.innerHTML = '';
+  let prevMonth = -1;
+  const monthStarts = [];
+  for (let w = 0; w < WEEKS; w++) {
+    const d = new Date(startDate);
+    d.setDate(startDate.getDate() + w * 7);
+    const m = d.getMonth();
+    if (m !== prevMonth) { monthStarts.push({ month: m, week: w }); prevMonth = m; }
+  }
+  monthStarts.forEach((ml, i) => {
+    const span = (monthStarts[i + 1]?.week ?? WEEKS) - ml.week;
+    const el = document.createElement('span');
+    el.className = 'streak-month-label';
+    el.textContent = MONTH_NAMES[ml.month].slice(0, 3);
+    el.style.minWidth = `${span * COL_W - GAP}px`;
+    monthsEl.appendChild(el);
+  });
+
+  // Grid
+  grid.innerHTML = '';
+  let totalDays = 0;
+
+  for (let w = 0; w < WEEKS; w++) {
+    const weekEl = document.createElement('div');
+    weekEl.className = 'streak-cal-week';
+    for (let d = 0; d < 7; d++) {
+      const date = new Date(startDate);
+      date.setDate(startDate.getDate() + w * 7 + d);
+      const iso = isoFromDate(date);
+      const count = countByDate[iso] || 0;
+      const isFuture = iso > todayStr;
+
+      const dayEl = document.createElement('div');
+      dayEl.className = 'streak-cal-day';
+      if (isFuture) {
+        dayEl.classList.add('future');
+      } else if (count > 0) {
+        totalDays++;
+        dayEl.classList.add(count >= 4 ? 'lvl-3' : count >= 2 ? 'lvl-2' : 'lvl-1');
+      }
+      weekEl.appendChild(dayEl);
+    }
+    grid.appendChild(weekEl);
+  }
+
+  document.getElementById('streak-stat-total').textContent = totalDays;
+  document.getElementById('streak-stat-best').textContent = computeBestStreak();
+}
+
+/* ============================================
    VIEW NAVIGATION
    ============================================ */
 
@@ -1377,6 +1477,10 @@ function attachEventListeners() {
   // Settings: data
   document.getElementById('btn-export').addEventListener('click', exportData);
   document.getElementById('btn-clear-data').addEventListener('click', clearAllData);
+
+  // Streak calendar view
+  document.getElementById('streak-bar').addEventListener('click', openStreakView);
+  document.getElementById('streak-cal-back').addEventListener('click', hideAllOverlays);
 
   // Android / browser back button: close topmost overlay instead of exiting
   window.addEventListener('popstate', () => {

@@ -30,7 +30,7 @@
   </header>
 
   <!-- ===== STREAK / HABIT BAR ===== -->
-  <section class="streak-bar" id="streak-bar">
+  <section class="streak-bar" id="streak-bar" role="button" aria-label="Ver calendario de racha">
     <div class="streak-info">
       <span class="streak-flame" id="streak-flame">🔥</span>
       <span class="streak-text"><strong id="streak-count">0</strong> días seguidos anotando</span>
@@ -289,6 +289,57 @@
     </div>
     <button class="btn-save" id="btn-save-category">agregar</button>
     <button class="btn-cancel" id="btn-cancel-category">cancelar</button>
+  </div>
+</div>
+
+<!-- ===== VIEW: STREAK CALENDAR ===== -->
+<div class="view-overlay" id="view-streak" hidden>
+  <header class="view-header">
+    <button class="icon-btn" id="streak-cal-back" aria-label="Volver">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M15 18l-6-6 6-6"/></svg>
+    </button>
+    <h2>registro de días</h2>
+    <div style="width:36px"></div>
+  </header>
+  <div class="view-body">
+
+    <div class="streak-hero">
+      <span class="streak-hero-count" id="streak-hero-count">0</span>
+      <span class="streak-hero-label">días seguidos</span>
+    </div>
+
+    <div class="streak-cal-container">
+      <div class="streak-cal-top">
+        <div class="streak-cal-day-spacer"></div>
+        <div class="streak-cal-months" id="streak-cal-months"></div>
+      </div>
+      <div class="streak-cal-main">
+        <div class="streak-cal-day-labels">
+          <span>lun</span><span></span><span>mié</span><span></span><span>vie</span><span></span><span></span>
+        </div>
+        <div class="streak-cal-grid" id="streak-cal-grid"></div>
+      </div>
+      <div class="streak-cal-legend">
+        <span>menos</span>
+        <div class="streak-cal-day"></div>
+        <div class="streak-cal-day lvl-1"></div>
+        <div class="streak-cal-day lvl-2"></div>
+        <div class="streak-cal-day lvl-3"></div>
+        <span>más</span>
+      </div>
+    </div>
+
+    <div class="streak-stat-row">
+      <div class="streak-stat">
+        <span class="streak-stat-val" id="streak-stat-total">0</span>
+        <span class="streak-stat-lbl">días anotados (últimos 4 meses)</span>
+      </div>
+      <div class="streak-stat">
+        <span class="streak-stat-val" id="streak-stat-best">0</span>
+        <span class="streak-stat-lbl">mejor racha</span>
+      </div>
+    </div>
+
   </div>
 </div>
 
