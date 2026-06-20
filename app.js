@@ -870,7 +870,7 @@ function renderGoals() {
 }
 
 function openGoalModal() {
-  closeAllOverlaysAndModals();
+  closeAllModals();
   document.getElementById('goal-name').value = '';
   document.getElementById('goal-target').value = '';
   document.getElementById('goal-current').value = '';
@@ -929,7 +929,7 @@ function renderCategoryManager() {
 }
 
 function openCategoryModal() {
-  closeAllOverlaysAndModals();
+  closeAllModals();
   document.getElementById('new-cat-name').value = '';
   selectedIconForNewCategory = ICON_OPTIONS[0];
   renderIconPicker();
@@ -998,7 +998,7 @@ function renderAccountManager() {
 
 function openAccountModal() {
   pendingRecurringData = null;
-  closeAllOverlaysAndModals();
+  closeAllModals();
   document.getElementById('new-account-name').value = '';
   selectedIconForNewAccount = ACCOUNT_ICON_OPTIONS[0];
   selectedAccountType = 'cash';
@@ -1009,12 +1009,8 @@ function openAccountModal() {
 }
 
 function closeAccountModal() {
+  pendingRecurringData = null;
   document.getElementById('account-modal-backdrop').hidden = true;
-  if (pendingRecurringData) {
-    const data = pendingRecurringData;
-    pendingRecurringData = null;
-    restoreRecurringModal(data);
-  }
 }
 
 function renderAccountIconPicker() {
@@ -1129,7 +1125,7 @@ function renderBudgetManager() {
 }
 
 function openBudgetModal() {
-  closeAllOverlaysAndModals();
+  closeAllModals();
   document.getElementById('budget-limit').value = '';
   selectedCategoryIdForBudget = null;
   renderBudgetCategorySelector();
@@ -1232,7 +1228,7 @@ function renderRecurringManager() {
 }
 
 function openRecurringModal() {
-  closeAllOverlaysAndModals();
+  closeAllModals();
   document.getElementById('recurring-name').value = '';
   document.getElementById('recurring-amount').value = '';
   document.getElementById('recurring-day').value = '';

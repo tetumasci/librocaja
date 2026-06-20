@@ -819,7 +819,10 @@ input { font-family: inherit; }
 
 .modal-backdrop {
   position: fixed;
-  inset: 0;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
   background: rgba(31,27,22,0.4);
   z-index: 100;
   display: flex;
@@ -1293,6 +1296,6 @@ input { font-family: inherit; }
 
 @media (min-width: 480px) {
   body { display: flex; justify-content: center; background: var(--paper-line); }
-  #app, .bottom-nav, .view-overlay, .modal-backdrop { background: var(--paper); }
+  #app, .bottom-nav, .view-overlay { background: var(--paper); }
   .bottom-nav { box-shadow: 0 0 0 1px var(--paper-line); }
 }
