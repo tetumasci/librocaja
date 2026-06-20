@@ -47,6 +47,7 @@ let state = {
   goals: [],               // {id, name, target, current}
   accounts: [...DEFAULT_ACCOUNTS],
   recurringExpenses: [],   // {id, name, amount, categoryId, accountId, dayOfMonth, active}
+  budgets: [],             // {categoryId, monthlyLimit}
   streak: { count: 0, lastDate: null },
 };
 
@@ -60,6 +61,7 @@ let selectedIconForNewAccount = ACCOUNT_ICON_OPTIONS[0];
 let selectedAccountType = 'cash';
 let selectedCategoryIdForRecurring = null;
 let selectedAccountIdForRecurring = null;
+let selectedCategoryIdForBudget = null;
 
 /* ---------- Persistence ---------- */
 
@@ -75,6 +77,9 @@ function loadState() {
     }
     if (!state.recurringExpenses) {
       state.recurringExpenses = [];
+    }
+    if (!state.budgets) {
+      state.budgets = [];
     }
     const needsMigration = state.entries.some(e => !e.accountId);
     if (needsMigration) {
@@ -156,7 +161,7 @@ function showToast(msg) {
    ============================================ */
 
 const VIEW_OVERLAY_IDS = ['view-stats', 'view-goals', 'view-settings'];
-const MODAL_OVERLAY_IDS = ['modal-backdrop', 'goal-modal-backdrop', 'cat-modal-backdrop', 'account-modal-backdrop', 'recurring-modal-backdrop'];
+const MODAL_OVERLAY_IDS = ['modal-backdrop', 'goal-modal-backdrop', 'cat-modal-backdrop', 'account-modal-backdrop', 'recurring-modal-backdrop', 'budget-modal-backdrop'];
 
 function updateNavForLedger() {
   document.querySelectorAll('.nav-item').forEach(item => {
@@ -315,6 +320,22 @@ function computeSuggestion() {
   const todayHasEntry = state.entries.some(e => e.date === todayISO());
   if (streak >= 3 && !todayHasEntry) {
     return `Llevás ${streak} días seguidos anotando. No cortes la racha — sumá el movimiento de hoy.`;
+  }
+
+  // Budget warning: flag first category that's >= 90% of its limit
+  if (state.budgets && state.budgets.length > 0) {
+    const monthExpenses = thisMonthEntries.filter(e => e.type === 'expense');
+    for (const budget of state.budgets) {
+      const spent = monthExpenses
+        .filter(e => e.categoryId === budget.categoryId)
+        .reduce((s, e) => s + e.amount, 0);
+      const budgetPct = (spent / budget.monthlyLimit) * 100;
+      if (budgetPct >= 90) {
+        const cat = getCategoryById(budget.categoryId, 'expense');
+        const label = budgetPct >= 100 ? 'superó' : `llegó al ${Math.round(budgetPct)}% de`;
+        return `${cat.name} ${label} su presupuesto mensual (${formatMoney(spent)} de ${formatMoney(budget.monthlyLimit)}).`;
+      }
+    }
   }
 
   const catTotals = (entries) => {
@@ -682,16 +703,34 @@ function renderCategoryBars(monthEntries, totalExpense) {
 
   sorted.forEach(([catId, amount]) => {
     const cat = getCategoryById(catId, 'expense');
-    const pct = (amount / totalExpense) * 100;
+    const budget = state.budgets ? state.budgets.find(b => b.categoryId === catId) : null;
+
+    let barWidth, barFillClass, amountLabel, overflowLabel = '';
+
+    if (budget) {
+      const budgetPct = (amount / budget.monthlyLimit) * 100;
+      barWidth = Math.min(100, budgetPct);
+      amountLabel = `${formatMoney(amount)} / ${formatMoney(budget.monthlyLimit)} · ${Math.round(budgetPct)}%`;
+      barFillClass = budgetPct >= 100 ? 'over-budget' : budgetPct >= 80 ? 'near-budget' : '';
+      if (budgetPct > 100) {
+        overflowLabel = `<span class="budget-overflow">+${Math.round(budgetPct - 100)}% sobre límite</span>`;
+      }
+    } else {
+      const pct = (amount / totalExpense) * 100;
+      barWidth = pct;
+      amountLabel = `${formatMoney(amount)} · ${Math.round(pct)}%`;
+      barFillClass = '';
+    }
 
     const row = document.createElement('div');
     row.className = 'category-bar-row';
     row.innerHTML = `
       <div class="category-bar-top">
         <span class="category-bar-name"><span>${cat.icon}</span>${escapeHtml(cat.name)}</span>
-        <span class="category-bar-amount">${formatMoney(amount)} · ${Math.round(pct)}%</span>
+        <span class="category-bar-amount">${amountLabel}</span>
       </div>
-      <div class="category-bar-track"><div class="category-bar-fill" style="width:${pct}%"></div></div>
+      <div class="category-bar-track"><div class="category-bar-fill ${barFillClass}" style="width:${barWidth}%"></div></div>
+      ${overflowLabel}
     `;
     container.appendChild(row);
   });
@@ -966,6 +1005,91 @@ function saveAccount() {
 }
 
 /* ============================================
+   VIEW: BUDGETS (within Settings)
+   ============================================ */
+
+function renderBudgetManager() {
+  const container = document.getElementById('budget-manager');
+  if (!container) return;
+  container.innerHTML = '';
+
+  if (!state.budgets || state.budgets.length === 0) {
+    container.innerHTML = '<p class="recurring-empty">todavía no hay presupuestos definidos</p>';
+    return;
+  }
+
+  state.budgets.forEach(budget => {
+    const cat = getCategoryById(budget.categoryId, 'expense');
+    const row = document.createElement('div');
+    row.className = 'category-manager-row';
+    row.innerHTML = `
+      <span><span>${cat.icon}</span>${escapeHtml(cat.name)}<span class="budget-limit-tag">${formatMoney(budget.monthlyLimit)}/mes</span></span>
+      <button class="cat-remove" data-budget-cat="${budget.categoryId}">quitar</button>
+    `;
+    container.appendChild(row);
+  });
+
+  container.querySelectorAll('.cat-remove[data-budget-cat]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      state.budgets = state.budgets.filter(b => b.categoryId !== btn.dataset.budgetCat);
+      saveState();
+      renderBudgetManager();
+    });
+  });
+}
+
+function openBudgetModal() {
+  closeAllModals();
+  document.getElementById('budget-limit').value = '';
+  selectedCategoryIdForBudget = null;
+  renderBudgetCategorySelector();
+  document.getElementById('budget-modal-backdrop').hidden = false;
+  history.pushState({ overlay: true }, '');
+}
+
+function closeBudgetModal() {
+  document.getElementById('budget-modal-backdrop').hidden = true;
+}
+
+function renderBudgetCategorySelector() {
+  const grid = document.getElementById('budget-category-grid');
+  if (!grid) return;
+  grid.innerHTML = '';
+  state.categories.forEach(cat => {
+    const chip = document.createElement('button');
+    chip.type = 'button';
+    chip.className = 'category-chip' + (selectedCategoryIdForBudget === cat.id ? ' selected' : '');
+    chip.innerHTML = `<span class="chip-icon">${cat.icon}</span><span>${escapeHtml(cat.name)}</span>`;
+    chip.addEventListener('click', () => {
+      selectedCategoryIdForBudget = cat.id;
+      renderBudgetCategorySelector();
+      // Pre-fill existing limit if any
+      const existing = state.budgets.find(b => b.categoryId === cat.id);
+      document.getElementById('budget-limit').value = existing ? existing.monthlyLimit : '';
+    });
+    grid.appendChild(chip);
+  });
+}
+
+function saveBudget() {
+  const limit = parseFloat(document.getElementById('budget-limit').value);
+  if (!selectedCategoryIdForBudget) { showToast('Elegí una categoría'); return; }
+  if (!limit || limit <= 0) { showToast('Ingresá un límite válido'); return; }
+
+  const existing = state.budgets.findIndex(b => b.categoryId === selectedCategoryIdForBudget);
+  if (existing >= 0) {
+    state.budgets[existing].monthlyLimit = limit;
+  } else {
+    state.budgets.push({ categoryId: selectedCategoryIdForBudget, monthlyLimit: limit });
+  }
+
+  saveState();
+  closeBudgetModal();
+  renderBudgetManager();
+  showToast('Presupuesto guardado');
+}
+
+/* ============================================
    VIEW: RECURRING EXPENSES (within Settings)
    ============================================ */
 
@@ -1119,11 +1243,13 @@ function clearAllData() {
     goals: [],
     accounts: [...DEFAULT_ACCOUNTS],
     recurringExpenses: [],
+    budgets: [],
     streak: { count: 0, lastDate: null },
   };
   saveState();
   renderAll();
   renderCategoryManager();
+  renderBudgetManager();
   renderAccountManager();
   renderRecurringManager();
   showToast('Todos los datos fueron borrados');
@@ -1145,7 +1271,7 @@ function showView(viewName) {
 
   if (viewName === 'stats') renderStats();
   if (viewName === 'goals') renderGoals();
-  if (viewName === 'settings') { renderCategoryManager(); renderAccountManager(); renderRecurringManager(); }
+  if (viewName === 'settings') { renderCategoryManager(); renderBudgetManager(); renderAccountManager(); renderRecurringManager(); }
   history.pushState({ overlay: true }, '');
 }
 
@@ -1217,6 +1343,14 @@ function attachEventListeners() {
     if (e.target.id === 'cat-modal-backdrop') closeCategoryModal();
   });
   document.getElementById('btn-save-category').addEventListener('click', saveCategory);
+
+  // Settings: budgets
+  document.getElementById('btn-add-budget').addEventListener('click', openBudgetModal);
+  document.getElementById('btn-cancel-budget').addEventListener('click', closeBudgetModal);
+  document.getElementById('budget-modal-backdrop').addEventListener('click', (e) => {
+    if (e.target.id === 'budget-modal-backdrop') closeBudgetModal();
+  });
+  document.getElementById('btn-save-budget').addEventListener('click', saveBudget);
 
   // Settings: recurring expenses
   document.getElementById('btn-add-recurring').addEventListener('click', openRecurringModal);

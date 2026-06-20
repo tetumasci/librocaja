@@ -187,6 +187,10 @@
     <div id="category-manager" class="category-manager"></div>
     <button class="text-btn" id="btn-add-category">+ agregar categoría</button>
 
+    <h3 class="section-label">presupuestos mensuales</h3>
+    <div id="budget-manager" class="category-manager"></div>
+    <button class="text-btn" id="btn-add-budget">+ definir presupuesto</button>
+
     <h3 class="section-label">cuentas</h3>
     <div id="account-manager" class="category-manager"></div>
     <button class="text-btn" id="btn-add-account">+ agregar cuenta</button>
@@ -285,6 +289,24 @@
     </div>
     <button class="btn-save" id="btn-save-category">agregar</button>
     <button class="btn-cancel" id="btn-cancel-category">cancelar</button>
+  </div>
+</div>
+
+<!-- ===== MODAL: SET BUDGET ===== -->
+<div class="modal-backdrop" id="budget-modal-backdrop" hidden>
+  <div class="modal-sheet">
+    <div class="modal-handle"></div>
+    <h3 class="modal-title">presupuesto mensual</h3>
+    <div class="field-group">
+      <label class="field-label">categoría</label>
+      <div class="category-grid" id="budget-category-grid"></div>
+    </div>
+    <div class="field-group">
+      <label class="field-label" for="budget-limit">límite mensual</label>
+      <input type="number" inputmode="decimal" id="budget-limit" class="text-input" placeholder="0">
+    </div>
+    <button class="btn-save" id="btn-save-budget">guardar presupuesto</button>
+    <button class="btn-cancel" id="btn-cancel-budget">cancelar</button>
   </div>
 </div>
 
