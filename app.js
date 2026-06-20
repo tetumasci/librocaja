@@ -63,6 +63,7 @@ let selectedAccountType = 'cash';
 let selectedCategoryIdForRecurring = null;
 let selectedAccountIdForRecurring = null;
 let selectedCategoryIdForBudget = null;
+let pendingRecurringData = null; // {name, amount, day, categoryId} — set when transitioning from recurring modal to account creation
 
 /* ---------- Persistence ---------- */
 
@@ -206,6 +207,9 @@ function closeTopmostOverlay() {
   if (id === 'modal-backdrop') closeAddModal();
   else if (id === 'goal-modal-backdrop') closeGoalModal();
   else if (id === 'cat-modal-backdrop') closeCategoryModal();
+  else if (id === 'account-modal-backdrop') closeAccountModal();
+  else if (id === 'recurring-modal-backdrop') closeRecurringModal();
+  else if (id === 'budget-modal-backdrop') closeBudgetModal();
   else { el.hidden = true; updateNavForLedger(); }
 }
 
@@ -866,7 +870,7 @@ function renderGoals() {
 }
 
 function openGoalModal() {
-  closeAllModals();
+  closeAllOverlaysAndModals();
   document.getElementById('goal-name').value = '';
   document.getElementById('goal-target').value = '';
   document.getElementById('goal-current').value = '';
@@ -925,7 +929,7 @@ function renderCategoryManager() {
 }
 
 function openCategoryModal() {
-  closeAllModals();
+  closeAllOverlaysAndModals();
   document.getElementById('new-cat-name').value = '';
   selectedIconForNewCategory = ICON_OPTIONS[0];
   renderIconPicker();
@@ -993,7 +997,8 @@ function renderAccountManager() {
 }
 
 function openAccountModal() {
-  closeAllModals();
+  pendingRecurringData = null;
+  closeAllOverlaysAndModals();
   document.getElementById('new-account-name').value = '';
   selectedIconForNewAccount = ACCOUNT_ICON_OPTIONS[0];
   selectedAccountType = 'cash';
@@ -1005,6 +1010,11 @@ function openAccountModal() {
 
 function closeAccountModal() {
   document.getElementById('account-modal-backdrop').hidden = true;
+  if (pendingRecurringData) {
+    const data = pendingRecurringData;
+    pendingRecurringData = null;
+    restoreRecurringModal(data);
+  }
 }
 
 function renderAccountIconPicker() {
@@ -1033,11 +1043,21 @@ function updateAccountTypeSelector() {
 function saveAccount() {
   const name = document.getElementById('new-account-name').value.trim();
   if (!name) { showToast('Ponele un nombre a la cuenta'); return; }
-  state.accounts.push({ id: uid(), name, icon: selectedIconForNewAccount, type: selectedAccountType });
+  const newAcc = { id: uid(), name, icon: selectedIconForNewAccount, type: selectedAccountType };
+  state.accounts.push(newAcc);
   saveState();
-  closeAccountModal();
-  renderAccountManager();
   showToast('Cuenta agregada');
+
+  if (pendingRecurringData) {
+    const data = pendingRecurringData;
+    pendingRecurringData = null;
+    selectedAccountIdForRecurring = newAcc.id;
+    closeAllOverlaysAndModals();
+    restoreRecurringModal(data);
+  } else {
+    closeAccountModal();
+    renderAccountManager();
+  }
 }
 
 /* ============================================
@@ -1109,7 +1129,7 @@ function renderBudgetManager() {
 }
 
 function openBudgetModal() {
-  closeAllModals();
+  closeAllOverlaysAndModals();
   document.getElementById('budget-limit').value = '';
   selectedCategoryIdForBudget = null;
   renderBudgetCategorySelector();
@@ -1212,7 +1232,7 @@ function renderRecurringManager() {
 }
 
 function openRecurringModal() {
-  closeAllModals();
+  closeAllOverlaysAndModals();
   document.getElementById('recurring-name').value = '';
   document.getElementById('recurring-amount').value = '';
   document.getElementById('recurring-day').value = '';
@@ -1226,6 +1246,34 @@ function openRecurringModal() {
 
 function closeRecurringModal() {
   document.getElementById('recurring-modal-backdrop').hidden = true;
+}
+
+function openAccountFromRecurring() {
+  pendingRecurringData = {
+    name: document.getElementById('recurring-name').value,
+    amount: document.getElementById('recurring-amount').value,
+    day: document.getElementById('recurring-day').value,
+    categoryId: selectedCategoryIdForRecurring,
+  };
+  closeAllOverlaysAndModals();
+  document.getElementById('new-account-name').value = '';
+  selectedIconForNewAccount = ACCOUNT_ICON_OPTIONS[0];
+  selectedAccountType = 'cash';
+  renderAccountIconPicker();
+  updateAccountTypeSelector();
+  document.getElementById('account-modal-backdrop').hidden = false;
+  history.pushState({ overlay: true }, '');
+}
+
+function restoreRecurringModal(data) {
+  document.getElementById('recurring-name').value = data.name || '';
+  document.getElementById('recurring-amount').value = data.amount || '';
+  document.getElementById('recurring-day').value = data.day || '';
+  selectedCategoryIdForRecurring = data.categoryId || null;
+  renderRecurringCategoryGrid();
+  renderRecurringAccountGrid();
+  document.getElementById('recurring-modal-backdrop').hidden = false;
+  history.pushState({ overlay: true }, '');
 }
 
 function renderRecurringCategoryGrid() {
@@ -1260,6 +1308,12 @@ function renderRecurringAccountGrid() {
     });
     grid.appendChild(chip);
   });
+  const addChip = document.createElement('button');
+  addChip.type = 'button';
+  addChip.className = 'category-chip add-new-chip';
+  addChip.innerHTML = `<span class="chip-icon">＋</span><span>nueva cuenta</span>`;
+  addChip.addEventListener('click', openAccountFromRecurring);
+  grid.appendChild(addChip);
 }
 
 function saveRecurring() {
@@ -1560,6 +1614,7 @@ function init() {
   attachEventListeners();
   renderAll();
   processRecurringExpenses();
+  closeAllOverlaysAndModals(); // safety net: ensure no overlay survives a reload
 }
 
 document.addEventListener('DOMContentLoaded', init);

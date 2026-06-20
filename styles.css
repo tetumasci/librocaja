@@ -939,6 +939,10 @@ input { font-family: inherit; }
   background: var(--ink);
   color: var(--paper);
 }
+.category-chip.add-new-chip {
+  border-style: dashed;
+  color: var(--ink-faint);
+}
 
 .text-input {
   width: 100%;
