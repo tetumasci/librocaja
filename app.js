@@ -48,6 +48,7 @@ let state = {
   accounts: [...DEFAULT_ACCOUNTS],
   recurringExpenses: [],   // {id, name, amount, categoryId, accountId, dayOfMonth, active}
   budgets: [],             // {categoryId, monthlyLimit}
+  inflationRates: {},      // {'2026-06': 4.2, ...}
   streak: { count: 0, lastDate: null },
 };
 
@@ -80,6 +81,9 @@ function loadState() {
     }
     if (!state.budgets) {
       state.budgets = [];
+    }
+    if (!state.inflationRates) {
+      state.inflationRates = {};
     }
     const needsMigration = state.entries.some(e => !e.accountId);
     if (needsMigration) {
@@ -128,6 +132,10 @@ function isoFromDate(d) {
 function dateFromISO(iso) {
   const [y, m, d] = iso.split('-').map(Number);
   return new Date(y, m - 1, d);
+}
+
+function yearMonthKey(date) {
+  return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
 }
 
 function isSameMonth(iso, date) {
@@ -695,6 +703,20 @@ function renderStats() {
   const daysInMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate();
   document.getElementById('metric-days-logged').textContent = `${distinctDays}/${daysInMonth}`;
 
+  // Real variation vs inflation
+  const realVarEl = document.getElementById('metric-real-var');
+  const inflationRate = state.inflationRates ? state.inflationRates[yearMonthKey(now)] : null;
+  if (inflationRate != null && lastExpense > 0) {
+    const prevAdjusted = lastExpense * (1 + inflationRate / 100);
+    const realDiff = ((expense / prevAdjusted) - 1) * 100;
+    realVarEl.textContent = `${realDiff >= 0 ? '+' : ''}${Math.round(realDiff)}%`;
+    realVarEl.classList.toggle('negative', realDiff > 0);
+    realVarEl.classList.toggle('positive', realDiff <= 0);
+  } else {
+    realVarEl.textContent = '—';
+    realVarEl.classList.remove('positive', 'negative');
+  }
+
   renderCategoryBars(thisMonthEntries, expense);
   renderTrendChart();
 }
@@ -1019,6 +1041,40 @@ function saveAccount() {
 }
 
 /* ============================================
+   VIEW: INFLATION (within Settings)
+   ============================================ */
+
+function renderInflationSection() {
+  const labelEl = document.getElementById('inflation-month-label');
+  const inputEl = document.getElementById('inflation-rate-input');
+  if (!labelEl || !inputEl) return;
+  const now = new Date();
+  labelEl.textContent = monthLabel(now);
+  const existing = state.inflationRates[yearMonthKey(now)];
+  inputEl.value = existing != null ? existing : '';
+  renderInflationHistory();
+}
+
+function renderInflationHistory() {
+  const histEl = document.getElementById('inflation-history');
+  if (!histEl) return;
+  const keys = Object.keys(state.inflationRates).sort().reverse().slice(0, 8);
+  histEl.innerHTML = keys.map(k => {
+    const [y, m] = k.split('-').map(Number);
+    return `<span class="inflation-hist-item">${MONTH_NAMES[m - 1].slice(0, 3)} ${y}: ${state.inflationRates[k]}%</span>`;
+  }).join('');
+}
+
+function saveInflationRate() {
+  const val = parseFloat(document.getElementById('inflation-rate-input').value);
+  if (isNaN(val) || val < 0) { showToast('Ingresá un porcentaje válido'); return; }
+  state.inflationRates[yearMonthKey(new Date())] = val;
+  saveState();
+  renderInflationHistory();
+  showToast('Tasa de inflación guardada');
+}
+
+/* ============================================
    VIEW: BUDGETS (within Settings)
    ============================================ */
 
@@ -1258,6 +1314,7 @@ function clearAllData() {
     accounts: [...DEFAULT_ACCOUNTS],
     recurringExpenses: [],
     budgets: [],
+    inflationRates: {},
     streak: { count: 0, lastDate: null },
   };
   saveState();
@@ -1371,7 +1428,7 @@ function showView(viewName) {
 
   if (viewName === 'stats') renderStats();
   if (viewName === 'goals') renderGoals();
-  if (viewName === 'settings') { renderCategoryManager(); renderBudgetManager(); renderAccountManager(); renderRecurringManager(); }
+  if (viewName === 'settings') { renderCategoryManager(); renderBudgetManager(); renderAccountManager(); renderRecurringManager(); renderInflationSection(); }
   history.pushState({ overlay: true }, '');
 }
 
@@ -1443,6 +1500,9 @@ function attachEventListeners() {
     if (e.target.id === 'cat-modal-backdrop') closeCategoryModal();
   });
   document.getElementById('btn-save-category').addEventListener('click', saveCategory);
+
+  // Settings: inflation
+  document.getElementById('btn-save-inflation').addEventListener('click', saveInflationRate);
 
   // Settings: budgets
   document.getElementById('btn-add-budget').addEventListener('click', openBudgetModal);

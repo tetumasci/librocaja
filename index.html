@@ -146,6 +146,10 @@
         <span class="metric-label">días anotados</span>
         <span class="metric-value" id="metric-days-logged">0/30</span>
       </div>
+      <div class="metric-card">
+        <span class="metric-label">var. real vs mes ant.</span>
+        <span class="metric-value" id="metric-real-var">—</span>
+      </div>
     </div>
 
     <h3 class="section-label">gastos por categoría</h3>
@@ -198,6 +202,17 @@
     <h3 class="section-label">gastos fijos</h3>
     <div id="recurring-manager" class="recurring-manager"></div>
     <button class="text-btn" id="btn-add-recurring">+ agregar gasto fijo</button>
+
+    <h3 class="section-label">inflación (INDEC)</h3>
+    <div class="inflation-row">
+      <span class="inflation-month-label" id="inflation-month-label">—</span>
+      <div class="inflation-input-wrap">
+        <input type="number" inputmode="decimal" id="inflation-rate-input" class="text-input inflation-input" placeholder="0.0" step="0.1" min="0">
+        <span class="inflation-pct">%</span>
+      </div>
+      <button class="text-btn" id="btn-save-inflation">guardar</button>
+    </div>
+    <div class="inflation-history" id="inflation-history"></div>
 
     <h3 class="section-label">datos</h3>
     <button class="settings-row" id="btn-export">
