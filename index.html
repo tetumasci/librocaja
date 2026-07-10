@@ -408,11 +408,11 @@
   </div>
 </div>
 
-<!-- ===== MODAL: ADD ACCOUNT ===== -->
+<!-- ===== MODAL: ADD / EDIT ACCOUNT ===== -->
 <div class="modal-backdrop" id="account-modal-backdrop" hidden>
   <div class="modal-sheet">
     <div class="modal-handle"></div>
-    <h3 class="modal-title">nueva cuenta</h3>
+    <h3 class="modal-title" id="account-modal-title">nueva cuenta</h3>
     <div class="field-group">
       <label class="field-label" for="new-account-name">nombre</label>
       <input type="text" id="new-account-name" class="text-input" placeholder="ej: BBVA, Ualá, MODO...">
@@ -429,14 +429,82 @@
       <label class="field-label">ícono</label>
       <div class="icon-picker" id="account-icon-picker"></div>
     </div>
+    <div class="field-group">
+      <label class="field-label" for="new-account-initial-balance">saldo inicial (lo que tenías antes de usar la app)</label>
+      <input type="number" inputmode="decimal" id="new-account-initial-balance" class="text-input" placeholder="0">
+    </div>
+    <div id="account-adjustment-section" hidden>
+      <div class="account-balance-info">
+        <span class="field-label" style="margin-bottom:0">saldo calculado actual</span>
+        <span class="account-calc-balance" id="account-calculated-balance">$ 0</span>
+      </div>
+      <div class="field-group">
+        <label class="field-label" for="account-real-balance">corregir saldo real (opcional)</label>
+        <input type="number" inputmode="decimal" id="account-real-balance" class="text-input" placeholder="dejá vacío para no ajustar">
+      </div>
+    </div>
     <button class="btn-save" id="btn-save-account">agregar cuenta</button>
     <button class="btn-cancel" id="btn-cancel-account">cancelar</button>
   </div>
 </div>
 
+<!-- ===== MODAL: DOLLAR SAVINGS DEPOSIT ===== -->
+<div class="modal-backdrop" id="dollar-modal-backdrop" hidden>
+  <div class="modal-sheet">
+    <div class="modal-handle"></div>
+    <h3 class="modal-title">depositar ahorro en USD</h3>
+    <div class="amount-input-wrap">
+      <span class="amount-currency" style="font-size:20px;letter-spacing:-.02em">USD</span>
+      <input type="number" inputmode="decimal" id="dollar-amount-usd" class="amount-input" placeholder="0" autocomplete="off" style="width:160px">
+    </div>
+    <div class="field-group">
+      <label class="field-label" for="dollar-exchange-rate">tipo de cambio · 1 USD = $</label>
+      <input type="number" inputmode="decimal" id="dollar-exchange-rate" class="text-input" placeholder="ej: 1250">
+      <p class="dollar-ars-preview" id="dollar-ars-preview" hidden></p>
+    </div>
+    <div class="field-group">
+      <label class="field-label">cuenta de origen</label>
+      <div class="account-grid" id="dollar-account-grid"></div>
+    </div>
+    <div class="field-group">
+      <label class="field-label" for="dollar-note">nota (opcional)</label>
+      <input type="text" id="dollar-note" class="text-input" placeholder="">
+    </div>
+    <div class="field-group" id="dollar-goal-group" hidden>
+      <label class="field-label">vincular a meta (opcional)</label>
+      <div class="category-grid" id="dollar-goal-selector"></div>
+    </div>
+    <button class="btn-save" id="btn-save-dollar">guardar depósito</button>
+    <button class="btn-cancel" id="btn-cancel-dollar">cancelar</button>
+  </div>
+</div>
+
+<!-- ===== ACTION SHEET: ENTRY ACTIONS ===== -->
+<div class="modal-backdrop" id="action-sheet-backdrop" hidden>
+  <div class="modal-sheet">
+    <div class="modal-handle"></div>
+    <button class="action-sheet-btn" id="action-edit">
+      <span class="action-sheet-icon">✏️</span> editar movimiento
+    </button>
+    <button class="action-sheet-btn action-sheet-danger" id="action-delete">
+      <span class="action-sheet-icon">🗑️</span> eliminar
+    </button>
+    <button class="btn-cancel" id="action-cancel">cancelar</button>
+  </div>
+</div>
+
 <div class="toast" id="toast"></div>
 
-<script src="app.js"></script>
+<script src="js/state.js"></script>
+<script src="js/ui.js"></script>
+<script src="js/ledger.js"></script>
+<script src="js/recurring.js"></script>
+<script src="js/accounts.js"></script>
+<script src="js/budgets.js"></script>
+<script src="js/goals.js"></script>
+<script src="js/stats.js"></script>
+<script src="js/settings.js"></script>
+<script src="js/main.js"></script>
 <script>
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {

@@ -1,11 +1,20 @@
-const CACHE_NAME = 'libro-de-caja-v3';
+const CACHE_NAME = 'libro-de-caja-v4';
 const ASSETS_TO_CACHE = [
   './',
   './index.html',
   './styles.css',
-  './app.js',
   './manifest.json',
   './icon.svg',
+  './js/state.js',
+  './js/ui.js',
+  './js/ledger.js',
+  './js/recurring.js',
+  './js/accounts.js',
+  './js/budgets.js',
+  './js/goals.js',
+  './js/stats.js',
+  './js/settings.js',
+  './js/main.js',
 ];
 
 self.addEventListener('install', (event) => {
