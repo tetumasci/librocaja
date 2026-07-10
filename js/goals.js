@@ -2,6 +2,17 @@
    GOALS.JS — metas de ahorro + ahorro en dólares
    ============================================ */
 
+const DOLAR_TYPES = [
+  { key: 'blue',    label: 'Blue' },
+  { key: 'oficial', label: 'Oficial' },
+  { key: 'bolsa',   label: 'MEP' },
+  { key: 'tarjeta', label: 'Tarjeta' },
+];
+const RATE_CACHE_TTL = 30 * 60 * 1000;
+
+let rateCache = { rates: null, timestamp: 0 };
+let selectedDolarType = 'blue';
+
 /* ---------- Goals ---------- */
 
 function renderGoals() {
@@ -153,20 +164,110 @@ function renderDollarSavings(container) {
   container.appendChild(card);
 }
 
+function getRateForType(type, rates) {
+  const match = rates.find(r => r.casa === type);
+  return match ? match.venta : null;
+}
+
+function renderDolarTypeChips(rates) {
+  const container = document.getElementById('dollar-rate-chips');
+  if (!container) return;
+  if (!rates) { container.hidden = true; return; }
+  container.innerHTML = '';
+  container.hidden = false;
+  DOLAR_TYPES.forEach(({ key, label }) => {
+    const rate = getRateForType(key, rates);
+    if (!rate) return;
+    const chip = document.createElement('button');
+    chip.type = 'button';
+    chip.className = 'dollar-type-chip' + (selectedDolarType === key ? ' selected' : '');
+    chip.textContent = label;
+    chip.addEventListener('click', () => {
+      selectedDolarType = key;
+      const rateVal = getRateForType(key, rates);
+      if (rateVal) {
+        document.getElementById('dollar-exchange-rate').value = rateVal;
+        updateDollarArsPreview();
+      }
+      renderDolarTypeChips(rates);
+      setDolarRateStatus(rates, false);
+    });
+    container.appendChild(chip);
+  });
+}
+
+function setDolarRateStatus(rates, loading) {
+  const el = document.getElementById('dollar-rate-status');
+  if (!el) return;
+  if (loading) {
+    el.textContent = 'actualizando cotización...';
+    el.className = 'dollar-rate-status';
+  } else if (rates) {
+    const typeName = DOLAR_TYPES.find(t => t.key === selectedDolarType)?.label || selectedDolarType;
+    el.textContent = `cotización dólar ${typeName.toLowerCase()} · actualizada`;
+    el.className = 'dollar-rate-status ok';
+  } else {
+    el.textContent = 'sin conexión · ingresá el TC manualmente';
+    el.className = 'dollar-rate-status error';
+  }
+}
+
+async function prefillExchangeRate() {
+  const rateInput = document.getElementById('dollar-exchange-rate');
+  if (!rateInput) return;
+
+  let rates = null;
+  const now = Date.now();
+
+  if (rateCache.rates && (now - rateCache.timestamp) < RATE_CACHE_TTL) {
+    rates = rateCache.rates;
+  } else {
+    setDolarRateStatus(null, true);
+    try {
+      const resp = await fetch('https://dolarapi.com/v1/dolares');
+      if (!resp.ok) throw new Error('status ' + resp.status);
+      const data = await resp.json();
+      if (!Array.isArray(data)) throw new Error('unexpected format');
+      rateCache.rates = data;
+      rateCache.timestamp = now;
+      rates = data;
+    } catch {
+      rates = null;
+    }
+  }
+
+  if (rates) {
+    const rate = getRateForType(selectedDolarType, rates);
+    if (rate && !rateInput.value) {
+      rateInput.value = rate;
+      updateDollarArsPreview();
+    }
+    renderDolarTypeChips(rates);
+    setDolarRateStatus(rates, false);
+  } else {
+    const lastRate = getLastExchangeRate();
+    if (lastRate && !rateInput.value) rateInput.value = lastRate;
+    renderDolarTypeChips(null);
+    setDolarRateStatus(null, false);
+  }
+}
+
 function openDollarModal() {
   closeAllModals();
+  selectedDolarType = 'blue';
   document.getElementById('dollar-amount-usd').value = '';
-  const lastRate = getLastExchangeRate();
-  document.getElementById('dollar-exchange-rate').value = lastRate || '';
+  document.getElementById('dollar-exchange-rate').value = '';
   document.getElementById('dollar-note').value = '';
   document.getElementById('dollar-ars-preview').hidden = true;
+  document.getElementById('dollar-rate-status').textContent = '';
+  document.getElementById('dollar-rate-chips').hidden = true;
   selectedAccountIdForDollar = state.accounts.length > 0 ? state.accounts[0].id : null;
   selectedGoalIdForDollar = null;
   renderDollarAccountGrid();
   renderDollarGoalSelector();
-  if (lastRate) updateDollarArsPreview();
   document.getElementById('dollar-modal-backdrop').hidden = false;
   history.pushState({ overlay: true }, '');
+  prefillExchangeRate();
   setTimeout(() => document.getElementById('dollar-amount-usd').focus(), 200);
 }
 

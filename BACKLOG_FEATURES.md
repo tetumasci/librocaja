@@ -67,7 +67,7 @@ al usuario en vez de implementarla fuera de orden.
 ---
 
 ## FEATURE: Edición completa de movimientos existentes
-**Estado: pendiente**
+**Estado: hecha**
 
 ### Qué se pide
 Hoy los movimientos solo se pueden borrar (toque → confirm). Agregar la
@@ -101,10 +101,17 @@ nota y fecha. El `id` y `createdAt` nunca se modifican.
 - Cancelar una edición a mitad de camino: no debe alterar el entry
   original.
 
+### Notas de implementación
+- Archivos modificados: `index.html`, `styles.css`, `js/ledger.js`, `js/main.js`, `js/state.js`
+- Action sheet (`#action-sheet-backdrop`) con dos botones: "editar" y "eliminar". Se oculta el botón "editar" si el entry es de tipo `adjustment`.
+- Variable global `editingEntryId` y `actionSheetEntry` en `state.js`.
+- `openEditModal(entry)` pre-puebla el modal sin llamar a `setEntryType()` (esa función resetea `selectedCategoryId`); en cambio, toggle manual de botones + `renderCategoryGrid()` con el id ya seteado.
+- `saveEntry()` ramifica: si `editingEntryId` existe, actualiza el entry en `state.entries` (mismo id, mismo createdAt, agrega updatedAt); si no, crea uno nuevo.
+
 ---
 
 ## FEATURE: Edición de cuentas y saldo inicial
-**Estado: pendiente**
+**Estado: hecha**
 
 ### Qué se pide
 Las cuentas (entidad `accounts`) hoy solo se pueden crear y (si no tienen
@@ -142,10 +149,18 @@ hoy, no solo del mes). Formato: nombre de cuenta + ícono + saldo.
   el ícono viejo: los movimientos existentes deben reflejar el ícono
   nuevo (el ícono se lee de la cuenta, no se copia al movimiento).
 
+### Notas de implementación
+- Archivos modificados: `index.html`, `styles.css`, `js/accounts.js`, `js/state.js`
+- Campo `initialBalance` agregado a `DEFAULT_ACCOUNTS` y a la migración en `loadState()`.
+- `getAccountBalance(accountId)` suma `initialBalance` + movimientos (income suma, expense resta, adjustment suma signed).
+- Modal de cuenta re-usa el existente; se detecta si es edición por `editingAccountId`. En modo edición aparece la sección `#account-adjustment-section` con el saldo calculado y campo de saldo real.
+- Si el usuario ingresa un saldo real distinto al calculado, `saveAccount()` crea un entry de tipo `adjustment` con la diferencia (puede ser positiva o negativa).
+- `renderAccountBreakdown()` muestra todas las cuentas con su saldo total actual (no solo mensual).
+
 ---
 
 ## FEATURE: Módulo de ahorro en dólares
-**Estado: pendiente**
+**Estado: hecha**
 
 ### Concepto
 El usuario quiere poder separar una porción de su sueldo u otros ingresos
@@ -218,10 +233,18 @@ no es un gasto de consumo sino un movimiento de ahorro.
   ella: el depósito histórico no debe romperse, mostrar el nombre de
   cuenta guardado o "cuenta eliminada" en vez de fallar.
 
+### Notas de implementación
+- Archivos modificados: `index.html`, `styles.css`, `js/goals.js`, `js/state.js`
+- Entidades nuevas: `state.dollarSavings[]` y `state.exchangeRates[]` con defaults en `loadState()`.
+- Cada depósito crea automáticamente un entry en `state.entries` de tipo `expense` con `categoryId: 'ahorro-usd'`.
+- `getCategoryById('ahorro-usd')` retorna `{ id, name: 'Ahorro USD', icon: '💵' }` como caso especial (no se agrega a `state.categories`).
+- `renderGoals()` siempre llama a `renderDollarSavings(body)` al final, incluso cuando no hay metas.
+- `renderCategoryBars()` en stats separa visualmente la categoría `ahorro-usd` del resto.
+
 ---
 
 ## FEATURE: Cotización del dólar automática
-**Estado: pendiente** desde una API
+**Estado: hecha** desde una API
 pública gratuita (ej. DolarAPI — `https://dolarapi.com/v1/dolares` — u
 otra equivalente que no requiera API key), en vez de que el usuario tenga
 que cargar el tipo de cambio a mano cada vez.
@@ -252,6 +275,16 @@ que cargar el tipo de cambio a mano cada vez.
   requests innecesarias, debe usar el caché.
 - La API devuelve un formato inesperado o error 500: no debe romper el
   JS de toda la página, solo fallar silenciosamente ese fetch puntual.
+
+### Notas de implementación
+- Archivos modificados: `index.html`, `styles.css`, `js/goals.js`, `sw.js`
+- Cache de sesión en variable de módulo `rateCache { rates, timestamp }` (TTL 30 min). No persiste en localStorage — se refresca al recargar la app, que es el comportamiento deseable.
+- API: `https://dolarapi.com/v1/dolares` (sin API key). Se usa el campo `venta` de cada tipo.
+- Tipos mostrados: Blue (default), Oficial, MEP (`casa: 'bolsa'`), Tarjeta. Solo aparecen los que la API devuelve.
+- Al elegir un tipo con los chips, se reemplaza el valor en el input y se recalcula el preview ARS.
+- Si la API falla: se deja el último TC manual del historial o el campo vacío, y se muestra "sin conexión · ingresá el TC manualmente" en rojo.
+- El input sigue siendo editable siempre; la cotización automática es solo una sugerencia.
+- SW bumpeado a `libro-de-caja-v5` para forzar recarga de archivos nuevos.
 
 ---
 
