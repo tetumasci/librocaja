@@ -1304,3 +1304,201 @@ input { font-family: inherit; }
   #app, .bottom-nav, .view-overlay { background: var(--paper); }
   .bottom-nav { box-shadow: 0 0 0 1px var(--paper-line); }
 }
+
+/* ============================================
+   DOLLAR SAVINGS SECTION
+   ============================================ */
+
+.dollar-savings-card {
+  background: var(--paper-raised);
+  border: 1px solid var(--paper-line);
+  border-radius: var(--radius-lg);
+  padding: 16px 18px;
+  margin-bottom: 14px;
+  box-shadow: var(--shadow-card);
+}
+
+.dollar-savings-totals {
+  display: flex;
+  border-bottom: 1px dashed var(--paper-line);
+  padding-bottom: 14px;
+  margin-bottom: 12px;
+}
+
+.dollar-total-item {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+}
+
+.dollar-total-item + .dollar-total-item {
+  border-left: 1px solid var(--paper-line);
+}
+
+.dollar-total-label {
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: .05em;
+  color: var(--ink-faint);
+}
+
+.dollar-total-usd {
+  font-family: var(--font-mono);
+  font-size: 20px;
+  font-weight: 600;
+  color: var(--income);
+  font-variant-numeric: tabular-nums;
+}
+
+.dollar-total-ars {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--ink-soft);
+  font-variant-numeric: tabular-nums;
+}
+
+.dollar-deposit-list {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 10px;
+}
+
+.dollar-deposit-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--paper-line);
+  gap: 12px;
+}
+
+.dollar-deposit-row:last-child { border-bottom: none; }
+
+.dollar-deposit-left {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.dollar-deposit-date {
+  font-size: 11px;
+  color: var(--ink-faint);
+}
+
+.dollar-deposit-note {
+  font-size: 12px;
+  color: var(--ink-soft);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.dollar-deposit-right {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 2px;
+  flex-shrink: 0;
+}
+
+.dollar-deposit-usd {
+  font-family: var(--font-mono);
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--income);
+  font-variant-numeric: tabular-nums;
+}
+
+.dollar-deposit-ars {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--ink-soft);
+  font-variant-numeric: tabular-nums;
+}
+
+.dollar-savings-empty {
+  font-size: 13px;
+  color: var(--ink-faint);
+  padding: 8px 0 12px;
+}
+
+/* ARS preview in deposit modal */
+.dollar-ars-preview {
+  font-family: var(--font-mono);
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--income);
+  margin: 8px 0 0;
+  text-align: center;
+}
+
+/* separator in category bars */
+.savings-section-label {
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: .05em;
+  color: var(--ink-faint);
+  padding: 10px 0 4px;
+  border-top: 1px dashed var(--paper-line);
+  margin-top: 6px;
+}
+
+/* ============================================
+   ACCOUNT MANAGER — edit button + balance
+   ============================================ */
+
+.cat-edit {
+  color: var(--accent);
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.account-mgr-balance {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--ink-faint);
+  margin-left: 8px;
+}
+
+/* adjustment section inside account modal */
+.account-balance-info {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 0;
+  border-top: 1px dashed var(--paper-line);
+  border-bottom: 1px dashed var(--paper-line);
+  margin-bottom: 16px;
+}
+.account-calc-balance {
+  font-family: var(--font-mono);
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--ink);
+}
+
+/* adjustment entry in ledger */
+.entry-icon.adjustment { background: var(--accent-soft); color: var(--accent); }
+
+/* ============================================
+   ACTION SHEET
+   ============================================ */
+
+.action-sheet-btn {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  padding: 16px 8px;
+  font-size: 15px;
+  font-weight: 500;
+  color: var(--ink);
+  border-bottom: 1px solid var(--paper-line);
+  text-align: left;
+}
+.action-sheet-btn:active { background: rgba(31,27,22,0.04); }
+.action-sheet-danger { color: var(--expense); }
+.action-sheet-icon { font-size: 18px; width: 24px; text-align: center; }
