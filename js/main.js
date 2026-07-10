@@ -153,6 +153,8 @@ function attachEventListeners() {
 
   // Settings: data
   document.getElementById('btn-export').addEventListener('click', exportData);
+  document.getElementById('btn-import').addEventListener('click', importData);
+  document.getElementById('import-file-input').addEventListener('change', handleImportFile);
   document.getElementById('btn-clear-data').addEventListener('click', clearAllData);
 
   // Streak calendar view

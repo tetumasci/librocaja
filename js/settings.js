@@ -182,6 +182,70 @@ function renderStreakCalendar() {
 
 /* ---------- Data management ---------- */
 
+function importData() {
+  document.getElementById('import-file-input').click();
+}
+
+function handleImportFile(e) {
+  const file = e.target.files[0];
+  if (!file) return;
+  e.target.value = '';
+
+  const reader = new FileReader();
+  reader.onload = (evt) => {
+    let parsed;
+    try {
+      parsed = JSON.parse(evt.target.result);
+    } catch {
+      showToast('El archivo no es un JSON válido');
+      return;
+    }
+
+    if (!parsed || typeof parsed !== 'object' || !Array.isArray(parsed.entries)) {
+      showToast('El archivo no parece ser un backup de Libro de Caja');
+      return;
+    }
+
+    const entryCount = parsed.entries.length;
+    if (!confirm(`¿Reemplazar todos los datos actuales con los del archivo?\n\n${entryCount} movimientos encontrados.\n\nEsta acción no se puede deshacer.`)) return;
+
+    state = {
+      entries:           parsed.entries            || [],
+      categories:        parsed.categories         || DEFAULT_CATEGORIES,
+      incomeCategories:  parsed.incomeCategories   || DEFAULT_INCOME_CATEGORIES,
+      goals:             parsed.goals              || [],
+      accounts:          parsed.accounts?.length   ? parsed.accounts : [...DEFAULT_ACCOUNTS],
+      recurringExpenses: parsed.recurringExpenses  || [],
+      budgets:           parsed.budgets            || [],
+      inflationRates:    parsed.inflationRates     || {},
+      streak:            parsed.streak             || { count: 0, lastDate: null },
+      dollarSavings:     parsed.dollarSavings      || [],
+      exchangeRates:     parsed.exchangeRates      || [],
+    };
+
+    state.accounts = state.accounts.map(acc =>
+      acc.initialBalance !== undefined ? acc : { ...acc, initialBalance: 0 }
+    );
+    const needsMigration = state.entries.some(e => !e.accountId);
+    if (needsMigration) {
+      if (!state.accounts.find(a => a.id === 'general')) {
+        state.accounts = [{ id: 'general', name: 'General', icon: '◆', type: 'cash', initialBalance: 0 }, ...state.accounts];
+      }
+      state.entries = state.entries.map(e => e.accountId ? e : { ...e, accountId: 'general' });
+    }
+
+    saveState();
+    renderAll();
+    renderCategoryManager();
+    renderBudgetManager();
+    renderAccountManager();
+    renderRecurringManager();
+    renderInflationSection();
+    showToast(`Datos importados: ${entryCount} movimientos`);
+  };
+  reader.readAsText(file);
+}
+
 function exportData() {
   const dataStr = JSON.stringify(state, null, 2);
   const blob = new Blob([dataStr], { type: 'application/json' });
