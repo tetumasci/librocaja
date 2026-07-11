@@ -100,6 +100,22 @@ function saveInflationRate() {
   showToast('Tasa de inflación guardada');
 }
 
+/* ---------- Small expense threshold ---------- */
+
+function renderSmallExpenseThreshold() {
+  const input = document.getElementById('small-expense-threshold-input');
+  if (!input) return;
+  input.value = state.smallExpenseThreshold != null ? state.smallExpenseThreshold : 5000;
+}
+
+function saveSmallExpenseThreshold() {
+  const val = parseFloat(document.getElementById('small-expense-threshold-input').value);
+  if (isNaN(val) || val <= 0) { showToast('Ingresá un monto válido mayor a 0'); return; }
+  state.smallExpenseThreshold = val;
+  saveState();
+  showToast('Umbral actualizado');
+}
+
 /* ---------- Streak calendar ---------- */
 
 function openStreakView() {
@@ -210,17 +226,19 @@ function handleImportFile(e) {
     if (!confirm(`¿Reemplazar todos los datos actuales con los del archivo?\n\n${entryCount} movimientos encontrados.\n\nEsta acción no se puede deshacer.`)) return;
 
     state = {
-      entries:           parsed.entries            || [],
-      categories:        parsed.categories         || DEFAULT_CATEGORIES,
-      incomeCategories:  parsed.incomeCategories   || DEFAULT_INCOME_CATEGORIES,
-      goals:             parsed.goals              || [],
-      accounts:          parsed.accounts?.length   ? parsed.accounts : [...DEFAULT_ACCOUNTS],
-      recurringExpenses: parsed.recurringExpenses  || [],
-      budgets:           parsed.budgets            || [],
-      inflationRates:    parsed.inflationRates     || {},
-      streak:            parsed.streak             || { count: 0, lastDate: null },
-      dollarSavings:     parsed.dollarSavings      || [],
-      exchangeRates:     parsed.exchangeRates      || [],
+      entries:                parsed.entries            || [],
+      categories:             parsed.categories         || DEFAULT_CATEGORIES,
+      incomeCategories:       parsed.incomeCategories   || DEFAULT_INCOME_CATEGORIES,
+      goals:                  parsed.goals              || [],
+      accounts:               parsed.accounts?.length   ? parsed.accounts : [...DEFAULT_ACCOUNTS],
+      recurringExpenses:      parsed.recurringExpenses  || [],
+      budgets:                parsed.budgets            || [],
+      inflationRates:         parsed.inflationRates     || {},
+      streak:                 parsed.streak             || { count: 0, lastDate: null },
+      dollarSavings:          parsed.dollarSavings      || [],
+      exchangeRates:          parsed.exchangeRates      || [],
+      investmentPlans:        parsed.investmentPlans    || [],
+      smallExpenseThreshold:  parsed.smallExpenseThreshold ?? 5000,
     };
 
     state.accounts = state.accounts.map(acc =>
@@ -275,6 +293,8 @@ function clearAllData() {
     streak: { count: 0, lastDate: null },
     dollarSavings: [],
     exchangeRates: [],
+    investmentPlans: [],
+    smallExpenseThreshold: 5000,
   };
   saveState();
   renderAll();

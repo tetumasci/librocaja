@@ -158,6 +158,51 @@ hoy, no solo del mes). Formato: nombre de cuenta + ícono + saldo.
 - `renderAccountBreakdown()` muestra todas las cuentas con su saldo total actual (no solo mensual).
 
 ---
+## FEATURE: Edición de categorías
+**Estado: pendiente**
+
+### Qué se pide
+Hoy las categorías (tanto de gasto como de ingreso) solo se pueden crear
+y, si no están en uso, eliminar (ver gestor de categorías en Ajustes).
+Agregar la posibilidad de **editar** el nombre y el ícono de una
+categoría ya existente, esté o no en uso.
+
+### Comportamiento esperado
+- En el gestor de categorías de Ajustes, cada fila de categoría debe
+  tener, además de la opción "quitar" ya existente, una opción "editar".
+- "Editar" abre un modal (reusando el mismo patrón visual que el modal de
+  "nueva categoría" ya existente) pre-poblado con el nombre y el ícono
+  actual de esa categoría. El botón de guardar dice "guardar cambios" en
+  vez de "agregar".
+- Al guardar, actualiza el objeto de esa categoría en `state.categories`
+  (o `state.incomeCategories` según corresponda) en el mismo lugar del
+  array, sin cambiar su `id`.
+- Como el `id` de la categoría no cambia, todos los movimientos
+  existentes que ya usan esa categoría (`categoryId`) deben reflejar
+  automáticamente el nombre e ícono nuevos en el listado, en reportes, y
+  en cualquier otro lugar donde se muestre — no hace falta migrar nada en
+  `entries`, ya que esos solo guardan la referencia por `id`.
+- Debe funcionar igual tanto para categorías de gasto como de ingreso
+  (hoy son dos listas separadas, `state.categories` y
+  `state.incomeCategories` — el modal de edición debe operar sobre la
+  lista correcta según de cuál categoría se trate).
+
+### Casos de borde a probar
+- Editar el nombre de una categoría que ya tiene movimientos cargados: 
+  confirmar que el listado de movimientos, los reportes (barras por
+  categoría) y los presupuestos vinculados a esa categoría (si la
+  feature de presupuestos ya está implementada) muestran el nombre nuevo
+  sin romper nada.
+- Editar el ícono de una categoría con presupuesto asignado: el
+  presupuesto debe seguir vinculado correctamente por `categoryId`, no
+  por nombre.
+- Intentar guardar con el nombre vacío: debe bloquearse igual que en la
+  creación de categoría nueva.
+- Cancelar la edición a mitad de camino: no debe alterar la categoría
+  original.
+
+
+---
 
 ## FEATURE: Módulo de ahorro en dólares
 **Estado: hecha**
@@ -289,7 +334,7 @@ que cargar el tipo de cambio a mano cada vez.
 ---
 
 ## FEATURE: Proyección de fin de mes y gastos hormiga
-**Estado: pendiente**
+**Estado: hecha**
 
 ### Qué se pide
 Dos métricas nuevas en la vista de Reportes:
@@ -325,6 +370,15 @@ actuales (promedio diario, tasa de ahorro, etc.).
 - Mes sin ningún gasto todavía: no debe romper (división por cero).
 - Umbral de gasto hormiga editado por el usuario a un valor absurdo
   (negativo, cero): validar el input.
+
+### Notas de implementación
+- Archivos modificados: `js/state.js`, `js/stats.js`, `js/settings.js`, `js/main.js`, `index.html`, `styles.css`.
+- Nuevo campo `state.smallExpenseThreshold` (default 5000). Migración en `loadState()` y reset en `clearAllData()` / `handleImportFile()`.
+- Proyección: se muestra `—` si `daysElapsed < 3` o si no hay gastos (evita división por cero y proyecciones sin sentido). Referencia de alerta: suma de todos los `budgets.monthlyLimit` si hay presupuestos configurados; si no, gasto del mes anterior. Texto `.negative` (terracota) si la proyección supera la referencia.
+- Gastos hormiga: excluye categoría `ahorro-usd` (no es un gasto de consumo). El conteo y monto se muestran como subtexto dentro del metric-card con la clase `.metric-sub` (nueva clase CSS).
+- Desglose por categoría: sección `#ants-section-label` con `hidden` por defecto, solo visible si hay gastos hormiga ese mes. Las barras muestran cantidad de movimientos en vez de porcentaje secundario, ya que el dato relevante aquí es la frecuencia.
+- Umbral configurable en Ajustes bajo la nueva sección "umbrales", reutilizando el layout `.inflation-row` y `.inflation-input`.
+- Caso de borde: umbral negativo o cero validado en `saveSmallExpenseThreshold()`.
 
 ---
 

@@ -115,6 +115,10 @@
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 11-2.83 2.83l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 11-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 11-2.83-2.83l.06-.06a1.65 1.65 0 00.33-1.82 1.65 1.65 0 00-1.51-1H3a2 2 0 110-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 112.83-2.83l.06.06a1.65 1.65 0 001.82.33H9a1.65 1.65 0 001-1.51V3a2 2 0 114 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 112.83 2.83l-.06.06a1.65 1.65 0 00-.33 1.82V9a1.65 1.65 0 001.51 1H21a2 2 0 110 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg>
     <span>ajustes</span>
   </button>
+  <button class="nav-item" data-view="plan">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/></svg>
+    <span>plan</span>
+  </button>
 </nav>
 
 <!-- ===== VIEW: STATS (full screen overlay) ===== -->
@@ -150,6 +154,16 @@
         <span class="metric-label">var. real vs mes ant.</span>
         <span class="metric-value" id="metric-real-var">—</span>
       </div>
+      <div class="metric-card">
+        <span class="metric-label">proyección este mes</span>
+        <span class="metric-value" id="metric-projection">—</span>
+        <span class="metric-sub" id="metric-projection-sub"></span>
+      </div>
+      <div class="metric-card">
+        <span class="metric-label">gastos hormiga</span>
+        <span class="metric-value" id="metric-ants">—</span>
+        <span class="metric-sub" id="metric-ants-sub"></span>
+      </div>
     </div>
 
     <h3 class="section-label">gastos por categoría</h3>
@@ -157,6 +171,9 @@
 
     <h3 class="section-label">últimos 6 meses</h3>
     <div class="trend-chart" id="trend-chart"></div>
+
+    <h3 class="section-label" id="ants-section-label" hidden>gastos hormiga por categoría</h3>
+    <div id="ants-category-bars" class="category-bars"></div>
 
   </div>
 </div>
@@ -214,6 +231,17 @@
     </div>
     <div class="inflation-history" id="inflation-history"></div>
 
+    <h3 class="section-label">umbrales</h3>
+    <div class="inflation-row">
+      <span class="inflation-month-label">gasto hormiga</span>
+      <div class="inflation-input-wrap">
+        <input type="number" inputmode="decimal" id="small-expense-threshold-input" class="text-input inflation-input" placeholder="5000" step="100" min="1">
+        <span class="inflation-pct">$</span>
+      </div>
+      <button class="text-btn" id="btn-save-threshold">guardar</button>
+    </div>
+    <p style="font-size:11px;color:var(--ink-faint);margin:0 0 8px">gastos por debajo de este monto se agrupan como "gastos hormiga" en Reportes</p>
+
     <h3 class="section-label">datos</h3>
     <button class="settings-row" id="btn-export">
       <span>exportar datos (.json)</span>
@@ -230,6 +258,22 @@
     </button>
 
     <p class="app-version">Libro de caja · v1.0 · tus datos viven solo en este dispositivo</p>
+  </div>
+</div>
+
+<!-- ===== VIEW: PLAN ===== -->
+<div class="view-overlay" id="view-plan" hidden>
+  <header class="view-header">
+    <button class="icon-btn" id="plan-back" aria-label="Volver">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M15 18l-6-6 6-6"/></svg>
+    </button>
+    <h2>plan</h2>
+    <button class="icon-btn" id="btn-add-plan" aria-label="Nuevo plan">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>
+    </button>
+  </header>
+  <div class="view-body">
+    <div id="plan-list"></div>
   </div>
 </div>
 
@@ -500,6 +544,67 @@
   </div>
 </div>
 
+<!-- ===== MODAL: NEW PLAN ===== -->
+<div class="modal-backdrop" id="plan-modal-backdrop" hidden>
+  <div class="modal-sheet">
+    <div class="modal-handle"></div>
+    <h3 class="modal-title">nuevo plan de inversión</h3>
+    <div class="field-group">
+      <label class="field-label" for="plan-name-input">nombre del plan</label>
+      <input type="text" id="plan-name-input" class="text-input" placeholder="ej: Swiss Medical 25 años, Cocos...">
+    </div>
+    <div class="plan-modal-row">
+      <div class="field-group" style="flex:1">
+        <label class="field-label" for="plan-monthly-usd">aporte mensual (USD)</label>
+        <input type="number" inputmode="decimal" id="plan-monthly-usd" class="text-input" placeholder="100">
+      </div>
+      <div class="field-group" style="flex:0 0 110px">
+        <label class="field-label" for="plan-rate">tasa anual %</label>
+        <input type="number" inputmode="decimal" id="plan-rate" class="text-input" placeholder="6.5">
+      </div>
+    </div>
+    <div class="plan-modal-row">
+      <div class="field-group" style="flex:1">
+        <label class="field-label" for="plan-start-date">fecha de inicio</label>
+        <input type="date" id="plan-start-date" class="text-input">
+      </div>
+      <div class="field-group" style="flex:0 0 110px">
+        <label class="field-label" for="plan-term-years">plazo (años)</label>
+        <input type="number" inputmode="numeric" id="plan-term-years" class="text-input" placeholder="25" min="1" max="50">
+      </div>
+    </div>
+    <button class="btn-save" id="btn-save-plan">crear plan</button>
+    <button class="btn-cancel" id="btn-cancel-plan">cancelar</button>
+  </div>
+</div>
+
+<!-- ===== MODAL: REGISTER PLAN PAYMENT ===== -->
+<div class="modal-backdrop" id="plan-payment-modal-backdrop" hidden>
+  <div class="modal-sheet">
+    <div class="modal-handle"></div>
+    <h3 class="modal-title">registrar pago</h3>
+    <p class="plan-payment-plan-name" id="payment-plan-name"></p>
+    <div class="plan-payment-usd-fixed">
+      <span class="field-label" style="margin-bottom:0">aporte fijo</span>
+      <span class="plan-payment-usd-val" id="payment-usd-amount">USD 0</span>
+    </div>
+    <div class="field-group">
+      <label class="field-label" for="payment-ars-input">monto en pesos pagado (informativo)</label>
+      <input type="number" inputmode="decimal" id="payment-ars-input" class="text-input" placeholder="0">
+    </div>
+    <div class="field-group">
+      <label class="field-label" for="payment-rate-input">tipo de cambio usado (opcional · 1 USD = $)</label>
+      <input type="number" inputmode="decimal" id="payment-rate-input" class="text-input" placeholder="ej: 1250">
+    </div>
+    <div class="field-group">
+      <label class="field-label" for="payment-date-input">fecha</label>
+      <input type="date" id="payment-date-input" class="text-input">
+    </div>
+    <button class="btn-save" id="btn-save-payment">registrar pago</button>
+    <button class="btn-cancel" id="btn-cancel-payment">cancelar</button>
+  </div>
+</div>
+
 <div class="toast" id="toast"></div>
 
 <script src="js/state.js"></script>
@@ -511,6 +616,7 @@
 <script src="js/goals.js"></script>
 <script src="js/stats.js"></script>
 <script src="js/settings.js"></script>
+<script src="js/plan.js"></script>
 <script src="js/main.js"></script>
 <script>
 if ('serviceWorker' in navigator) {

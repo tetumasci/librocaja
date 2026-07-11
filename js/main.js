@@ -7,6 +7,7 @@ function showView(viewName) {
   document.getElementById('view-stats').hidden = viewName !== 'stats';
   document.getElementById('view-goals').hidden = viewName !== 'goals';
   document.getElementById('view-settings').hidden = viewName !== 'settings';
+  document.getElementById('view-plan').hidden = viewName !== 'plan';
 
   document.querySelectorAll('.nav-item').forEach(item => {
     item.classList.toggle('active', item.dataset.view === viewName);
@@ -20,7 +21,9 @@ function showView(viewName) {
     renderAccountManager();
     renderRecurringManager();
     renderInflationSection();
+    renderSmallExpenseThreshold();
   }
+  if (viewName === 'plan') renderPlan();
   history.pushState({ overlay: true }, '');
 }
 
@@ -92,6 +95,7 @@ function attachEventListeners() {
   document.getElementById('stats-back').addEventListener('click', hideAllOverlays);
   document.getElementById('goals-back').addEventListener('click', hideAllOverlays);
   document.getElementById('settings-back').addEventListener('click', hideAllOverlays);
+  document.getElementById('plan-back').addEventListener('click', hideAllOverlays);
 
   // Dollar savings modal
   document.getElementById('btn-save-dollar').addEventListener('click', saveDollarDeposit);
@@ -120,6 +124,9 @@ function attachEventListeners() {
 
   // Settings: inflation
   document.getElementById('btn-save-inflation').addEventListener('click', saveInflationRate);
+
+  // Settings: small expense threshold
+  document.getElementById('btn-save-threshold').addEventListener('click', saveSmallExpenseThreshold);
 
   // Settings: budgets
   document.getElementById('btn-add-budget').addEventListener('click', openBudgetModal);
@@ -160,6 +167,19 @@ function attachEventListeners() {
   // Streak calendar view
   document.getElementById('streak-bar').addEventListener('click', openStreakView);
   document.getElementById('streak-cal-back').addEventListener('click', hideAllOverlays);
+
+  // Plan module
+  document.getElementById('btn-add-plan').addEventListener('click', openNewPlanModal);
+  document.getElementById('btn-cancel-plan').addEventListener('click', closeNewPlanModal);
+  document.getElementById('plan-modal-backdrop').addEventListener('click', (e) => {
+    if (e.target.id === 'plan-modal-backdrop') closeNewPlanModal();
+  });
+  document.getElementById('btn-save-plan').addEventListener('click', saveNewPlan);
+  document.getElementById('btn-cancel-payment').addEventListener('click', closePaymentModal);
+  document.getElementById('plan-payment-modal-backdrop').addEventListener('click', (e) => {
+    if (e.target.id === 'plan-payment-modal-backdrop') closePaymentModal();
+  });
+  document.getElementById('btn-save-payment').addEventListener('click', savePayment);
 
   // Android / browser back button
   window.addEventListener('popstate', () => {

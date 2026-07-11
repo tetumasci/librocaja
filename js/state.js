@@ -51,6 +51,8 @@ let state = {
   streak: { count: 0, lastDate: null },
   dollarSavings: [],
   exchangeRates: [],
+  investmentPlans: [],
+  smallExpenseThreshold: 5000,
 };
 
 let viewDate = new Date();
@@ -88,6 +90,8 @@ function loadState() {
     if (!state.inflationRates) state.inflationRates = {};
     if (!state.dollarSavings) state.dollarSavings = [];
     if (!state.exchangeRates) state.exchangeRates = [];
+    if (!state.investmentPlans) state.investmentPlans = [];
+    if (state.smallExpenseThreshold == null || state.smallExpenseThreshold <= 0) state.smallExpenseThreshold = 5000;
     state.accounts = state.accounts.map(acc =>
       acc.initialBalance !== undefined ? acc : { ...acc, initialBalance: 0 }
     );

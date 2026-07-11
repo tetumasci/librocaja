@@ -16,8 +16,8 @@ function escapeHtml(str) {
   return div.innerHTML;
 }
 
-const VIEW_OVERLAY_IDS = ['view-stats', 'view-goals', 'view-settings', 'view-streak'];
-const MODAL_OVERLAY_IDS = ['action-sheet-backdrop', 'dollar-modal-backdrop', 'modal-backdrop', 'goal-modal-backdrop', 'cat-modal-backdrop', 'account-modal-backdrop', 'recurring-modal-backdrop', 'budget-modal-backdrop'];
+const VIEW_OVERLAY_IDS = ['view-stats', 'view-goals', 'view-settings', 'view-streak', 'view-plan'];
+const MODAL_OVERLAY_IDS = ['action-sheet-backdrop', 'dollar-modal-backdrop', 'modal-backdrop', 'goal-modal-backdrop', 'cat-modal-backdrop', 'account-modal-backdrop', 'recurring-modal-backdrop', 'budget-modal-backdrop', 'plan-modal-backdrop', 'plan-payment-modal-backdrop'];
 
 function updateNavForLedger() {
   document.querySelectorAll('.nav-item').forEach(item => {
@@ -59,5 +59,7 @@ function closeTopmostOverlay() {
   else if (id === 'account-modal-backdrop') closeAccountModal();
   else if (id === 'recurring-modal-backdrop') closeRecurringModal();
   else if (id === 'budget-modal-backdrop') closeBudgetModal();
+  else if (id === 'plan-modal-backdrop') closeNewPlanModal();
+  else if (id === 'plan-payment-modal-backdrop') closePaymentModal();
   else { el.hidden = true; updateNavForLedger(); }
 }

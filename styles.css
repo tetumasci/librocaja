@@ -582,6 +582,11 @@ input { font-family: inherit; }
 }
 .metric-value.positive { color: var(--income); }
 .metric-value.negative { color: var(--expense); }
+.metric-sub {
+  font-size: 10px;
+  color: var(--ink-faint);
+  line-height: 1.2;
+}
 
 /* category bars */
 .category-bars {
@@ -1532,3 +1537,176 @@ input { font-family: inherit; }
 .action-sheet-btn:active { background: rgba(31,27,22,0.04); }
 .action-sheet-danger { color: var(--expense); }
 .action-sheet-icon { font-size: 18px; width: 24px; text-align: center; }
+
+/* ============================================
+   PLAN MODULE
+   ============================================ */
+
+.plan-empty {
+  text-align: center;
+  padding: 60px 20px;
+  font-family: var(--font-display);
+  font-size: 15px;
+  color: var(--ink-faint);
+}
+
+.plan-card {
+  background: var(--paper-raised);
+  border: 1px solid var(--paper-line);
+  border-radius: var(--radius-lg);
+  padding: 18px 18px 16px;
+  margin-bottom: 16px;
+  box-shadow: var(--shadow-card);
+}
+
+.plan-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 14px;
+}
+
+.plan-card-title {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+  padding-right: 8px;
+}
+
+.plan-card-name {
+  font-family: var(--font-display);
+  font-size: 17px;
+  font-weight: 600;
+  line-height: 1.2;
+}
+
+.plan-card-meta {
+  font-size: 11px;
+  color: var(--ink-faint);
+  font-family: var(--font-mono);
+}
+
+.plan-card-delete {
+  color: var(--ink-faint);
+  padding: 4px;
+  flex-shrink: 0;
+}
+.plan-card-delete:active { color: var(--expense); }
+
+.plan-stats-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.plan-stat {
+  background: var(--paper);
+  border: 1px solid var(--paper-line);
+  border-radius: var(--radius-md);
+  padding: 10px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.plan-stat-label {
+  font-size: 9px;
+  text-transform: uppercase;
+  letter-spacing: .05em;
+  color: var(--ink-faint);
+}
+
+.plan-stat-value {
+  font-family: var(--font-mono);
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--income);
+  font-variant-numeric: tabular-nums;
+}
+
+.plan-stat-sub {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--ink-faint);
+}
+
+.plan-projected {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 0;
+  border-top: 1px dashed var(--paper-line);
+  border-bottom: 1px dashed var(--paper-line);
+  margin-bottom: 14px;
+}
+
+.plan-projected-label {
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: .04em;
+  color: var(--ink-faint);
+}
+
+.plan-projected-value {
+  font-family: var(--font-mono);
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--accent);
+  font-variant-numeric: tabular-nums;
+}
+
+.plan-chart {
+  width: 100%;
+  display: block;
+  margin-bottom: 14px;
+  border-radius: var(--radius-sm);
+}
+
+.plan-payment-btn {
+  width: 100%;
+  height: 40px;
+  border: 1.5px solid var(--paper-line);
+  border-radius: var(--radius-md);
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--ink-soft);
+  background: transparent;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.plan-payment-btn:active { background: var(--paper-line); color: var(--ink); }
+
+/* plan modal row — two inputs side by side */
+.plan-modal-row {
+  display: flex;
+  gap: 12px;
+}
+
+/* payment modal header info */
+.plan-payment-plan-name {
+  text-align: center;
+  font-size: 14px;
+  color: var(--ink-soft);
+  margin: -8px 0 16px;
+}
+
+.plan-payment-usd-fixed {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 0;
+  border-top: 1px dashed var(--paper-line);
+  border-bottom: 1px dashed var(--paper-line);
+  margin-bottom: 16px;
+}
+
+.plan-payment-usd-val {
+  font-family: var(--font-mono);
+  font-size: 17px;
+  font-weight: 700;
+  color: var(--income);
+  font-variant-numeric: tabular-nums;
+}
