@@ -391,6 +391,56 @@ actuales (promedio diario, tasa de ahorro, etc.).
 
 ---
 
+## FEATURE: Actualizaciones automáticas del Service Worker (PWA update flow)
+**Estado: hecha**
+
+### Problema
+Cada vez que se hace push de un cambio (commit → Netlify redeploy), el
+Service Worker (sw.js) sigue sirviendo la versión vieja cacheada en los
+dispositivos ya instalados, hasta que el usuario fuerza un refresh o
+reinstala. Esto obliga a intervención manual cada vez que hay un cambio,
+lo cual no es viable a largo plazo.
+
+### Qué se pide
+Implementar el patrón estándar de detección de Service Worker nuevo +
+aviso no invasivo al usuario para que decida cuándo aplicar la
+actualización.
+
+### Comportamiento esperado
+- Cuando el navegador detecta que hay una versión nueva del SW disponible
+  (evento `updatefound` + nuevo worker llega a estado `installed` mientras
+  ya hay uno `activated` controlando la página), mostrar un banner fijo en
+  la parte inferior con el texto "Hay una versión nueva disponible" y
+  un botón "Actualizar" + X para ignorar.
+- Al tocar "Actualizar": `postMessage({type:'SKIP_WAITING'})` al SW
+  esperando, y en `sw.js` escuchar ese mensaje y llamar a
+  `self.skipWaiting()`. Cuando el nuevo SW toma control
+  (`controllerchange`), hacer `window.location.reload()`.
+- Si el usuario ignora el aviso, la app sigue funcionando normalmente.
+- En primera instalación (sin SW previo), no mostrar ningún aviso.
+
+### Casos de borde a probar
+- Primer uso (sin SW previo): no debe aparecer el banner.
+- Cambio desplegado → abrir app → verificar que aparece el banner.
+- Tocar "Actualizar" → app recarga con versión nueva.
+- Ignorar el banner → app sigue usable normalmente.
+
+### Notas de implementación
+- Archivos modificados: `sw.js`, `index.html`, `styles.css`, `_headers` (nuevo)
+- `sw.js`: eliminado `self.skipWaiting()` del install; agregado listener
+  `message` que lo llama solo cuando recibe `{type:'SKIP_WAITING'}`.
+- `index.html`: inline script de registro ampliado — detecta `updatefound`,
+  espera `statechange === 'installed'` con `navigator.serviceWorker.controller`
+  activo (no primera instalación), muestra el banner. `controllerchange`
+  recarga solo si `reloadOnControllerChange` es true (evita reload
+  espurio en primer install).
+- `_headers` (Netlify): `sw.js` con `Cache-Control: no-store` — crítico
+  para iOS Safari, que de otro modo cachea el archivo SW a nivel HTTP y
+  nunca detecta actualizaciones.
+- CACHE_NAME bumpeado a `libro-de-caja-v7`.
+
+---
+
 ## FEATURE: Transferencias entre cuentas
 **Estado: pendiente**
 **Depende de: "Edición de cuentas y saldo inicial" (usa el saldo por cuenta)**

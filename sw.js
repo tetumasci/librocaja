@@ -1,4 +1,4 @@
-const CACHE_NAME = 'libro-de-caja-v6';
+const CACHE_NAME = 'libro-de-caja-v7';
 const ASSETS_TO_CACHE = [
   './',
   './index.html',
@@ -21,7 +21,12 @@ self.addEventListener('install', (event) => {
   event.waitUntil(
     caches.open(CACHE_NAME).then((cache) => cache.addAll(ASSETS_TO_CACHE))
   );
-  self.skipWaiting();
+  // No llamamos skipWaiting() aquí — la página lo pide explícitamente
+  // cuando el usuario toca "Actualizar" en el banner.
+});
+
+self.addEventListener('message', (event) => {
+  if (event.data?.type === 'SKIP_WAITING') self.skipWaiting();
 });
 
 self.addEventListener('activate', (event) => {

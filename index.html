@@ -611,6 +611,15 @@
 
 <div class="toast" id="toast"></div>
 
+<!-- ===== UPDATE BANNER ===== -->
+<div id="update-banner" class="update-banner" hidden>
+  <span class="update-banner-text">Hay una versión nueva disponible</span>
+  <div class="update-banner-actions">
+    <button id="btn-update-app" class="update-banner-btn">Actualizar</button>
+    <button id="btn-dismiss-update" class="update-banner-dismiss" aria-label="Ignorar">✕</button>
+  </div>
+</div>
+
 <script src="js/state.js"></script>
 <script src="js/ui.js"></script>
 <script src="js/ledger.js"></script>
@@ -624,8 +633,38 @@
 <script src="js/main.js"></script>
 <script>
 if ('serviceWorker' in navigator) {
+  let swReg = null;
+  let reloadOnControllerChange = false;
+
   window.addEventListener('load', () => {
-    navigator.serviceWorker.register('sw.js').catch(() => {});
+    navigator.serviceWorker.register('sw.js').then(reg => {
+      swReg = reg;
+      reg.addEventListener('updatefound', () => {
+        const newWorker = reg.installing;
+        newWorker.addEventListener('statechange', () => {
+          // Solo mostrar el banner si ya había un SW activo (no primera instalación)
+          if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+            document.getElementById('update-banner').hidden = false;
+          }
+        });
+      });
+    }).catch(() => {});
+
+    // Recargar solo si el usuario pidió la actualización
+    navigator.serviceWorker.addEventListener('controllerchange', () => {
+      if (reloadOnControllerChange) window.location.reload();
+    });
+
+    document.getElementById('btn-update-app').addEventListener('click', () => {
+      reloadOnControllerChange = true;
+      if (swReg && swReg.waiting) {
+        swReg.waiting.postMessage({ type: 'SKIP_WAITING' });
+      }
+    });
+
+    document.getElementById('btn-dismiss-update').addEventListener('click', () => {
+      document.getElementById('update-banner').hidden = true;
+    });
   });
 }
 </script>
