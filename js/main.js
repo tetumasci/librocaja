@@ -17,6 +17,7 @@ function showView(viewName) {
   if (viewName === 'goals') renderGoals();
   if (viewName === 'settings') {
     renderCategoryManager();
+    renderIncomeCategoryManager();
     renderBudgetManager();
     renderAccountManager();
     renderRecurringManager();
@@ -116,6 +117,7 @@ function attachEventListeners() {
 
   // Settings: categories
   document.getElementById('btn-add-category').addEventListener('click', openCategoryModal);
+  document.getElementById('btn-add-income-category').addEventListener('click', openAddIncomeCategoryModal);
   document.getElementById('btn-cancel-category').addEventListener('click', closeCategoryModal);
   document.getElementById('cat-modal-backdrop').addEventListener('click', (e) => {
     if (e.target.id === 'cat-modal-backdrop') closeCategoryModal();

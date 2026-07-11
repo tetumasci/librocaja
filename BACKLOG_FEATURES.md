@@ -159,7 +159,7 @@ hoy, no solo del mes). Formato: nombre de cuenta + ícono + saldo.
 
 ---
 ## FEATURE: Edición de categorías
-**Estado: pendiente**
+**Estado: hecha**
 
 ### Qué se pide
 Hoy las categorías (tanto de gasto como de ingreso) solo se pueden crear
@@ -201,6 +201,15 @@ categoría ya existente, esté o no en uso.
 - Cancelar la edición a mitad de camino: no debe alterar la categoría
   original.
 
+### Notas de implementación
+- Archivos modificados: `index.html`, `js/settings.js`, `js/state.js`, `js/main.js`
+- Se agregó sección "categorías de ingreso" en Ajustes (`income-category-manager`) con botón "+ agregar categoría de ingreso". Antes de esta feature, las categorías de ingreso no tenían ninguna UI en Ajustes.
+- La lógica de renderizado de filas se extrajo a `renderCategoryRows(container, list, listKey)`, compartida entre `renderCategoryManager()` y `renderIncomeCategoryManager()`.
+- Cada fila muestra ambos botones "editar" y "quitar". El botón "quitar" ahora opera sobre la lista correcta según `data-list="expense"|"income"`.
+- El modal existente `cat-modal-backdrop` se reutiliza para los tres casos (nueva categoría de gasto, nueva de ingreso, editar cualquiera). Título y texto del botón guardar se actualizan dinámicamente al abrir.
+- Variables nuevas `editingCategoryId` y `editingCategoryList` en `state.js` controlan el modo del modal.
+- `saveCategory()` ramifica: si `editingCategoryId` existe, actualiza en el lugar del array (mismo `id`); si no, hace push. Como el `id` no cambia en edición, todos los movimientos, presupuestos y reportes reflejan el cambio automáticamente.
+- Caso de borde no listado: si el ícono actual de una categoría no está en `ICON_OPTIONS` (ej. un emoji agregado manualmente por un futuro feature), el icon picker lo pre-selecciona visualmente aunque no figure en el grid — no rompe, simplemente no se ve resaltado ningún item hasta que el usuario elige uno.
 
 ---
 

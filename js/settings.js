@@ -5,34 +5,91 @@
 
 /* ---------- Category manager ---------- */
 
-function renderCategoryManager() {
-  const container = document.getElementById('category-manager');
+function renderCategoryRows(container, list, listKey) {
   container.innerHTML = '';
-  state.categories.forEach(cat => {
+  list.forEach(cat => {
     const row = document.createElement('div');
     row.className = 'category-manager-row';
     row.innerHTML = `
       <span><span>${cat.icon}</span>${escapeHtml(cat.name)}</span>
-      <button class="cat-remove" data-cat-id="${cat.id}">quitar</button>
+      <span style="display:flex;gap:10px">
+        <button class="cat-edit" data-cat-id="${cat.id}" data-list="${listKey}">editar</button>
+        <button class="cat-remove" data-cat-id="${cat.id}" data-list="${listKey}">quitar</button>
+      </span>
     `;
     container.appendChild(row);
+  });
+  container.querySelectorAll('.cat-edit').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const id = btn.dataset.catId;
+      const lk = btn.dataset.list;
+      const list = lk === 'income' ? state.incomeCategories : state.categories;
+      const cat = list.find(c => c.id === id);
+      if (cat) openEditCategoryModal(cat, lk);
+    });
   });
   container.querySelectorAll('.cat-remove').forEach(btn => {
     btn.addEventListener('click', () => {
       const id = btn.dataset.catId;
+      const lk = btn.dataset.list;
       const inUse = state.entries.some(e => e.categoryId === id);
       if (inUse) { showToast('No se puede quitar: tiene movimientos cargados'); return; }
-      state.categories = state.categories.filter(c => c.id !== id);
+      if (lk === 'income') {
+        state.incomeCategories = state.incomeCategories.filter(c => c.id !== id);
+      } else {
+        state.categories = state.categories.filter(c => c.id !== id);
+      }
       saveState();
       renderCategoryManager();
+      renderIncomeCategoryManager();
     });
   });
 }
 
+function renderCategoryManager() {
+  renderCategoryRows(document.getElementById('category-manager'), state.categories, 'expense');
+}
+
+function renderIncomeCategoryManager() {
+  const container = document.getElementById('income-category-manager');
+  if (!container) return;
+  renderCategoryRows(container, state.incomeCategories, 'income');
+}
+
 function openCategoryModal() {
+  editingCategoryId = null;
+  editingCategoryList = 'expense';
   closeAllModals();
   document.getElementById('new-cat-name').value = '';
+  document.querySelector('#cat-modal-backdrop .modal-title').textContent = 'nueva categoría';
+  document.getElementById('btn-save-category').textContent = 'agregar';
   selectedIconForNewCategory = ICON_OPTIONS[0];
+  renderIconPicker();
+  document.getElementById('cat-modal-backdrop').hidden = false;
+  history.pushState({ overlay: true }, '');
+}
+
+function openAddIncomeCategoryModal() {
+  editingCategoryId = null;
+  editingCategoryList = 'income';
+  closeAllModals();
+  document.getElementById('new-cat-name').value = '';
+  document.querySelector('#cat-modal-backdrop .modal-title').textContent = 'nueva categoría de ingreso';
+  document.getElementById('btn-save-category').textContent = 'agregar';
+  selectedIconForNewCategory = ICON_OPTIONS[0];
+  renderIconPicker();
+  document.getElementById('cat-modal-backdrop').hidden = false;
+  history.pushState({ overlay: true }, '');
+}
+
+function openEditCategoryModal(cat, listKey) {
+  editingCategoryId = cat.id;
+  editingCategoryList = listKey;
+  closeAllModals();
+  document.getElementById('new-cat-name').value = cat.name;
+  document.querySelector('#cat-modal-backdrop .modal-title').textContent = 'editar categoría';
+  document.getElementById('btn-save-category').textContent = 'guardar cambios';
+  selectedIconForNewCategory = cat.icon;
   renderIconPicker();
   document.getElementById('cat-modal-backdrop').hidden = false;
   history.pushState({ overlay: true }, '');
@@ -61,11 +118,23 @@ function renderIconPicker() {
 function saveCategory() {
   const name = document.getElementById('new-cat-name').value.trim();
   if (!name) { showToast('Ponele un nombre'); return; }
-  state.categories.push({ id: uid(), name, icon: selectedIconForNewCategory });
-  saveState();
-  closeCategoryModal();
-  renderCategoryManager();
-  showToast('Categoría agregada');
+  const list = editingCategoryList === 'income' ? state.incomeCategories : state.categories;
+  if (editingCategoryId) {
+    const idx = list.findIndex(c => c.id === editingCategoryId);
+    if (idx !== -1) list[idx] = { ...list[idx], name, icon: selectedIconForNewCategory };
+    saveState();
+    closeCategoryModal();
+    renderCategoryManager();
+    renderIncomeCategoryManager();
+    showToast('Categoría actualizada');
+  } else {
+    list.push({ id: uid(), name, icon: selectedIconForNewCategory });
+    saveState();
+    closeCategoryModal();
+    renderCategoryManager();
+    renderIncomeCategoryManager();
+    showToast('Categoría agregada');
+  }
 }
 
 /* ---------- Inflation ---------- */
@@ -255,6 +324,7 @@ function handleImportFile(e) {
     saveState();
     renderAll();
     renderCategoryManager();
+    renderIncomeCategoryManager();
     renderBudgetManager();
     renderAccountManager();
     renderRecurringManager();
@@ -299,6 +369,7 @@ function clearAllData() {
   saveState();
   renderAll();
   renderCategoryManager();
+  renderIncomeCategoryManager();
   renderBudgetManager();
   renderAccountManager();
   renderRecurringManager();

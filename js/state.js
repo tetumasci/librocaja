@@ -72,6 +72,8 @@ let actionSheetEntry = null;
 let editingAccountId = null;
 let selectedAccountIdForDollar = null;
 let selectedGoalIdForDollar = null;
+let editingCategoryId = null;
+let editingCategoryList = null; // 'expense' | 'income'
 
 /* ---------- Persistence ---------- */
 
