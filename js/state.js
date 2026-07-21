@@ -46,6 +46,7 @@ let state = {
   goals: [],
   accounts: [...DEFAULT_ACCOUNTS],
   recurringExpenses: [],
+  recurringIncomes: [],
   budgets: [],
   inflationRates: {},
   streak: { count: 0, lastDate: null },
@@ -74,6 +75,8 @@ let selectedAccountIdForDollar = null;
 let selectedGoalIdForDollar = null;
 let editingCategoryId = null;
 let editingCategoryList = null; // 'expense' | 'income'
+let editingRecurringId = null;
+let editingRecurringType = 'expense'; // 'expense' | 'income'
 
 /* ---------- Persistence ---------- */
 
@@ -88,6 +91,7 @@ function loadState() {
       state.accounts = [...DEFAULT_ACCOUNTS];
     }
     if (!state.recurringExpenses) state.recurringExpenses = [];
+    if (!state.recurringIncomes) state.recurringIncomes = [];
     if (!state.budgets) state.budgets = [];
     if (!state.inflationRates) state.inflationRates = {};
     if (!state.dollarSavings) state.dollarSavings = [];

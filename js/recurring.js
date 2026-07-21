@@ -1,15 +1,16 @@
 /* ============================================
-   RECURRING.JS — gastos fijos / recurrentes
+   RECURRING.JS — gastos e ingresos fijos / recurrentes
    ============================================ */
 
-function processRecurringExpenses() {
-  if (!state.recurringExpenses || state.recurringExpenses.length === 0) return;
+/* ---------- Auto-generation ---------- */
 
+function processRecurring(list, entryType) {
+  if (!list || list.length === 0) return [];
   const now = new Date();
   const monthKey = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
   const generated = [];
 
-  state.recurringExpenses.forEach(rec => {
+  list.forEach(rec => {
     if (!rec.active) return;
     const alreadyExists = state.entries.some(
       e => e.recurringId === rec.id && e.date.startsWith(monthKey)
@@ -22,7 +23,7 @@ function processRecurringExpenses() {
 
     state.entries.push({
       id: uid(),
-      type: 'expense',
+      type: entryType,
       amount: rec.amount,
       categoryId: rec.categoryId,
       accountId: rec.accountId,
@@ -35,29 +36,39 @@ function processRecurringExpenses() {
     generated.push(rec.name);
   });
 
-  if (generated.length > 0) {
+  return generated;
+}
+
+function processRecurringExpenses() {
+  const generatedExp = processRecurring(state.recurringExpenses, 'expense');
+  const generatedInc = processRecurring(state.recurringIncomes, 'income');
+  const all = [...generatedExp, ...generatedInc];
+
+  if (all.length > 0) {
     saveState();
     renderAll();
+    const now = new Date();
     const monthName = MONTH_NAMES[now.getMonth()];
-    const msg = generated.length === 1
-      ? `Gasto fijo "${generated[0]}" generado para ${monthName}`
-      : `${generated.length} gastos fijos generados para ${monthName}`;
+    const msg = all.length === 1
+      ? `"${all[0]}" generado para ${monthName}`
+      : `${all.length} recurrentes generados para ${monthName}`;
     setTimeout(() => showToast(msg), 150);
   }
 }
 
-function renderRecurringManager() {
-  const container = document.getElementById('recurring-manager');
-  if (!container) return;
+/* ---------- Shared row renderer ---------- */
+
+function renderRecurringRows(container, list, entryType) {
   container.innerHTML = '';
 
-  if (state.recurringExpenses.length === 0) {
-    container.innerHTML = '<p class="recurring-empty">todavía no hay gastos fijos</p>';
+  if (list.length === 0) {
+    const label = entryType === 'income' ? 'ingresos fijos' : 'gastos fijos';
+    container.innerHTML = `<p class="recurring-empty">todavía no hay ${label}</p>`;
     return;
   }
 
-  state.recurringExpenses.forEach(rec => {
-    const cat = getCategoryById(rec.categoryId, 'expense');
+  list.forEach(rec => {
+    const cat = getCategoryById(rec.categoryId, entryType);
     const row = document.createElement('div');
     row.className = 'recurring-row';
     row.innerHTML = `
@@ -66,41 +77,115 @@ function renderRecurringManager() {
         <span class="recurring-row-detail">${formatMoney(rec.amount)} · día ${rec.dayOfMonth}</span>
       </div>
       <div class="recurring-row-actions">
-        <button class="recurring-toggle${rec.active ? ' active' : ''}" data-rec-id="${rec.id}">
+        <button class="cat-edit rec-edit" data-rec-id="${rec.id}" data-rec-type="${entryType}">editar</button>
+        <button class="recurring-toggle${rec.active ? ' active' : ''}" data-rec-id="${rec.id}" data-rec-type="${entryType}">
           ${rec.active ? 'pausar' : 'activar'}
         </button>
-        <button class="cat-remove" data-rec-id="${rec.id}">quitar</button>
+        <button class="cat-remove rec-remove" data-rec-id="${rec.id}" data-rec-type="${entryType}">quitar</button>
       </div>
     `;
     container.appendChild(row);
   });
 
+  container.querySelectorAll('.rec-edit').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const type = btn.dataset.recType;
+      const list = type === 'income' ? state.recurringIncomes : state.recurringExpenses;
+      const rec = list.find(r => r.id === btn.dataset.recId);
+      if (rec) openEditRecurringModal(rec, type);
+    });
+  });
+
   container.querySelectorAll('.recurring-toggle').forEach(btn => {
     btn.addEventListener('click', () => {
-      const rec = state.recurringExpenses.find(r => r.id === btn.dataset.recId);
+      const type = btn.dataset.recType;
+      const list = type === 'income' ? state.recurringIncomes : state.recurringExpenses;
+      const rec = list.find(r => r.id === btn.dataset.recId);
       if (!rec) return;
       rec.active = !rec.active;
       saveState();
       renderRecurringManager();
+      renderRecurringIncomeManager();
     });
   });
 
-  container.querySelectorAll('.cat-remove[data-rec-id]').forEach(btn => {
+  container.querySelectorAll('.rec-remove').forEach(btn => {
     btn.addEventListener('click', () => {
-      state.recurringExpenses = state.recurringExpenses.filter(r => r.id !== btn.dataset.recId);
+      const id = btn.dataset.recId;
+      const type = btn.dataset.recType;
+      const hasHistory = state.entries.some(e => e.recurringId === id && e.autoGenerated);
+      if (hasHistory) {
+        const label = type === 'income' ? 'ingreso fijo' : 'gasto fijo';
+        if (confirm(`Este ${label} ya tiene movimientos generados. ¿Querés pausarlo en vez de eliminarlo?\n\nPausar: deja de generarse en meses futuros pero conserva el historial.\nEliminar: quita la definición pero los movimientos ya generados quedan en el historial.`)) {
+          const list = type === 'income' ? state.recurringIncomes : state.recurringExpenses;
+          const rec = list.find(r => r.id === id);
+          if (rec) rec.active = false;
+        } else {
+          if (!confirm('¿Confirmar eliminación? Los movimientos ya generados quedan en el historial.')) return;
+          if (type === 'income') {
+            state.recurringIncomes = state.recurringIncomes.filter(r => r.id !== id);
+          } else {
+            state.recurringExpenses = state.recurringExpenses.filter(r => r.id !== id);
+          }
+        }
+      } else {
+        if (type === 'income') {
+          state.recurringIncomes = state.recurringIncomes.filter(r => r.id !== id);
+        } else {
+          state.recurringExpenses = state.recurringExpenses.filter(r => r.id !== id);
+        }
+      }
       saveState();
       renderRecurringManager();
+      renderRecurringIncomeManager();
     });
   });
 }
 
+function renderRecurringManager() {
+  const container = document.getElementById('recurring-manager');
+  if (!container) return;
+  renderRecurringRows(container, state.recurringExpenses, 'expense');
+}
+
+function renderRecurringIncomeManager() {
+  const container = document.getElementById('recurring-income-manager');
+  if (!container) return;
+  renderRecurringRows(container, state.recurringIncomes, 'income');
+}
+
+/* ---------- Modal open/close ---------- */
+
 function openRecurringModal() {
+  editingRecurringId = null;
+  editingRecurringType = 'expense';
+  _openRecurringModalShared('nuevo gasto fijo', 'guardar gasto fijo');
+}
+
+function openRecurringIncomeModal() {
+  editingRecurringId = null;
+  editingRecurringType = 'income';
+  _openRecurringModalShared('nuevo ingreso fijo', 'guardar ingreso fijo');
+}
+
+function openEditRecurringModal(rec, type) {
+  editingRecurringId = rec.id;
+  editingRecurringType = type;
+  const label = type === 'income' ? 'ingreso fijo' : 'gasto fijo';
+  _openRecurringModalShared(`editar ${label}`, 'guardar cambios', rec);
+}
+
+function _openRecurringModalShared(title, saveLabel, rec) {
   closeAllModals();
-  document.getElementById('recurring-name').value = '';
-  document.getElementById('recurring-amount').value = '';
-  document.getElementById('recurring-day').value = '';
-  selectedCategoryIdForRecurring = null;
-  selectedAccountIdForRecurring = state.accounts.length > 0 ? state.accounts[0].id : null;
+  document.querySelector('#recurring-modal-backdrop .modal-title').textContent = title;
+  document.getElementById('btn-save-recurring').textContent = saveLabel;
+  document.getElementById('recurring-name').value = rec ? rec.name : '';
+  document.getElementById('recurring-amount').value = rec ? rec.amount : '';
+  document.getElementById('recurring-day').value = rec ? rec.dayOfMonth : '';
+  selectedCategoryIdForRecurring = rec ? rec.categoryId : null;
+  selectedAccountIdForRecurring = rec
+    ? rec.accountId
+    : (state.accounts.length > 0 ? state.accounts[0].id : null);
   renderRecurringCategoryGrid();
   renderRecurringAccountGrid();
   document.getElementById('recurring-modal-backdrop').hidden = false;
@@ -111,12 +196,16 @@ function closeRecurringModal() {
   document.getElementById('recurring-modal-backdrop').hidden = true;
 }
 
+/* ---------- Category & account grids ---------- */
+
 function openAccountFromRecurring() {
   pendingRecurringData = {
     name: document.getElementById('recurring-name').value,
     amount: document.getElementById('recurring-amount').value,
     day: document.getElementById('recurring-day').value,
     categoryId: selectedCategoryIdForRecurring,
+    recurringType: editingRecurringType,
+    editingRecurringId: editingRecurringId,
   };
   editingAccountId = null;
   closeAllOverlaysAndModals();
@@ -134,6 +223,8 @@ function openAccountFromRecurring() {
 }
 
 function restoreRecurringModal(data) {
+  editingRecurringType = data.recurringType || 'expense';
+  editingRecurringId = data.editingRecurringId || null;
   document.getElementById('recurring-name').value = data.name || '';
   document.getElementById('recurring-amount').value = data.amount || '';
   document.getElementById('recurring-day').value = data.day || '';
@@ -148,7 +239,8 @@ function renderRecurringCategoryGrid() {
   const grid = document.getElementById('recurring-category-grid');
   if (!grid) return;
   grid.innerHTML = '';
-  state.categories.forEach(cat => {
+  const cats = editingRecurringType === 'income' ? state.incomeCategories : state.categories;
+  cats.forEach(cat => {
     const chip = document.createElement('button');
     chip.type = 'button';
     chip.className = 'category-chip' + (selectedCategoryIdForRecurring === cat.id ? ' selected' : '');
@@ -184,29 +276,53 @@ function renderRecurringAccountGrid() {
   grid.appendChild(addChip);
 }
 
+/* ---------- Save ---------- */
+
 function saveRecurring() {
   const name = document.getElementById('recurring-name').value.trim();
   const amount = parseFloat(document.getElementById('recurring-amount').value);
   const day = parseInt(document.getElementById('recurring-day').value, 10);
+  const typeLabel = editingRecurringType === 'income' ? 'ingreso fijo' : 'gasto fijo';
 
-  if (!name) { showToast('Ponele un nombre al gasto fijo'); return; }
+  if (!name) { showToast(`Ponele un nombre al ${typeLabel}`); return; }
   if (!amount || amount <= 0) { showToast('Ingresá un monto válido'); return; }
   if (!day || day < 1 || day > 28) { showToast('El día debe estar entre 1 y 28'); return; }
   if (!selectedCategoryIdForRecurring) { showToast('Elegí una categoría'); return; }
   if (!selectedAccountIdForRecurring) { showToast('Elegí una cuenta'); return; }
 
-  state.recurringExpenses.push({
-    id: uid(),
-    name,
-    amount,
-    categoryId: selectedCategoryIdForRecurring,
-    accountId: selectedAccountIdForRecurring,
-    dayOfMonth: day,
-    active: true,
-  });
+  const list = editingRecurringType === 'income' ? state.recurringIncomes : state.recurringExpenses;
 
-  saveState();
-  closeRecurringModal();
-  renderRecurringManager();
-  showToast('Gasto fijo agregado');
+  if (editingRecurringId) {
+    const idx = list.findIndex(r => r.id === editingRecurringId);
+    if (idx !== -1) {
+      list[idx] = {
+        ...list[idx],
+        name,
+        amount,
+        categoryId: selectedCategoryIdForRecurring,
+        accountId: selectedAccountIdForRecurring,
+        dayOfMonth: day,
+      };
+    }
+    saveState();
+    closeRecurringModal();
+    renderRecurringManager();
+    renderRecurringIncomeManager();
+    showToast(`${typeLabel.charAt(0).toUpperCase() + typeLabel.slice(1)} actualizado`);
+  } else {
+    list.push({
+      id: uid(),
+      name,
+      amount,
+      categoryId: selectedCategoryIdForRecurring,
+      accountId: selectedAccountIdForRecurring,
+      dayOfMonth: day,
+      active: true,
+    });
+    saveState();
+    closeRecurringModal();
+    renderRecurringManager();
+    renderRecurringIncomeManager();
+    showToast(`${typeLabel.charAt(0).toUpperCase() + typeLabel.slice(1)} agregado`);
+  }
 }

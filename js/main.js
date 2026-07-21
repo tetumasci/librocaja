@@ -21,6 +21,7 @@ function showView(viewName) {
     renderBudgetManager();
     renderAccountManager();
     renderRecurringManager();
+    renderRecurringIncomeManager();
     renderInflationSection();
     renderSmallExpenseThreshold();
   }
@@ -138,8 +139,9 @@ function attachEventListeners() {
   });
   document.getElementById('btn-save-budget').addEventListener('click', saveBudget);
 
-  // Settings: recurring expenses
+  // Settings: recurring expenses + income
   document.getElementById('btn-add-recurring').addEventListener('click', openRecurringModal);
+  document.getElementById('btn-add-recurring-income').addEventListener('click', openRecurringIncomeModal);
   document.getElementById('btn-cancel-recurring').addEventListener('click', closeRecurringModal);
   document.getElementById('recurring-modal-backdrop').addEventListener('click', (e) => {
     if (e.target.id === 'recurring-modal-backdrop') closeRecurringModal();

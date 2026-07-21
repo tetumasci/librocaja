@@ -301,6 +301,7 @@ function handleImportFile(e) {
       goals:                  parsed.goals              || [],
       accounts:               parsed.accounts?.length   ? parsed.accounts : [...DEFAULT_ACCOUNTS],
       recurringExpenses:      parsed.recurringExpenses  || [],
+      recurringIncomes:       parsed.recurringIncomes   || [],
       budgets:                parsed.budgets            || [],
       inflationRates:         parsed.inflationRates     || {},
       streak:                 parsed.streak             || { count: 0, lastDate: null },
@@ -328,6 +329,7 @@ function handleImportFile(e) {
     renderBudgetManager();
     renderAccountManager();
     renderRecurringManager();
+    renderRecurringIncomeManager();
     renderInflationSection();
     showToast(`Datos importados: ${entryCount} movimientos`);
   };
@@ -358,6 +360,7 @@ function clearAllData() {
     goals: [],
     accounts: [...DEFAULT_ACCOUNTS],
     recurringExpenses: [],
+    recurringIncomes: [],
     budgets: [],
     inflationRates: {},
     streak: { count: 0, lastDate: null },
@@ -373,5 +376,6 @@ function clearAllData() {
   renderBudgetManager();
   renderAccountManager();
   renderRecurringManager();
+  renderRecurringIncomeManager();
   showToast('Todos los datos fueron borrados');
 }
