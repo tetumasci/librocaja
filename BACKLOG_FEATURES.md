@@ -63,6 +63,11 @@ al usuario en vez de implementarla fuera de orden.
   salvo llamadas de solo lectura a APIs públicas para datos externos
   (cotización del dólar, inflación) cuando la feature lo pida
   explícitamente — nunca enviar datos del usuario a ningún servidor.
+- **Bump de versión del SW obligatorio en cada push**: cada vez que se
+  modifique cualquier archivo JS/CSS/HTML y se haga push, incrementar el
+  número en `CACHE_NAME` de `sw.js` (ej. `v8` → `v9`). Sin este cambio
+  el browser no detecta que hay una nueva versión y el banner de
+  actualización nunca aparece en iOS.
 
 ---
 
