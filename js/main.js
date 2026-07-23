@@ -162,6 +162,14 @@ function attachEventListeners() {
     });
   });
 
+  // Transfer between accounts
+  document.getElementById('btn-open-transfer').addEventListener('click', openTransferModal);
+  document.getElementById('btn-cancel-transfer').addEventListener('click', closeTransferModal);
+  document.getElementById('transfer-modal-backdrop').addEventListener('click', (e) => {
+    if (e.target.id === 'transfer-modal-backdrop') closeTransferModal();
+  });
+  document.getElementById('btn-save-transfer').addEventListener('click', saveTransfer);
+
   // Settings: data
   document.getElementById('btn-export').addEventListener('click', exportData);
   document.getElementById('btn-import').addEventListener('click', importData);

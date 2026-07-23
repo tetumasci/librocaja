@@ -29,8 +29,13 @@ function renderSummary() {
 
 function renderAccountBreakdown() {
   const container = document.getElementById('account-breakdown');
+  const transferBtn = document.getElementById('btn-open-transfer');
   if (!container) return;
-  if (state.accounts.length <= 1) { container.hidden = true; return; }
+  if (state.accounts.length <= 1) {
+    container.hidden = true;
+    if (transferBtn) transferBtn.hidden = true;
+    return;
+  }
 
   container.hidden = false;
   container.innerHTML = '';
@@ -44,6 +49,7 @@ function renderAccountBreakdown() {
     `;
     container.appendChild(row);
   });
+  if (transferBtn) transferBtn.hidden = false;
 }
 
 /* ---------- Streak ---------- */
@@ -195,7 +201,9 @@ function renderLedger() {
   let entries = getEntriesForMonth(viewDate);
   if (currentFilter !== 'all') entries = entries.filter(e => e.type === currentFilter);
 
-  if (entries.length === 0) {
+  const transfers = currentFilter === 'all' ? getTransfersForMonth(viewDate) : [];
+
+  if (entries.length === 0 && transfers.length === 0) {
     emptyEl.hidden = false;
     return;
   }
@@ -204,8 +212,13 @@ function renderLedger() {
   const byDate = {};
   entries.forEach(e => {
     if (!byDate[e.date]) byDate[e.date] = [];
-    byDate[e.date].push(e);
+    byDate[e.date].push({ isTransfer: false, item: e, sortKey: e.createdAt || 0 });
   });
+  transfers.forEach(t => {
+    if (!byDate[t.date]) byDate[t.date] = [];
+    byDate[t.date].push({ isTransfer: true, item: t, sortKey: t.createdAt || 0 });
+  });
+
   const sortedDates = Object.keys(byDate).sort((a, b) => b.localeCompare(a));
 
   sortedDates.forEach(dateISO => {
@@ -218,8 +231,10 @@ function renderLedger() {
     group.appendChild(label);
 
     byDate[dateISO]
-      .sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0))
-      .forEach(entry => group.appendChild(renderEntryRow(entry)));
+      .sort((a, b) => b.sortKey - a.sortKey)
+      .forEach(({ isTransfer, item }) => {
+        group.appendChild(isTransfer ? renderTransferRow(item) : renderEntryRow(item));
+      });
 
     listEl.appendChild(group);
   });

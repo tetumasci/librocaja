@@ -1569,6 +1569,28 @@ input { font-family: inherit; }
 /* adjustment entry in ledger */
 .entry-icon.adjustment { background: var(--accent-soft); color: var(--accent); }
 
+/* transfer entry in ledger */
+.entry-icon.transfer { background: var(--paper-line); color: var(--ink-faint); font-size: 16px; font-family: var(--font-ui); }
+.entry-amount.transfer { color: var(--ink-faint); }
+
+/* transfer trigger button in summary card */
+.transfer-trigger-btn {
+  display: block;
+  width: 100%;
+  margin-top: 10px;
+  padding: 8px 0;
+  background: none;
+  border: 1px dashed var(--paper-line);
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  font-family: var(--font-ui);
+  color: var(--ink-faint);
+  cursor: pointer;
+  letter-spacing: 0.01em;
+}
+.transfer-trigger-btn:active { background: rgba(31,27,22,0.03); }
+
 /* ============================================
    ACTION SHEET
    ============================================ */

@@ -544,7 +544,7 @@ actualización.
 ---
 
 ## FEATURE: Transferencias entre cuentas
-**Estado: pendiente**
+**Estado: hecha**
 **Depende de: "Edición de cuentas y saldo inicial" (usa el saldo por cuenta)**
 
 (Nota: si esta feature ya fue implementada en una sesión anterior de
@@ -576,6 +576,18 @@ transferencias aparecen como líneas con ícono ↔.
   calculado: permitir igual (la app no impide saldos negativos en
   efectivo/otras cuentas, es información del usuario) pero considerar un
   aviso visual suave, no un bloqueo duro.
+
+### Notas de implementación
+- Archivos modificados: `js/state.js`, `js/transfers.js` (nuevo), `js/ledger.js`, `js/ui.js`, `js/settings.js`, `js/main.js`, `index.html`, `styles.css`, `sw.js`
+- Nueva entidad `state.transfers[]` con migración en `loadState()`, `clearAllData()` e `handleImportFile()`.
+- `getAccountBalance()` en `state.js` ahora suma transferencias entrantes y resta salientes, con filtro por fecha igual que entries.
+- `getTransfersForMonth(date)` nueva función helper en `state.js`.
+- `js/transfers.js` nuevo archivo de dominio: `openTransferModal`, `closeTransferModal`, `saveTransfer`, `renderTransferRow`, grids de cuenta separados para origen y destino.
+- Las transferencias NO generan entries en `state.entries` — solo viven en `state.transfers`.
+- En `renderLedger()`, cuando el filtro es "all", las transferencias del mes se mezclan con los entries en la misma agrupación por fecha, cada una con `renderTransferRow()` (ícono ↔, color neutro `var(--ink-faint)`).
+- En `renderAccountBreakdown()`: si hay 2+ cuentas, muestra el botón `#btn-open-transfer` (punteado, discreto) debajo del desglose de saldos. Con 1 cuenta sola, el botón permanece oculto.
+- Mismo origen = mismo destino: bloqueado con toast.
+- Saldo negativo tras transferencia: `confirm()` suave (no bloqueo duro).
 
 ---
 

@@ -63,6 +63,7 @@
       </div>
     </div>
     <div class="account-breakdown" id="account-breakdown" hidden></div>
+    <button class="transfer-trigger-btn" id="btn-open-transfer" hidden>↔ transferir</button>
   </section>
 
   <!-- ===== SUGGESTION BANNER (dynamic) ===== -->
@@ -538,6 +539,36 @@
   </div>
 </div>
 
+<!-- ===== MODAL: TRANSFER BETWEEN ACCOUNTS ===== -->
+<div class="modal-backdrop" id="transfer-modal-backdrop" hidden>
+  <div class="modal-sheet">
+    <div class="modal-handle"></div>
+    <h3 class="modal-title">transferir entre cuentas</h3>
+    <div class="amount-input-wrap">
+      <span class="amount-currency">$</span>
+      <input type="number" inputmode="decimal" id="transfer-amount" class="amount-input" placeholder="0" autocomplete="off">
+    </div>
+    <div class="field-group">
+      <label class="field-label">desde</label>
+      <div class="account-grid" id="transfer-from-grid"></div>
+    </div>
+    <div class="field-group">
+      <label class="field-label">hacia</label>
+      <div class="account-grid" id="transfer-to-grid"></div>
+    </div>
+    <div class="field-group">
+      <label class="field-label" for="transfer-date">fecha</label>
+      <input type="date" id="transfer-date" class="text-input">
+    </div>
+    <div class="field-group">
+      <label class="field-label" for="transfer-note">nota (opcional)</label>
+      <input type="text" id="transfer-note" class="text-input" placeholder="ej: pasé plata a MP">
+    </div>
+    <button class="btn-save" id="btn-save-transfer">registrar transferencia</button>
+    <button class="btn-cancel" id="btn-cancel-transfer">cancelar</button>
+  </div>
+</div>
+
 <!-- ===== ACTION SHEET: ENTRY ACTIONS ===== -->
 <div class="modal-backdrop" id="action-sheet-backdrop" hidden>
   <div class="modal-sheet">
@@ -634,6 +665,7 @@
 <script src="js/stats.js"></script>
 <script src="js/settings.js"></script>
 <script src="js/plan.js"></script>
+<script src="js/transfers.js"></script>
 <script src="js/main.js"></script>
 <script>
 if ('serviceWorker' in navigator) {

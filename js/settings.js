@@ -309,6 +309,7 @@ function handleImportFile(e) {
       exchangeRates:          parsed.exchangeRates      || [],
       investmentPlans:        parsed.investmentPlans    || [],
       smallExpenseThreshold:  parsed.smallExpenseThreshold ?? 5000,
+      transfers:              parsed.transfers          || [],
     };
 
     state.accounts = state.accounts.map(acc =>
@@ -368,6 +369,7 @@ function clearAllData() {
     exchangeRates: [],
     investmentPlans: [],
     smallExpenseThreshold: 5000,
+    transfers: [],
   };
   saveState();
   renderAll();

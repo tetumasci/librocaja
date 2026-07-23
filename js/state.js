@@ -54,6 +54,7 @@ let state = {
   exchangeRates: [],
   investmentPlans: [],
   smallExpenseThreshold: 5000,
+  transfers: [],
 };
 
 let viewDate = new Date();
@@ -97,6 +98,7 @@ function loadState() {
     if (!state.dollarSavings) state.dollarSavings = [];
     if (!state.exchangeRates) state.exchangeRates = [];
     if (!state.investmentPlans) state.investmentPlans = [];
+    if (!state.transfers) state.transfers = [];
     if (state.smallExpenseThreshold == null || state.smallExpenseThreshold <= 0) state.smallExpenseThreshold = 5000;
     state.accounts = state.accounts.map(acc =>
       acc.initialBalance !== undefined ? acc : { ...acc, initialBalance: 0 }
@@ -176,7 +178,7 @@ function getAccountBalance(accountId) {
   const acc = state.accounts.find(a => a.id === accountId);
   const base = (acc && acc.initialBalance) || 0;
   const today = todayISO();
-  return state.entries
+  const entriesBalance = state.entries
     .filter(e => e.accountId === accountId && e.date <= today)
     .reduce((sum, e) => {
       if (e.type === 'income') return sum + e.amount;
@@ -184,4 +186,15 @@ function getAccountBalance(accountId) {
       if (e.type === 'adjustment') return sum + e.amount;
       return sum;
     }, base);
+  const transferIn = (state.transfers || [])
+    .filter(t => t.toAccountId === accountId && t.date <= today)
+    .reduce((s, t) => s + t.amount, 0);
+  const transferOut = (state.transfers || [])
+    .filter(t => t.fromAccountId === accountId && t.date <= today)
+    .reduce((s, t) => s + t.amount, 0);
+  return entriesBalance + transferIn - transferOut;
+}
+
+function getTransfersForMonth(date) {
+  return (state.transfers || []).filter(t => isSameMonth(t.date, date));
 }
