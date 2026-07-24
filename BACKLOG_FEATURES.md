@@ -864,7 +864,7 @@ elegir una).
 
 ---
 ## FEATURE: Sugerencia automática de categoría según la nota
-**Estado: pendiente**
+**Estado: hecha**
 **Depende de: "Subcategorías" (opcional — si no está implementada, esta feature funciona igual solo con categorías, ignorando el paso de subcategoría)**
 
 ### Qué se pide
@@ -956,6 +956,17 @@ independiente entre sí.
   cálculo de sugerencias (categoría + subcategoría) no debe sentirse
   lento al escribir en el campo de nota — de ahí la importancia de
   cachear y no recalcular en cada tecla.
+
+### Notas de implementación
+- Nuevo archivo `js/suggestions.js` con: `_buildSuggestionCache()`, `_extractWords()`, `invalidateSuggestionCache()`, `getSuggestionForNote()`.
+- Cache invalidada en `saveEntry()` (ambas ramas create/edit) via `invalidateSuggestionCache()`.
+- Cache lazy: se reconstruye en el primer `getSuggestionForNote()` tras invalidación; comparación por `state.entries.length` como atajo rápido.
+- Funciones públicas: `getSuggestionForNote(note, entryType)` → `{categoryId, subcategoryId} | null`; `invalidateSuggestionCache()`.
+- `_applyActiveSuggestion()` y `onNoteInputSuggestion()` en `ledger.js`: aplican clase `.suggested` al chip via `data-cat-id`; muestran/ocultan `#category-suggestion-hint`.
+- Sugerencia se limpia cuando el usuario hace click en cualquier chip (incluso el sugerido), dejando `_activeSuggestion = null`.
+- `setEntryType()` también limpia `_activeSuggestion` porque cambia la lista de categorías válidas.
+- `<p id="category-suggestion-hint">` añadido en HTML justo bajo `#input-note`.
+- CSS: `.category-chip.suggested` con borde dashed acento; `.suggestion-hint` texto chico acento itálico.
 
 ---
 ## FEATURE: Carga rápida por texto libre

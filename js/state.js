@@ -79,6 +79,7 @@ let editingCategoryList = null; // 'expense' | 'income'
 let editingRecurringId = null;
 let editingRecurringType = 'expense'; // 'expense' | 'income'
 let selectedSubcategoryId = null;
+let _activeSuggestion = null;
 
 /* ---------- Persistence ---------- */
 

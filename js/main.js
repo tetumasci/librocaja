@@ -57,6 +57,7 @@ function attachEventListeners() {
   // FAB + modal
   document.getElementById('btn-add').addEventListener('click', openAddModal);
   document.getElementById('btn-cancel-entry').addEventListener('click', closeAddModal);
+  document.getElementById('input-note').addEventListener('input', onNoteInputSuggestion);
   document.getElementById('modal-backdrop').addEventListener('click', (e) => {
     if (e.target.id === 'modal-backdrop') closeAddModal();
   });

@@ -328,6 +328,9 @@ function openAddModal() {
   currentEntryType = 'expense';
   selectedCategoryId = null;
   selectedSubcategoryId = null;
+  _activeSuggestion = null;
+  const hint = document.getElementById('category-suggestion-hint');
+  if (hint) hint.hidden = true;
   selectedAccountId = state.accounts.length > 0 ? state.accounts[0].id : null;
   document.getElementById('input-amount').value = '';
   document.getElementById('input-note').value = '';
@@ -369,6 +372,7 @@ function setEntryType(type) {
   currentEntryType = type;
   selectedCategoryId = null;
   selectedSubcategoryId = null;
+  _activeSuggestion = null;
   document.getElementById('type-expense').classList.toggle('active', type === 'expense');
   document.getElementById('type-income').classList.toggle('active', type === 'income');
   renderCategoryGrid();
@@ -382,15 +386,20 @@ function renderCategoryGrid() {
     const chip = document.createElement('button');
     chip.type = 'button';
     chip.className = 'category-chip' + (selectedCategoryId === cat.id ? ' selected' : '');
+    chip.dataset.catId = cat.id;
     chip.innerHTML = `<span class="chip-icon">${cat.icon}</span><span>${escapeHtml(cat.name)}</span>`;
     chip.addEventListener('click', () => {
       selectedCategoryId = cat.id;
       selectedSubcategoryId = null;
+      _activeSuggestion = null;
+      const hint = document.getElementById('category-suggestion-hint');
+      if (hint) hint.hidden = true;
       renderCategoryGrid();
     });
     grid.appendChild(chip);
   });
   renderSubcategoryGrid();
+  _applyActiveSuggestion();
 }
 
 function renderSubcategoryGrid() {
@@ -430,6 +439,40 @@ function renderSubcategoryGrid() {
     });
     grid.appendChild(chip);
   });
+}
+
+function _applyActiveSuggestion() {
+  const hint = document.getElementById('category-suggestion-hint');
+  document.querySelectorAll('#category-grid .category-chip').forEach(c => c.classList.remove('suggested'));
+
+  if (!_activeSuggestion || selectedCategoryId) {
+    if (hint) hint.hidden = true;
+    return;
+  }
+
+  const { categoryId, subcategoryId } = _activeSuggestion;
+  const list = currentEntryType === 'income' ? state.incomeCategories : state.categories;
+  const cat = list.find(c => c.id === categoryId);
+  if (!cat) { if (hint) hint.hidden = true; return; }
+
+  const chip = document.querySelector(`#category-grid [data-cat-id="${categoryId}"]`);
+  if (chip) chip.classList.add('suggested');
+
+  let hintText = `sugerido: ${cat.icon} ${cat.name}`;
+  if (subcategoryId) {
+    const sub = cat.subcategories && cat.subcategories.find(s => s.id === subcategoryId);
+    if (sub) hintText += ` › ${sub.name}`;
+  }
+  if (hint) {
+    hint.textContent = hintText;
+    hint.hidden = false;
+  }
+}
+
+function onNoteInputSuggestion() {
+  const note = document.getElementById('input-note').value;
+  _activeSuggestion = getSuggestionForNote(note, currentEntryType);
+  _applyActiveSuggestion();
 }
 
 function renderAccountGrid() {
@@ -474,6 +517,7 @@ function saveEntry() {
         updatedAt: Date.now(),
       };
     }
+    invalidateSuggestionCache();
     saveState();
     closeAddModal();
     renderAll();
@@ -493,6 +537,7 @@ function saveEntry() {
     createdAt: Date.now(),
   });
 
+  invalidateSuggestionCache();
   saveState();
   closeAddModal();
   renderAll();
