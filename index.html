@@ -94,6 +94,9 @@
 </div>
 
 <!-- ===== FLOATING ADD BUTTON ===== -->
+<button class="fab-quick" id="btn-quick-add" aria-label="Carga rápida">
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+</button>
 <button class="fab" id="btn-add" aria-label="Agregar movimiento">
   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>
 </button>
@@ -283,6 +286,59 @@
   </header>
   <div class="view-body">
     <div id="plan-list"></div>
+  </div>
+</div>
+
+<!-- ===== MODAL: QUICK ADD ===== -->
+<div class="modal-backdrop" id="quick-add-backdrop" hidden>
+  <div class="modal-sheet">
+    <div class="modal-handle"></div>
+    <p class="modal-section-title">carga rápida</p>
+
+    <div class="field-group">
+      <label class="field-label">escribí el movimiento</label>
+      <input type="text" id="quick-input-text" class="text-input"
+             placeholder="ej: 500 nafta, cobré 50000 sueldo...">
+      <p id="quick-parse-error" class="quick-parse-error" hidden>
+        No encontré un monto. Intentá "500 nafta" o usá el formulario completo.
+      </p>
+    </div>
+
+    <div id="quick-preview" hidden>
+      <div class="quick-preview-header">
+        <div class="modal-type-toggle">
+          <button class="type-btn expense active" id="quick-type-expense">gasto</button>
+          <button class="type-btn income" id="quick-type-income">ingreso</button>
+        </div>
+        <div class="amount-input-wrap quick-amount-wrap">
+          <span class="amount-currency">$</span>
+          <input type="number" inputmode="decimal" id="quick-input-amount" class="amount-input" placeholder="0" autocomplete="off">
+        </div>
+      </div>
+
+      <div class="field-group">
+        <label class="field-label">categoría</label>
+        <div class="category-grid" id="quick-category-grid"></div>
+      </div>
+
+      <div class="field-group">
+        <label class="field-label">nota</label>
+        <input type="text" id="quick-input-note" class="text-input" placeholder="(opcional)">
+      </div>
+
+      <div class="field-group">
+        <label class="field-label">cuenta</label>
+        <div class="category-grid" id="quick-account-grid"></div>
+      </div>
+
+      <div class="field-group">
+        <label class="field-label">fecha</label>
+        <input type="date" id="quick-input-date" class="text-input">
+      </div>
+    </div>
+
+    <button class="btn-save" id="btn-save-quick">guardar</button>
+    <button class="btn-cancel" id="btn-cancel-quick">cancelar</button>
   </div>
 </div>
 
@@ -682,6 +738,7 @@
 <script src="js/settings.js"></script>
 <script src="js/plan.js"></script>
 <script src="js/suggestions.js"></script>
+<script src="js/quickadd.js"></script>
 <script src="js/transfers.js"></script>
 <script src="js/main.js"></script>
 <script>

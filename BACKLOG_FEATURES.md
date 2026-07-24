@@ -970,7 +970,7 @@ independiente entre sí.
 
 ---
 ## FEATURE: Carga rápida por texto libre
-**Estado: pendiente**
+**Estado: hecha**
 **Se potencia con: "Sugerencia automática de categoría según la nota" (si ya está implementada, reusar esa misma lógica de aprendizaje)**
 
 ### Qué se pide
@@ -1017,6 +1017,16 @@ sin tener que pasar por todos los campos del modal uno por uno.
 - Texto ambiguo sobre si es gasto o ingreso: default a gasto (más común
   en el uso diario) pero dejar bien visible y fácil de cambiar en la
   confirmación antes de guardar.
+
+### Notas de implementación
+- Nuevo archivo `js/quickadd.js`. Botón FAB secundario `.fab-quick` (⚡ icono rayo) posicionado a la izquierda del FAB principal.
+- Regex de extracción: primer token `[\d]+(?:[.,][\d]+)*` en el texto. Parseo de monto: si tiene coma → dots=miles, coma=decimal; si punto seguido de exactamente 3 dígitos → dot=miles; de lo contrario dot=decimal.
+- Detección de tipo: normalizado lowercase sin tildes, busca keywords de ingreso en `_INCOME_KEYWORDS`; default a gasto.
+- Nota extraída = texto original minus el token de monto (incluyendo posible `$`).
+- Preview se muestra en tiempo real al tipear (event `input`). Tipo y categoría son corregibles en el preview antes de guardar.
+- Categoría auto-seleccionada si `getSuggestionForNote()` retorna resultado (>70% confianza). El usuario puede corregir tocando otro chip en el preview.
+- Múltiples números en texto (ej. "pagué 500 por 2 entradas"): se toma el primero; el usuario puede corregir el amount en el campo editable del preview.
+- Al guardar: llama `invalidateSuggestionCache()` igual que `saveEntry()` en el modal completo.
 
 ---
 ## FEATURE: Alerta de aporte del Plan sin registrar

@@ -58,6 +58,17 @@ function attachEventListeners() {
   document.getElementById('btn-add').addEventListener('click', openAddModal);
   document.getElementById('btn-cancel-entry').addEventListener('click', closeAddModal);
   document.getElementById('input-note').addEventListener('input', onNoteInputSuggestion);
+
+  // Quick add
+  document.getElementById('btn-quick-add').addEventListener('click', openQuickAddModal);
+  document.getElementById('btn-cancel-quick').addEventListener('click', closeQuickAddModal);
+  document.getElementById('quick-add-backdrop').addEventListener('click', (e) => {
+    if (e.target.id === 'quick-add-backdrop') closeQuickAddModal();
+  });
+  document.getElementById('quick-input-text').addEventListener('input', onQuickTextInput);
+  document.getElementById('btn-save-quick').addEventListener('click', saveQuickEntry);
+  document.getElementById('quick-type-expense').addEventListener('click', () => _setQuickType('expense'));
+  document.getElementById('quick-type-income').addEventListener('click', () => _setQuickType('income'));
   document.getElementById('modal-backdrop').addEventListener('click', (e) => {
     if (e.target.id === 'modal-backdrop') closeAddModal();
   });

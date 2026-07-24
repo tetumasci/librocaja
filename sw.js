@@ -1,4 +1,4 @@
-const CACHE_NAME = 'libro-de-caja-v12';
+const CACHE_NAME = 'libro-de-caja-v13';
 const ASSETS_TO_CACHE = [
   './',
   './index.html',
@@ -15,6 +15,7 @@ const ASSETS_TO_CACHE = [
   './js/stats.js',
   './js/settings.js',
   './js/suggestions.js',
+  './js/quickadd.js',
   './js/transfers.js',
   './js/main.js',
 ];

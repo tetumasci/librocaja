@@ -1645,6 +1645,57 @@ input { font-family: inherit; }
 .transfer-trigger-btn:active { background: rgba(31,27,22,0.03); }
 
 /* ============================================
+   QUICK ADD FAB + MODAL
+   ============================================ */
+
+.fab-quick {
+  position: fixed;
+  right: 84px;
+  bottom: 88px;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: var(--paper);
+  color: var(--ink);
+  border: 1.5px solid var(--ink);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 8px rgba(31,27,22,0.15);
+  z-index: 40;
+}
+.fab-quick svg { width: 18px; height: 18px; }
+.fab-quick:active { transform: scale(0.94); }
+
+.modal-section-title {
+  font-family: var(--font-display);
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--ink);
+  margin: 0 0 16px;
+}
+
+.quick-parse-error {
+  font-size: 13px;
+  color: var(--expense);
+  margin: 6px 0 0;
+  line-height: 1.4;
+}
+
+.quick-preview-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+.quick-amount-wrap {
+  flex: 1;
+}
+.quick-amount-wrap .amount-input {
+  font-size: 22px;
+}
+
+/* ============================================
    ACTION SHEET
    ============================================ */
 
