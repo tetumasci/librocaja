@@ -144,6 +144,61 @@ function renderCategoryBars(monthEntries, totalExpense) {
         <div class="category-bar-track"><div class="category-bar-fill ${barFillClass}" style="width:${barWidth}%"></div></div>
         ${overflowLabel}
       `;
+
+      const subcatEntries = monthEntries.filter(e => e.type === 'expense' && e.categoryId === catId && e.subcategoryId);
+      if (subcatEntries.length > 0) {
+        const catObj = state.categories.find(c => c.id === catId);
+        const subcatDefs = catObj && catObj.subcategories ? catObj.subcategories : [];
+        if (subcatDefs.length > 0) {
+          const toggleBtn = document.createElement('button');
+          toggleBtn.className = 'subcat-toggle-btn';
+          toggleBtn.textContent = '▸ ver por subcategoría';
+          const breakdown = document.createElement('div');
+          breakdown.className = 'subcat-breakdown';
+          breakdown.hidden = true;
+          const subcatTotals = {};
+          subcatEntries.forEach(e => {
+            subcatTotals[e.subcategoryId] = (subcatTotals[e.subcategoryId] || 0) + e.amount;
+          });
+          Object.entries(subcatTotals).sort((a, b) => b[1] - a[1]).forEach(([sid, sAmt]) => {
+            const sd = subcatDefs.find(s => s.id === sid) || { name: sid };
+            const pct = amount > 0 ? (sAmt / amount) * 100 : 0;
+            const sr = document.createElement('div');
+            sr.className = 'subcat-bar-row';
+            sr.innerHTML = `
+              <div class="category-bar-top">
+                <span class="category-bar-name subcat-name">· ${escapeHtml(sd.name)}</span>
+                <span class="category-bar-amount subcat-amount">${formatMoney(sAmt)} · ${Math.round(pct)}%</span>
+              </div>
+              <div class="category-bar-track"><div class="category-bar-fill" style="width:${pct}%;opacity:.65"></div></div>
+            `;
+            breakdown.appendChild(sr);
+          });
+          const noSubAmt = monthEntries
+            .filter(e => e.type === 'expense' && e.categoryId === catId && !e.subcategoryId)
+            .reduce((s, e) => s + e.amount, 0);
+          if (noSubAmt > 0) {
+            const pct = amount > 0 ? (noSubAmt / amount) * 100 : 0;
+            const sr = document.createElement('div');
+            sr.className = 'subcat-bar-row';
+            sr.innerHTML = `
+              <div class="category-bar-top">
+                <span class="category-bar-name subcat-name" style="color:var(--ink-faint)">· sin subcategoría</span>
+                <span class="category-bar-amount subcat-amount" style="color:var(--ink-faint)">${formatMoney(noSubAmt)} · ${Math.round(pct)}%</span>
+              </div>
+              <div class="category-bar-track"><div class="category-bar-fill" style="width:${pct}%;opacity:.35"></div></div>
+            `;
+            breakdown.appendChild(sr);
+          }
+          toggleBtn.addEventListener('click', () => {
+            breakdown.hidden = !breakdown.hidden;
+            toggleBtn.textContent = breakdown.hidden ? '▸ ver por subcategoría' : '▾ colapsar';
+          });
+          row.appendChild(toggleBtn);
+          row.appendChild(breakdown);
+        }
+      }
+
       container.appendChild(row);
     });
 

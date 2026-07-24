@@ -709,3 +709,429 @@ racha de carga diaria.
 - Simulador de escenarios en el módulo Plan ("¿y si aporto más por mes?")
 - Foto de comprobante adjunta a un movimiento (base64 local)
 - PIN o bloqueo biométrico al abrir la app
+
+## FEATURE: Recordatorio de conciliación periódica
+**Estado: pendiente**
+
+### Qué se pide
+Un aviso proactivo cada 2 semanas invitando al usuario a revisar si el
+saldo calculado de sus cuentas coincide con la realidad, para que el
+ajuste de saldo (feature ya existente) sea algo que se hace de forma
+regular y a propósito, en vez de descubrirse por sorpresa cuando ya hay
+una diferencia grande acumulada.
+
+### Modelo de datos
+Campo nuevo en `state`: `lastReconciliationPrompt` (fecha ISO de la
+última vez que se mostró este aviso, o `null` si nunca se mostró).
+
+### Comportamiento esperado
+- Al abrir la app, calcular cuántos días pasaron desde
+  `lastReconciliationPrompt` (o desde la primera vez que se usó la app,
+  si el campo es `null` — usar la fecha del primer `entry` cargado como
+  referencia de inicio).
+- Si pasaron 14 días o más, mostrar un aviso no bloqueante (mismo patrón
+  visual que el banner de sugerencias ya existente, o el mismo banner de
+  sugerencias reusado como un caso más de `computeSuggestion()`) del
+  tipo: "¿Hace cuánto no revisás el saldo de tus cuentas? Un chequeo
+  rápido evita sorpresas." con un botón o link que lleve directo a la
+  vista de cuentas donde están los ajustes de saldo.
+- Al mostrarse el aviso (se haya actuado o no sobre él), actualizar
+  `lastReconciliationPrompt` a la fecha de hoy, para que no vuelva a
+  aparecer hasta pasar otras 2 semanas — no depende de que el usuario
+  haga el ajuste, solo de que haya pasado el tiempo, para no ser
+  insistente si decide ignorarlo una vez.
+- Si el usuario ya hizo un ajuste de saldo en cualquier cuenta dentro de
+  los últimos 14 días (sin necesidad del aviso), no mostrar el
+  recordatorio — ya está conciliando por su cuenta.
+
+### Casos de borde a probar
+- Primera vez que se usa la app (sin `entries` todavía): no debe
+  aparecer el aviso hasta que haya al menos algo cargado y pasen los 14
+  días correspondientes.
+- Usuario que ajusta saldo seguido (cada pocos días): el aviso no debe
+  aparecer nunca en ese caso, ya que la condición de "sin ajustes en los
+  últimos 14 días" no se cumple.
+- No debe competir ni superponerse con otras sugerencias del banner
+  existente — si ya hay una sugerencia mostrándose ese día, definir
+  prioridad clara entre sugerencias (esto puede coordinarse con el resto
+  de casos ya existentes en `computeSuggestion()`, por ejemplo dando
+  prioridad a avisos más urgentes como el de racha por cortarse).
+
+---
+## FEATURE: Historial de ajustes por cuenta
+**Estado: pendiente**
+**Depende de: "Edición de cuentas y saldo inicial" (ya implementada)**
+
+### Qué se pide
+En el detalle de cada cuenta (dentro de Ajustes o donde se gestionen las
+cuentas), mostrar cuántas veces se ajustó el saldo de esa cuenta
+específica y de cuánto fue cada ajuste, para que el usuario pueda
+detectar patrones — por ejemplo, si siempre es la misma cuenta (típico:
+efectivo) la que requiere corrección, es una señal de que ahí se le
+escapan más gastos sin cargar.
+
+### Comportamiento esperado
+- En la vista de detalle/edición de una cuenta, agregar una sección
+  "historial de ajustes" listando todos los `entries` de tipo
+  `adjustment` asociados a esa cuenta (filtrar por `accountId`), con
+  fecha y monto de cada uno (positivo o negativo).
+- Mostrar un resumen arriba de la lista: cantidad total de ajustes
+  hechos en esa cuenta y la suma acumulada (en valor absoluto, para
+  responder "¿cuánto termine perdiendo/ganando de rastro en esta
+  cuenta en total?").
+- Si la cuenta nunca tuvo ajustes, mostrar un estado vacío simple ("sin
+  ajustes registrados en esta cuenta") en vez de una sección rota o
+  confusa.
+- Opcional pero recomendable: si hay más de una cuenta con ajustes, en
+  algún lugar (puede ser la misma vista de cuentas) destacar cuál es la
+  cuenta con más ajustes acumulados, como una forma pasiva de que el
+  usuario note el patrón sin tener que comparar manualmente cuenta por
+  cuenta.
+
+### Casos de borde a probar
+- Cuenta eliminada que tenía ajustes históricos: definir criterio
+  consistente con el resto de la app (mismo tratamiento que ya se usa
+  para movimientos de cuentas eliminadas en otras partes, si existe).
+- Cuenta con muchísimos ajustes (edge case de uso intensivo): que la
+  lista no rompa el layout, considerar scroll interno si crece mucho.
+
+---
+## FEATURE: Subcategorías
+**Estado: hecha**
+**Depende de: "Edición de categorías" (recomendable tenerla implementada antes)**
+
+### Qué se pide
+Permitir que una categoría tenga subcategorías opcionales — por ejemplo
+"Comida" con subcategorías "Supermercado", "Delivery" y "Restaurantes" —
+para poder analizar el gasto con más detalle sin tener que inflar la
+lista principal de categorías con decenas de ítems sueltos.
+
+### Modelo de datos
+Extender el objeto de categoría (`state.categories` y
+`state.incomeCategories`) con un campo opcional:
+```
+{
+  id, name, icon,
+  subcategories: [
+    { id, name }
+  ]
+}
+```
+Si `subcategories` está vacío o no existe, la categoría se comporta
+exactamente igual que hoy (retrocompatible con todas las categorías
+existentes, que no tienen por qué migrar a tener subcategorías).
+
+Extender `entries` con un campo opcional `subcategoryId` (puede ser
+`null` si el movimiento no especifica subcategoría, incluso si la
+categoría elegida sí las tiene definidas — no debe ser obligatorio
+elegir una).
+
+### Comportamiento esperado
+- En el gestor de categorías de Ajustes, cada categoría puede tener
+  subcategorías gestionables (agregar/editar/quitar), con una UI simple
+  anidada bajo la categoría padre.
+- En el modal de carga de movimiento, al elegir una categoría que tiene
+  subcategorías definidas, mostrar un selector adicional (opcional, no
+  bloqueante) para elegir la subcategoría. Si la categoría no tiene
+  subcategorías, no mostrar nada extra — mantener el flujo actual
+  intacto para quien no usa esta feature.
+- En Reportes, al ver el desglose de una categoría con subcategorías,
+  permitir un nivel de detalle adicional (ej. tocar la barra de "Comida"
+  despliega el desglose por subcategoría) sin romper la vista general
+  por categorías que ya existe.
+
+### Casos de borde a probar
+- Categoría con subcategorías que luego se editan/eliminan: los
+  movimientos que ya usaban una subcategoría eliminada no deben romperse
+  — mostrar el nombre guardado históricamente o "subcategoría eliminada"
+  en vez de fallar.
+- Usuario que nunca usa subcategorías: la app debe verse y comportarse
+  exactamente igual que antes de esta feature, sin UI adicional
+  molestando si no la necesita.
+- Categorías de ingreso también deben poder tener subcategorías, mismo
+  criterio que las de gasto.
+
+### Notas de implementación
+- Archivos modificados: `js/state.js`, `js/settings.js`, `js/ledger.js`, `js/stats.js`, `js/main.js`, `index.html`, `styles.css`, `sw.js`
+- `state.categories` y `state.incomeCategories` extendidas con `subcategories: []` (migración en `loadState()`). Campo retrocompatible — si está vacío la UI no muestra nada extra.
+- `getSubcategoryById(catId, subcatId, type)` en `state.js`.
+- En Ajustes, la sección de subcategorías aparece SOLO en modo edición (no al crear una categoría nueva). Agregar/quitar subcategorías es inmediato (save instantáneo); nombre+ícono de la categoría padre requieren "guardar cambios" como antes.
+- `selectedSubcategoryId` (global en state.js) se resetea cuando cambia la categoría o el tipo (gasto/ingreso). Se restaura en `openEditModal()`.
+- `renderSubcategoryGrid()` se llama al final de `renderCategoryGrid()`. El campo `#subcategory-field` permanece oculto si la categoría seleccionada no tiene subcategorías definidas. Chip "—" permite limpiar la selección.
+- `subcategoryId` se guarda en entries (null si no aplica). `renderEntryRow()` muestra el nombre de la subcategoría en el subtítulo antes de la nota.
+- En Reportes, botón "▸ ver por subcategoría" aparece debajo de la barra de categoría solo si hay entries con subcategoryId para esa categoría ese mes. Expandible con toggle.
+- Subcategoría eliminada: `getSubcategoryById()` retorna null → simplemente no se muestra en el subtítulo (no rompe). Los entries con subcategoryId huérfano quedan intactos.
+
+---
+## FEATURE: Sugerencia automática de categoría según la nota
+**Estado: pendiente**
+**Depende de: "Subcategorías" (opcional — si no está implementada, esta feature funciona igual solo con categorías, ignorando el paso de subcategoría)**
+
+### Qué se pide
+Que la app aprenda de las notas que el usuario ya escribió en
+movimientos anteriores, y sugiera automáticamente una categoría cuando
+detecta una palabra que ya usó antes junto a esa misma categoría — por
+ejemplo, si varias veces cargó un gasto con la nota "uber" y eligió la
+categoría "Transporte", la próxima vez que escriba "uber" en la nota, la
+app sugiere "Transporte" automáticamente antes de que el usuario elija a
+mano. Si la categoría sugerida tiene subcategorías (ver feature
+"Subcategorías"), sugerir también la subcategoría más probable, en un
+segundo paso dependiente de la categoría ya sugerida — nunca de forma
+independiente entre sí.
+
+### Cómo funciona el aprendizaje (sin backend, todo local)
+- No hace falta una entidad nueva separada: esta información se puede
+  derivar directamente de `state.entries` cada vez que se necesite (no
+  hay que mantener un modelo entrenado ni nada persistido aparte), pero
+  por performance conviene cachear el resultado en memoria y
+  recalcularlo solo cuando se agrega o edita un movimiento, no en cada
+  tecla que el usuario tipea.
+- Algoritmo simple: tomar las palabras de la nota (en minúsculas, sin
+  tildes, separadas por espacios, ignorando palabras muy cortas o muy
+  genéricas tipo "de", "el", "la"), y por cada palabra llevar un conteo
+  de con qué categoría apareció más veces en el historial. Cuando el
+  usuario tipea una nota nueva, buscar si alguna palabra de lo que ya
+  escribió coincide con alguna palabra "aprendida", y si hay una
+  categoría claramente dominante para esa palabra (ej. apareció con esa
+  categoría más del 70% de las veces, con un mínimo de 2-3 apariciones
+  para no sugerir en base a un solo caso aislado), sugerirla.
+
+### Aprendizaje de subcategoría (en dos pasos, dependiente de la categoría)
+- Una vez determinada la categoría sugerida para la palabra (con el
+  algoritmo de arriba), repetir el mismo tipo de análisis pero
+  **filtrando solo los movimientos históricos que ya pertenecen a esa
+  categoría**: de esos, ver con qué subcategoría apareció más
+  frecuentemente esa misma palabra, con el mismo criterio de confianza
+  mínima (ej. >70% de las veces, con mínimo de 2-3 apariciones dentro de
+  ese subconjunto ya filtrado por categoría).
+- La subcategoría sugerida debe pertenecer siempre a la categoría ya
+  sugerida — nunca se aprende ni se sugiere una combinación
+  palabra→categoría y palabra→subcategoría de forma independiente entre
+  sí, precisamente para evitar sugerir una subcategoría que no tiene
+  sentido bajo la categoría elegida (ej. sugerir categoría "Transporte"
+  pero subcategoría "Delivery", que pertenece a "Comida").
+- Si la categoría sugerida no tiene subcategorías definidas, o no hay
+  suficiente historial para determinar una subcategoría con confianza,
+  simplemente no sugerir ninguna — sugerir solo la categoría es un
+  resultado válido y esperado, no un caso de error.
+
+### Comportamiento esperado
+- En el modal de carga de movimiento, mientras el usuario escribe en el
+  campo de nota, si se detecta una coincidencia con suficiente
+  confianza, resaltar visualmente (no seleccionar automáticamente sin
+  avisar) la categoría sugerida en el grid de categorías — por ejemplo
+  con un borde o indicador sutil, y/o un texto chico tipo "sugerido:
+  Transporte" cerca del campo de nota. Si también hay subcategoría
+  sugerida, mostrarla de la misma forma una vez que el selector de
+  subcategoría esté visible (que aparece al elegir/confirmar la
+  categoría, según el comportamiento ya definido en la feature de
+  Subcategorías).
+- El usuario sigue teniendo el control total: la sugerencia es una
+  ayuda visual, nunca selecciona la categoría ni la subcategoría de
+  forma automática sin que el usuario confirme tocándola.
+- El aprendizaje debe ser continuo: cada movimiento nuevo que se carga
+  refuerza o ajusta las asociaciones palabra-categoría (y
+  palabra-subcategoría) para sugerencias futuras, sin necesidad de una
+  etapa de "entrenamiento" separada ni configuración manual por parte
+  del usuario.
+
+### Casos de borde a probar
+- Usuario nuevo sin historial suficiente: no debe sugerir nada hasta
+  tener datos suficientes (mínimo de apariciones definido arriba), ni
+  debe romper si `entries` está vacío.
+- Palabra que aparece con distintas categorías en proporciones similares
+  (sin un ganador claro, ej. 50/50): no sugerir nada en vez de adivinar
+  con baja confianza.
+- Palabras muy genéricas que aparecen en casi todos los movimientos (ej.
+  "compra", "pago"): considerar una lista corta de palabras a ignorar
+  por ser poco informativas, además del filtro de palabras muy cortas.
+- Categoría con suficiente confianza pero sin suficiente historial dentro
+  de esa categoría para determinar la subcategoría: debe sugerir solo la
+  categoría, sin forzar una subcategoría de baja confianza.
+- Feature de Subcategorías no implementada todavía, o categoría sin
+  ninguna subcategoría definida: el flujo de sugerencia de categoría debe
+  funcionar exactamente igual que si esta ampliación no existiera, sin
+  errores ni referencias a subcategorías inexistentes.
+- Rendimiento: con un historial grande de movimientos (cientos), el
+  cálculo de sugerencias (categoría + subcategoría) no debe sentirse
+  lento al escribir en el campo de nota — de ahí la importancia de
+  cachear y no recalcular en cada tecla.
+
+---
+## FEATURE: Carga rápida por texto libre
+**Estado: pendiente**
+**Se potencia con: "Sugerencia automática de categoría según la nota" (si ya está implementada, reusar esa misma lógica de aprendizaje)**
+
+### Qué se pide
+Una forma alternativa y más rápida de cargar un movimiento: el usuario
+escribe una frase corta en lenguaje natural (ej. "500 en nafta", "2000
+supermercado", "cobré 50000 de sueldo") y la app interpreta
+automáticamente el monto, si es gasto o ingreso, y sugiere la categoría,
+sin tener que pasar por todos los campos del modal uno por uno.
+
+### Comportamiento esperado
+- Agregar un campo de texto libre, accesible por ejemplo con un ícono
+  alternativo junto al botón + existente, o como una opción dentro del
+  mismo modal de carga ("cargar rápido" vs. "cargar con detalle").
+- Al escribir una frase y confirmar, la app debe:
+  1. Extraer el monto: buscar el primer número en el texto (soportar
+     formatos con y sin decimales, con puntos de miles si aplica).
+  2. Determinar tipo (gasto/ingreso): usar palabras clave simples —
+     "cobré", "recibí", "ingreso", "sueldo" sugieren ingreso; ausencia de
+     esas palabras asume gasto por default (los gastos son la mayoría de
+     los movimientos del día a día).
+  3. Sugerir categoría: usando la misma lógica de aprendizaje por
+     palabras de la feature de categorización automática si ya está
+     implementada; si no, hacer un matching simple contra los nombres de
+     categorías existentes (ej. si el texto contiene "nafta" o
+     "transporte", sugerir la categoría Transporte por coincidencia
+     directa de nombre — versión simplificada sin aprendizaje).
+  4. El resto del texto (lo que no es el número) se guarda como nota.
+- Antes de guardar definitivamente, mostrar una confirmación breve con lo
+  interpretado (monto, tipo, categoría sugerida, nota) para que el
+  usuario pueda corregir cualquier campo antes de confirmar — nunca
+  guardar directamente sin mostrar qué se interpretó, para evitar cargar
+  algo mal interpretado sin darse cuenta.
+- Si no se puede interpretar un monto válido en el texto, mostrar un
+  aviso claro pidiendo que lo intente de nuevo o use el modal completo,
+  en vez de guardar algo incorrecto.
+
+### Casos de borde a probar
+- Texto sin ningún número: debe rechazarse con aviso claro, no debe
+  guardar un monto de 0 o inventado.
+- Texto con varios números (ej. "pagué 500 por 2 entradas"): definir un
+  criterio simple y consistente sobre cuál número se toma como el monto
+  (ej. el primero que aparece), y permitir que el usuario lo corrija
+  fácilmente en la confirmación si tomó el número equivocado.
+- Texto ambiguo sobre si es gasto o ingreso: default a gasto (más común
+  en el uso diario) pero dejar bien visible y fácil de cambiar en la
+  confirmación antes de guardar.
+
+---
+## FEATURE: Alerta de aporte del Plan sin registrar
+**Estado: pendiente**
+**Depende de: módulo "Plan" (inversiones/interés compuesto) ya implementado**
+
+### Qué se pide
+Igual que la racha del libro de caja avisa si estás por cortar el hábito
+diario de carga, este aviso hace lo mismo pero para el módulo Plan: si ya
+pasó la fecha esperada del aporte mensual (ej. Swiss Medical) y todavía no
+se registró el pago de ese mes, avisar — para no perder de vista un
+aporte real que sí se pagó pero no se cargó en la app, lo cual
+distorsionaría la proyección de interés compuesto.
+
+### Comportamiento esperado
+- Cada plan de `investmentPlans` tiene un `startDate` y aportes mensuales
+  esperados. Calcular, para el mes en curso, si ya debería existir un
+  registro en `contributions` para ese plan y ese mes (usando el día del
+  mes del `startDate` como referencia de "cuándo se espera el aporte", de
+  forma similar a `dayOfMonth` en gastos/ingresos fijos).
+- Si pasó esa fecha esperada y no hay un aporte registrado para el mes en
+  curso, mostrar un aviso — puede integrarse al mismo banner de
+  sugerencias general, o mostrarse específicamente dentro de la vista
+  "Plan" como un indicador visual en la tarjeta del plan correspondiente
+  (ej. un badge o borde de alerta en la tarjeta), sin necesidad de ser
+  invasivo fuera de esa vista.
+- El aviso debe incluir un acceso directo al botón "registrar pago de
+  este mes" que ya existe en el módulo Plan, para resolverlo en un toque.
+
+### Casos de borde a probar
+- Plan recién creado, todavía dentro del primer mes (antes de que llegue
+  la fecha esperada del primer aporte): no debe avisar prematuramente.
+- Plan con aporte ya registrado ese mes: no debe aparecer ningún aviso.
+- Varios planes activos simultáneamente, cada uno con su propia fecha
+  esperada: el aviso debe evaluarse de forma independiente por plan, no
+  global.
+
+---
+## FEATURE: Rendimiento real vs. proyectado en el Plan
+**Estado: pendiente**
+**Depende de: módulo "Plan" (inversiones/interés compuesto) ya implementado**
+
+### Qué se pide
+A medida que pasan los meses y se van registrando aportes reales, mostrar
+en cada plan una comparación entre lo que la fórmula de interés compuesto
+predecía para este punto en el tiempo y el valor acumulado real (aportes
++ interés generado hasta la fecha), para que el usuario pueda ver si el
+plan está evolucionando como se esperaba.
+
+### Comportamiento esperado
+- Para cada plan, calcular dos valores a la fecha de hoy:
+  1. **Proyectado**: lo que la fórmula de interés compuesto predice que
+     debería haber acumulado a esta altura, dados los meses transcurridos
+     desde `startDate` y la tasa `annualRatePct` (mismo cálculo ya usado
+     para la proyección a término, pero evaluado a "hoy" en vez de al
+     final del plazo completo).
+  2. **Real**: la suma de aportes efectivamente registrados en
+     `contributions` (en USD) más el interés que esos aportes
+     efectivamente generaron según las fechas reales en que se
+     cargaron (no asumir que todos los meses se aportó puntualmente si
+     hubo meses sin registrar, ver feature de alerta de aporte sin
+     registrar).
+- Mostrar ambos valores lado a lado en la tarjeta del plan (ej.
+  "proyectado a la fecha: USD X" / "acumulado real: USD Y"), y la
+  diferencia entre ambos, con indicación visual de si está por encima o
+  por debajo de lo esperado (colores ya usados en la app: oliva si va
+  bien, terracota si está por debajo).
+- Si hay meses sin aporte registrado (ver feature de alerta), la
+  diferencia entre proyectado y real va a reflejar naturalmente esa
+  falta, lo cual es información correcta y esperada, no un error de
+  cálculo — no hay que "perdonar" esos meses en el cálculo del valor
+  real.
+
+### Casos de borde a probar
+- Plan recién creado sin aportes todavía: el valor real debe ser 0, sin
+  errores de cálculo, y el proyectado debe reflejar 0 días transcurridos
+  (no debe mostrar una proyección inflada de meses que no pasaron).
+- Plan con todos los aportes puntuales: proyectado y real deberían
+  coincidir bastante de cerca (pequeñas diferencias por redondeo son
+  esperables, no un bug).
+- Plan con varios meses sin aportar: la diferencia debe ser visible y
+  clara, sin romper el resto de la tarjeta.
+
+---
+## FEATURE: Exportar reporte mensual en PDF
+**Estado: pendiente**
+
+### Qué se pide
+Un resumen mensual prolijo, exportable como PDF, para imprimir o
+compartir (ej. por WhatsApp), como alternativa más presentable al export
+de JSON crudo que ya existe (pensado para backup técnico, no para leer).
+
+### Comportamiento esperado
+- Botón "exportar reporte del mes" en la vista de Reportes, para el mes
+  actualmente seleccionado.
+- El PDF generado debe incluir, con el mismo estilo visual "libro de
+  caja" de la app (papel crema, tinta, tipografía serif para títulos):
+  balance del mes, ingresos y gastos totales, desglose por categoría
+  (misma información que las barras de categoría en pantalla, pero en
+  formato lista o tabla apta para PDF), y las métricas ya calculadas
+  (promedio diario, tasa de ahorro, comparación vs. mes anterior).
+- Generación 100% client-side (sin backend) — usar una librería JS de
+  generación de PDF liviana que corra en el navegador (ej. jsPDF u
+  otra equivalente sin dependencias de servidor), cargada como script
+  externo igual que se hizo con otras librerías del proyecto si aplica,
+  o generar el PDF a partir de HTML/CSS con una librería de conversión
+  del lado del cliente.
+- El archivo generado debe poder descargarse o compartirse directamente
+  desde el navegador (usar la Web Share API si está disponible en el
+  dispositivo, con fallback a descarga simple si no lo está).
+
+### Casos de borde a probar
+- Mes sin movimientos: el PDF debe generarse igual, mostrando montos en
+  cero de forma prolija, no debe fallar ni generar un archivo vacío o
+  roto.
+- Nombre de archivo generado: debe incluir el mes y año de forma clara
+  (ej. `libro-de-caja-junio-2026.pdf`) para que sea fácil de identificar
+  si el usuario exporta varios meses con el tiempo.
+- Confirmar que el PDF se ve bien tanto en pantallas de celu como al
+  imprimirse en papel (proporciones legibles, no depender de scroll).
+
+---
+- Widget de pantalla de inicio para carga rápida de un gasto sin abrir la
+  app entera — **requiere empaquetar la app con Capacitor** (herramienta
+  que envuelve la PWA existente en un `.apk`/`.ipa` nativo sin reescribir
+  el código) y publicarla como app nativa en Play Store / App Store, ya
+  que los widgets de home screen no son accesibles desde una PWA pura.
+  No es urgente, queda como posibilidad de "fase 2" si en algún momento
+  se decide dar el paso de empaquetar la app.

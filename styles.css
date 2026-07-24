@@ -1569,6 +1569,47 @@ input { font-family: inherit; }
 /* adjustment entry in ledger */
 .entry-icon.adjustment { background: var(--accent-soft); color: var(--accent); }
 
+/* subcategory management in category edit modal */
+.subcategory-list { margin-bottom: 8px; }
+.subcategory-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 6px 0;
+  border-bottom: 1px solid var(--paper-line);
+  font-size: 14px;
+  color: var(--ink);
+}
+.subcategory-empty { font-size: 13px; color: var(--ink-faint); margin: 4px 0 8px; }
+.subcategory-add-row {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  margin-top: 8px;
+}
+.subcategory-add-row .text-input { flex: 1; margin: 0; }
+
+/* subcategory field label hint */
+.field-label-optional { font-weight: 400; color: var(--ink-faint); }
+
+/* subcategory drill-down in stats */
+.subcat-toggle-btn {
+  display: block;
+  margin-top: 4px;
+  background: none;
+  border: none;
+  font-size: 11px;
+  font-weight: 600;
+  font-family: var(--font-ui);
+  color: var(--ink-faint);
+  cursor: pointer;
+  padding: 2px 0;
+}
+.subcat-breakdown { margin-top: 6px; padding-left: 12px; }
+.subcat-bar-row { margin-bottom: 6px; }
+.subcat-name { font-size: 12px !important; color: var(--ink) !important; }
+.subcat-amount { font-size: 12px !important; }
+
 /* transfer entry in ledger */
 .entry-icon.transfer { background: var(--paper-line); color: var(--ink-faint); font-size: 16px; font-family: var(--font-ui); }
 .entry-amount.transfer { color: var(--ink-faint); }

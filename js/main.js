@@ -124,6 +124,7 @@ function attachEventListeners() {
     if (e.target.id === 'cat-modal-backdrop') closeCategoryModal();
   });
   document.getElementById('btn-save-category').addEventListener('click', saveCategory);
+  document.getElementById('btn-add-subcategory').addEventListener('click', addSubcategory);
 
   // Settings: inflation
   document.getElementById('btn-save-inflation').addEventListener('click', saveInflationRate);

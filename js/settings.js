@@ -63,6 +63,7 @@ function openCategoryModal() {
   document.getElementById('new-cat-name').value = '';
   document.querySelector('#cat-modal-backdrop .modal-title').textContent = 'nueva categoría';
   document.getElementById('btn-save-category').textContent = 'agregar';
+  document.getElementById('subcategory-section').hidden = true;
   selectedIconForNewCategory = ICON_OPTIONS[0];
   renderIconPicker();
   document.getElementById('cat-modal-backdrop').hidden = false;
@@ -76,6 +77,7 @@ function openAddIncomeCategoryModal() {
   document.getElementById('new-cat-name').value = '';
   document.querySelector('#cat-modal-backdrop .modal-title').textContent = 'nueva categoría de ingreso';
   document.getElementById('btn-save-category').textContent = 'agregar';
+  document.getElementById('subcategory-section').hidden = true;
   selectedIconForNewCategory = ICON_OPTIONS[0];
   renderIconPicker();
   document.getElementById('cat-modal-backdrop').hidden = false;
@@ -91,8 +93,58 @@ function openEditCategoryModal(cat, listKey) {
   document.getElementById('btn-save-category').textContent = 'guardar cambios';
   selectedIconForNewCategory = cat.icon;
   renderIconPicker();
+  renderSubcategorySection(cat.id, listKey);
   document.getElementById('cat-modal-backdrop').hidden = false;
   history.pushState({ overlay: true }, '');
+}
+
+function renderSubcategorySection(catId, listKey) {
+  const section = document.getElementById('subcategory-section');
+  if (!section) return;
+  section.hidden = false;
+
+  const list = listKey === 'income' ? state.incomeCategories : state.categories;
+  const cat = list.find(c => c.id === catId);
+  if (!cat) return;
+
+  const subcats = cat.subcategories || [];
+  const container = document.getElementById('subcategory-list');
+  container.innerHTML = '';
+
+  if (subcats.length === 0) {
+    container.innerHTML = '<p class="subcategory-empty">todavía no hay subcategorías</p>';
+  } else {
+    subcats.forEach(sc => {
+      const row = document.createElement('div');
+      row.className = 'subcategory-row';
+      row.innerHTML = `
+        <span>${escapeHtml(sc.name)}</span>
+        <button class="cat-remove subcat-remove" data-subcat-id="${sc.id}">quitar</button>
+      `;
+      row.querySelector('.subcat-remove').addEventListener('click', () => {
+        cat.subcategories = cat.subcategories.filter(s => s.id !== sc.id);
+        saveState();
+        renderSubcategorySection(catId, listKey);
+      });
+      container.appendChild(row);
+    });
+  }
+}
+
+function addSubcategory() {
+  if (!editingCategoryId || !editingCategoryList) return;
+  const nameInput = document.getElementById('new-subcategory-name');
+  const name = nameInput.value.trim();
+  if (!name) { showToast('Escribí un nombre para la subcategoría'); return; }
+
+  const list = editingCategoryList === 'income' ? state.incomeCategories : state.categories;
+  const cat = list.find(c => c.id === editingCategoryId);
+  if (!cat) return;
+  if (!cat.subcategories) cat.subcategories = [];
+  cat.subcategories.push({ id: uid(), name });
+  nameInput.value = '';
+  saveState();
+  renderSubcategorySection(editingCategoryId, editingCategoryList);
 }
 
 function closeCategoryModal() {

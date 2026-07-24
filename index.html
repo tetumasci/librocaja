@@ -305,6 +305,11 @@
       <div class="category-grid" id="category-grid"></div>
     </div>
 
+    <div class="field-group" id="subcategory-field" hidden>
+      <label class="field-label">subcategoría <span class="field-label-optional">(opcional)</span></label>
+      <div class="category-grid" id="subcategory-grid"></div>
+    </div>
+
     <div class="field-group">
       <label class="field-label">cuenta</label>
       <div class="account-grid" id="account-grid"></div>
@@ -359,6 +364,16 @@
     <div class="field-group">
       <label class="field-label">ícono</label>
       <div class="icon-picker" id="icon-picker"></div>
+    </div>
+    <div id="subcategory-section" hidden>
+      <div class="field-group">
+        <label class="field-label">subcategorías</label>
+        <div id="subcategory-list" class="subcategory-list"></div>
+        <div class="subcategory-add-row">
+          <input type="text" id="new-subcategory-name" class="text-input" placeholder="ej: Supermercado, Delivery...">
+          <button type="button" class="text-btn" id="btn-add-subcategory">+ agregar</button>
+        </div>
+      </div>
     </div>
     <button class="btn-save" id="btn-save-category">agregar</button>
     <button class="btn-cancel" id="btn-cancel-category">cancelar</button>

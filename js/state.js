@@ -78,6 +78,7 @@ let editingCategoryId = null;
 let editingCategoryList = null; // 'expense' | 'income'
 let editingRecurringId = null;
 let editingRecurringType = 'expense'; // 'expense' | 'income'
+let selectedSubcategoryId = null;
 
 /* ---------- Persistence ---------- */
 
@@ -99,6 +100,8 @@ function loadState() {
     if (!state.exchangeRates) state.exchangeRates = [];
     if (!state.investmentPlans) state.investmentPlans = [];
     if (!state.transfers) state.transfers = [];
+    state.categories = state.categories.map(c => c.subcategories ? c : { ...c, subcategories: [] });
+    state.incomeCategories = state.incomeCategories.map(c => c.subcategories ? c : { ...c, subcategories: [] });
     if (state.smallExpenseThreshold == null || state.smallExpenseThreshold <= 0) state.smallExpenseThreshold = 5000;
     state.accounts = state.accounts.map(acc =>
       acc.initialBalance !== undefined ? acc : { ...acc, initialBalance: 0 }
@@ -193,6 +196,13 @@ function getAccountBalance(accountId) {
     .filter(t => t.fromAccountId === accountId && t.date <= today)
     .reduce((s, t) => s + t.amount, 0);
   return entriesBalance + transferIn - transferOut;
+}
+
+function getSubcategoryById(catId, subcatId, type) {
+  const list = type === 'income' ? state.incomeCategories : state.categories;
+  const cat = list.find(c => c.id === catId);
+  if (!cat || !cat.subcategories) return null;
+  return cat.subcategories.find(s => s.id === subcatId) || null;
 }
 
 function getTransfersForMonth(date) {
