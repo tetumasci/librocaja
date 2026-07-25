@@ -101,6 +101,7 @@ function loadState() {
     if (!state.exchangeRates) state.exchangeRates = [];
     if (!state.investmentPlans) state.investmentPlans = [];
     if (!state.transfers) state.transfers = [];
+    state.goals = state.goals.map(g => g.currency ? g : { ...g, currency: 'ARS' });
     state.categories = state.categories.map(c => c.subcategories ? c : { ...c, subcategories: [] });
     state.incomeCategories = state.incomeCategories.map(c => c.subcategories ? c : { ...c, subcategories: [] });
     if (state.smallExpenseThreshold == null || state.smallExpenseThreshold <= 0) state.smallExpenseThreshold = 5000;

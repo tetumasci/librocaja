@@ -127,6 +127,20 @@ function attachEventListeners() {
     if (e.target.id === 'goal-modal-backdrop') closeGoalModal();
   });
   document.getElementById('btn-save-goal').addEventListener('click', saveGoal);
+  document.getElementById('btn-delete-goal').addEventListener('click', deleteGoal);
+  document.getElementById('goal-currency-ars').addEventListener('click', () => setGoalCurrency('ARS'));
+  document.getElementById('goal-currency-usd').addEventListener('click', () => setGoalCurrency('USD'));
+
+  // Add funds to goal
+  document.getElementById('btn-cancel-fund').addEventListener('click', closeAddFundModal);
+  document.getElementById('add-fund-modal-backdrop').addEventListener('click', (e) => {
+    if (e.target.id === 'add-fund-modal-backdrop') closeAddFundModal();
+  });
+  document.getElementById('btn-save-fund').addEventListener('click', saveAddFund);
+  document.getElementById('fund-currency-ars').addEventListener('click', () => setFundCurrency('ARS'));
+  document.getElementById('fund-currency-usd').addEventListener('click', () => setFundCurrency('USD'));
+  document.getElementById('fund-amount').addEventListener('input', updateFundRatePreview);
+  document.getElementById('fund-exchange-rate').addEventListener('input', updateFundRatePreview);
 
   // Settings: categories
   document.getElementById('btn-add-category').addEventListener('click', openCategoryModal);

@@ -13,7 +13,22 @@ const RATE_CACHE_TTL = 30 * 60 * 1000;
 let rateCache = { rates: null, timestamp: 0 };
 let selectedDolarType = 'blue';
 
-/* ---------- Goals ---------- */
+let editingGoalId = null;
+let goalModalCurrency = 'ARS';
+let addFundGoalId = null;
+let fundCurrency = 'ARS';
+
+/* ---------- Helpers ---------- */
+
+function formatUSD(amount) {
+  return 'USD ' + amount.toLocaleString('es-AR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+}
+
+function formatGoalAmount(amount, currency) {
+  return currency === 'USD' ? formatUSD(amount) : formatMoney(amount);
+}
+
+/* ---------- Goals render ---------- */
 
 function renderGoals() {
   const body = document.getElementById('goals-body');
@@ -27,57 +42,106 @@ function renderGoals() {
       <p style="font-size:13px;">tocá + arriba para crear la primera</p>`;
     body.appendChild(emptyDiv);
   } else {
+    const lastRate = getLastExchangeRate();
     state.goals.forEach(goal => {
-      const pct = Math.min(100, Math.round((goal.current / goal.target) * 100));
+      const currency = goal.currency || 'ARS';
+      const pct = goal.target > 0 ? Math.min(100, Math.round((goal.current / goal.target) * 100)) : 0;
+
+      let refHTML = '';
+      if (currency === 'USD' && lastRate) {
+        refHTML = `<p class="goal-ars-ref">≈ ${formatMoney(goal.current * lastRate)} ARS (ref.)</p>`;
+      }
+
       const card = document.createElement('div');
       card.className = 'goal-card';
       card.innerHTML = `
         <div class="goal-top">
           <p class="goal-name">${escapeHtml(goal.name)}</p>
-          <span class="goal-pct">${pct}%</span>
+          <div class="goal-top-right">
+            <span class="goal-currency-badge">${currency}</span>
+            <span class="goal-pct">${pct}%</span>
+            <button class="goal-edit-btn" data-goal-id="${goal.id}" aria-label="Editar meta">✏️</button>
+          </div>
         </div>
         <div class="goal-track"><div class="goal-fill" style="width:${pct}%"></div></div>
         <div class="goal-amounts">
-          <span><strong>${formatMoney(goal.current)}</strong> ahorrado</span>
-          <span>meta: <strong>${formatMoney(goal.target)}</strong></span>
+          <span><strong>${formatGoalAmount(goal.current, currency)}</strong> ahorrado</span>
+          <span>meta: <strong>${formatGoalAmount(goal.target, currency)}</strong></span>
         </div>
-        <div class="goal-add-funds">
-          <input type="number" inputmode="decimal" placeholder="sumar monto" id="add-fund-${goal.id}">
-          <button data-goal-id="${goal.id}" class="btn-add-fund">sumar</button>
-        </div>
+        ${refHTML}
+        <button class="btn-add-fund" data-goal-id="${goal.id}">+ sumar fondos</button>
       `;
       body.appendChild(card);
     });
 
-    body.querySelectorAll('.btn-add-fund').forEach(btn => {
+    body.querySelectorAll('.goal-edit-btn').forEach(btn => {
       btn.addEventListener('click', () => {
-        const goalId = btn.dataset.goalId;
-        const input = document.getElementById(`add-fund-${goalId}`);
-        const val = parseFloat(input.value);
-        if (!val || val <= 0) { showToast('Ingresá un monto válido'); return; }
-        const goal = state.goals.find(g => g.id === goalId);
-        goal.current += val;
-        saveState();
-        renderGoals();
-        showToast('Ahorro actualizado');
+        const goal = state.goals.find(g => g.id === btn.dataset.goalId);
+        if (goal) openEditGoalModal(goal);
       });
+    });
+
+    body.querySelectorAll('.btn-add-fund').forEach(btn => {
+      btn.addEventListener('click', () => openAddFundModal(btn.dataset.goalId));
     });
   }
 
   renderDollarSavings(body);
 }
 
+/* ---------- Goal modal (create + edit) ---------- */
+
+function _renderGoalCurrencySelector(locked) {
+  const arsBtn = document.getElementById('goal-currency-ars');
+  const usdBtn = document.getElementById('goal-currency-usd');
+  const hint = document.getElementById('goal-currency-hint');
+  if (!arsBtn) return;
+  arsBtn.classList.toggle('selected', goalModalCurrency === 'ARS');
+  usdBtn.classList.toggle('selected', goalModalCurrency === 'USD');
+  arsBtn.disabled = locked;
+  usdBtn.disabled = locked;
+  arsBtn.style.opacity = locked ? '0.55' : '';
+  usdBtn.style.opacity = locked ? '0.55' : '';
+  if (hint) hint.hidden = !locked;
+}
+
 function openGoalModal() {
   closeAllModals();
+  editingGoalId = null;
+  goalModalCurrency = 'ARS';
+  document.getElementById('goal-modal-title').textContent = 'nueva meta de ahorro';
   document.getElementById('goal-name').value = '';
   document.getElementById('goal-target').value = '';
   document.getElementById('goal-current').value = '';
+  document.getElementById('btn-save-goal').textContent = 'crear meta';
+  document.getElementById('btn-delete-goal').hidden = true;
+  _renderGoalCurrencySelector(false);
+  document.getElementById('goal-modal-backdrop').hidden = false;
+  history.pushState({ overlay: true }, '');
+}
+
+function openEditGoalModal(goal) {
+  closeAllModals();
+  editingGoalId = goal.id;
+  goalModalCurrency = goal.currency || 'ARS';
+  document.getElementById('goal-modal-title').textContent = 'editar meta';
+  document.getElementById('goal-name').value = goal.name;
+  document.getElementById('goal-target').value = goal.target;
+  document.getElementById('goal-current').value = goal.current;
+  document.getElementById('btn-save-goal').textContent = 'guardar cambios';
+  document.getElementById('btn-delete-goal').hidden = false;
+  _renderGoalCurrencySelector(true);
   document.getElementById('goal-modal-backdrop').hidden = false;
   history.pushState({ overlay: true }, '');
 }
 
 function closeGoalModal() {
   document.getElementById('goal-modal-backdrop').hidden = true;
+}
+
+function setGoalCurrency(currency) {
+  goalModalCurrency = currency;
+  _renderGoalCurrencySelector(false);
 }
 
 function saveGoal() {
@@ -88,11 +152,130 @@ function saveGoal() {
   if (!name) { showToast('Ponele un nombre a la meta'); return; }
   if (!target || target <= 0) { showToast('Ingresá un monto objetivo válido'); return; }
 
-  state.goals.push({ id: uid(), name, target, current });
+  if (editingGoalId) {
+    const idx = state.goals.findIndex(g => g.id === editingGoalId);
+    if (idx >= 0) {
+      state.goals[idx] = { ...state.goals[idx], name, target, current };
+    }
+    saveState();
+    closeGoalModal();
+    renderGoals();
+    showToast('Meta actualizada');
+    return;
+  }
+
+  state.goals.push({ id: uid(), name, target, current, currency: goalModalCurrency });
   saveState();
   closeGoalModal();
   renderGoals();
   showToast('Meta creada');
+}
+
+function deleteGoal() {
+  if (!editingGoalId) return;
+  const goal = state.goals.find(g => g.id === editingGoalId);
+  if (!goal) return;
+  if (!confirm(`¿Eliminar la meta "${goal.name}"?\nLos depósitos USD vinculados quedan sin asignar.`)) return;
+
+  // Orphan linked dollar deposits instead of deleting them
+  state.dollarSavings = state.dollarSavings.map(d =>
+    d.goalId === editingGoalId ? { ...d, goalId: null } : d
+  );
+  state.goals = state.goals.filter(g => g.id !== editingGoalId);
+  editingGoalId = null;
+  saveState();
+  closeGoalModal();
+  renderGoals();
+  showToast('Meta eliminada');
+}
+
+/* ---------- Add funds modal ---------- */
+
+function openAddFundModal(goalId) {
+  closeAllModals();
+  addFundGoalId = goalId;
+  const goal = state.goals.find(g => g.id === goalId);
+  if (!goal) return;
+
+  fundCurrency = goal.currency || 'ARS';
+  document.getElementById('add-fund-goal-name').textContent = `sumar a: ${goal.name}`;
+  document.getElementById('fund-amount').value = '';
+  document.getElementById('fund-exchange-rate').value = getLastExchangeRate() || '';
+  document.getElementById('fund-rate-preview').hidden = true;
+  _renderFundCurrencySelector();
+  document.getElementById('add-fund-modal-backdrop').hidden = false;
+  history.pushState({ overlay: true }, '');
+  setTimeout(() => document.getElementById('fund-amount').focus(), 200);
+}
+
+function closeAddFundModal() {
+  document.getElementById('add-fund-modal-backdrop').hidden = true;
+}
+
+function _renderFundCurrencySelector() {
+  const arsBtn = document.getElementById('fund-currency-ars');
+  const usdBtn = document.getElementById('fund-currency-usd');
+  if (!arsBtn) return;
+  arsBtn.classList.toggle('selected', fundCurrency === 'ARS');
+  usdBtn.classList.toggle('selected', fundCurrency === 'USD');
+
+  const goal = state.goals.find(g => g.id === addFundGoalId);
+  const gc = goal ? (goal.currency || 'ARS') : 'ARS';
+  const rateGroup = document.getElementById('fund-rate-group');
+  if (rateGroup) rateGroup.hidden = (fundCurrency === gc);
+  updateFundRatePreview();
+}
+
+function setFundCurrency(currency) {
+  fundCurrency = currency;
+  _renderFundCurrencySelector();
+}
+
+function updateFundRatePreview() {
+  const goal = state.goals.find(g => g.id === addFundGoalId);
+  if (!goal) return;
+  const gc = goal.currency || 'ARS';
+  const amount = parseFloat(document.getElementById('fund-amount').value) || 0;
+  const rate = parseFloat(document.getElementById('fund-exchange-rate').value) || 0;
+  const preview = document.getElementById('fund-rate-preview');
+  if (!preview) return;
+
+  if (fundCurrency !== gc && amount > 0 && rate > 0) {
+    const converted = (fundCurrency === 'ARS' && gc === 'USD')
+      ? `= ${formatUSD(amount / rate)}`
+      : `= ${formatMoney(amount * rate)} ARS`;
+    preview.textContent = converted;
+    preview.hidden = false;
+  } else {
+    preview.hidden = true;
+  }
+}
+
+function saveAddFund() {
+  const goal = state.goals.find(g => g.id === addFundGoalId);
+  if (!goal) return;
+
+  const gc = goal.currency || 'ARS';
+  const amount = parseFloat(document.getElementById('fund-amount').value);
+  const rate = parseFloat(document.getElementById('fund-exchange-rate').value) || 0;
+
+  if (!amount || amount <= 0) { showToast('Ingresá un monto válido'); return; }
+
+  let addedToGoal;
+  if (fundCurrency === gc) {
+    addedToGoal = amount;
+  } else {
+    if (!rate || rate <= 0) { showToast('Ingresá el tipo de cambio'); return; }
+    addedToGoal = (fundCurrency === 'ARS' && gc === 'USD')
+      ? amount / rate   // ARS → USD
+      : amount * rate;  // USD → ARS
+  }
+
+  goal.current += addedToGoal;
+  saveState();
+  closeAddFundModal();
+  renderGoals();
+  showToast('Ahorro actualizado');
 }
 
 /* ---------- Dollar savings ---------- */
@@ -120,7 +303,7 @@ function renderDollarSavings(container) {
   totalsEl.innerHTML = `
     <div class="dollar-total-item">
       <span class="dollar-total-label">total USD</span>
-      <span class="dollar-total-usd">USD ${totalUSD.toLocaleString('es-AR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+      <span class="dollar-total-usd">${formatUSD(totalUSD)}</span>
     </div>
     <div class="dollar-total-item">
       <span class="dollar-total-label">equiv. en ARS</span>
@@ -146,7 +329,7 @@ function renderDollarSavings(container) {
           <span class="dollar-deposit-note">${subtitle}</span>
         </div>
         <div class="dollar-deposit-right">
-          <span class="dollar-deposit-usd">USD ${dep.amountUSD.toLocaleString('es-AR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+          <span class="dollar-deposit-usd">${formatUSD(dep.amountUSD)}</span>
           <span class="dollar-deposit-ars">${formatMoney(dep.amountARS)} ARS</span>
         </div>
       `;
@@ -364,9 +547,12 @@ function saveDollarDeposit() {
     dollarSavingId: deposit.id,
   });
 
+  // Add to linked goal in goal's own currency
   if (selectedGoalIdForDollar) {
     const goal = state.goals.find(g => g.id === selectedGoalIdForDollar);
-    if (goal) goal.current += amountARS;
+    if (goal) {
+      goal.current += (goal.currency === 'USD') ? amountUSD : amountARS;
+    }
   }
 
   saveState();

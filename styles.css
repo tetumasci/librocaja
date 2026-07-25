@@ -702,9 +702,31 @@ input { font-family: inherit; }
 .goal-top {
   display: flex;
   justify-content: space-between;
-  align-items: baseline;
+  align-items: center;
   margin-bottom: 10px;
 }
+.goal-top-right {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.goal-currency-badge {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--ink-faint);
+  background: var(--paper-line);
+  border-radius: 4px;
+  padding: 1px 5px;
+  letter-spacing: 0.04em;
+}
+.goal-edit-btn {
+  font-size: 14px;
+  padding: 0 2px;
+  color: var(--ink-faint);
+  line-height: 1;
+}
+.goal-edit-btn:active { opacity: 0.6; }
 .goal-name {
   font-family: var(--font-display);
   font-size: 16px;
@@ -737,26 +759,20 @@ input { font-family: inherit; }
 }
 .goal-amounts strong { color: var(--ink); font-family: var(--font-mono); }
 
-.goal-add-funds {
-  display: flex;
-  gap: 8px;
+.goal-ars-ref {
+  font-size: 11px;
+  color: var(--ink-faint);
+  font-style: italic;
+  margin: 4px 0 0;
+}
+.btn-add-fund {
   margin-top: 12px;
-}
-.goal-add-funds input {
-  flex: 1;
+  width: 100%;
   height: 34px;
-  border: 1px solid var(--paper-line);
-  border-radius: var(--radius-sm);
-  padding: 0 10px;
-  font-size: 13px;
-  background: var(--paper);
-}
-.goal-add-funds button {
-  background: var(--ink);
-  color: var(--paper);
   font-size: 12px;
   font-weight: 600;
-  padding: 0 14px;
+  color: var(--ink);
+  border: 1px dashed var(--paper-line);
   border-radius: var(--radius-sm);
 }
 
@@ -987,6 +1003,23 @@ input { font-family: inherit; }
   font-size: 13px;
   color: var(--ink-faint);
   margin-top: 4px;
+}
+.btn-danger {
+  width: 100%;
+  height: 40px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--expense);
+  border: 1px solid var(--expense);
+  border-radius: var(--radius-md);
+  margin-top: 8px;
+}
+.btn-danger:active { opacity: 0.75; }
+.field-hint {
+  font-size: 11px;
+  color: var(--ink-faint);
+  font-style: italic;
+  margin: 4px 0 0;
 }
 
 .account-grid {

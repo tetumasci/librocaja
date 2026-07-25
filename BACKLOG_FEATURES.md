@@ -1156,3 +1156,60 @@ de JSON crudo que ya existe (pensado para backup técnico, no para leer).
   que los widgets de home screen no son accesibles desde una PWA pura.
   No es urgente, queda como posibilidad de "fase 2" si en algún momento
   se decide dar el paso de empaquetar la app.
+---
+
+FEATURE: Mejorar pestaña de Metas — edición y moneda propia
+
+Estado: hecha Depende de: "Módulo de ahorro en dólares" y "Cotización del dólar automática" (ambas ya implementadas — reusar su misma lógica de conversión)
+
+Problema actual
+
+La pestaña de Metas tiene dos limitaciones importantes:
+
+Una vez creada una meta, no se puede editar nada — ni el nombre, ni el monto objetivo, ni el monto ya ahorrado. Si el usuario se equivoca al cargarla o cambia de idea sobre el objetivo, no tiene forma de corregirlo sin borrar y recrear la meta (perdiendo el historial de aportes ya hechos, si lo hubiera).
+Las metas asumen siempre pesos. Si el usuario crea una meta en dólares (ej. "juntar USD 2400"), hoy el número se trata como si fueran $2400 pesos, lo cual rompe completamente el sentido de la meta — USD 2400 y $2400 son magnitudes totalmente distintas.
+Parte 1 — Edición de metas
+Cada meta debe poder editarse: nombre, monto objetivo (target), y monto ya ahorrado (current), con el mismo patrón de modal pre-poblado usado en otras ediciones ya implementadas (movimientos, cuentas, categorías).
+Accesible desde un botón/ícono de edición en la tarjeta de cada meta, junto al progreso ya visible.
+Si se edita el target de una meta que ya tiene aportes registrados (ver Parte 2), el porcentaje de progreso debe recalcularse automáticamente con el nuevo objetivo, sin perder el historial de aportes ya hechos.
+Debe poder eliminarse una meta (si no existe ya esa opción), con confirmación, sin que borre accidentalmente aportes de ahorro en dólares vinculados si el usuario decide conservarlos (ver Parte 3, sobre vínculo con goalId).
+Parte 2 — Moneda propia por meta
+
+Extender el modelo de meta (entidad goals) con un campo nuevo:
+
+{
+  id, name, target, current,   // campos existentes
+  currency: 'ARS' | 'USD',     // nuevo, default 'ARS' para no romper metas existentes
+}
+Al crear una meta, el usuario elige en qué moneda está definido el objetivo: pesos o dólares. Esto no cambia después de creada la meta (no hay razón para "convertir" una meta ya definida de una moneda a otra — si el usuario se equivocó, mejor editar el target directamente en la moneda correcta que ya tiene seleccionada).
+El target y el current de una meta se expresan siempre en la moneda de esa meta (currency). Ejemplo: una meta en USD con target: 2400 significa USD 2400, no $2400.
+Parte 3 — Aportes en moneda mixta
+
+Como una meta puede recibir aportes tanto en pesos como en dólares (ej. una meta en USD donde algunos meses se aporta directo en dólares y otros se convierte desde pesos), cada aporte individual debe registrar:
+
+El monto aportado y en qué moneda se aportó ese aporte puntual.
+Si la moneda del aporte es distinta a la moneda de la meta, el tipo de cambio usado en ese momento para poder convertir y sumar correctamente al progreso total (reusar la misma lógica de exchangeRates / cotización automática ya implementada en el módulo de ahorro en dólares, no duplicar el mecanismo).
+El campo current de la meta representa el total acumulado ya convertido a la moneda de la meta — al sumar un aporte en una moneda distinta, convertirlo primero y sumar el resultado a current.
+
+Esto ya está resuelto en el módulo de ahorro en dólares para el caso de depósitos vinculados a una meta (goalId en dollarSavings) — extender el mismo criterio para que la suma manual de fondos directamente desde la pestaña de Metas (el botón "sumar" que ya existe en cada tarjeta) también soporte elegir la moneda del aporte puntual, no solo depender de los depósitos vinculados desde el módulo de ahorro USD.
+
+Visualización
+El progreso de cada meta debe mostrarse en su propia moneda (formato correcto: formatMoney() para ARS, formateador de USD para metas en dólares) — nunca mezclar sin aclarar.
+Para metas en USD, mostrar además el equivalente en pesos como referencia, usando el último tipo de cambio disponible (mismo dato que ya se usa en el módulo de ahorro USD), claramente etiquetado como aproximado/referencial y no como el valor "real" de la meta.
+Casos de borde a probar
+Meta existente de antes de esta feature (sin campo currency): debe tratarse como 'ARS' por default en loadState(), sin romper ni perder datos.
+Editar el monto objetivo de una meta en USD: el porcentaje de progreso debe recalcularse en USD, no mezclarse con conversiones a pesos por error.
+Sumar un aporte en pesos a una meta en dólares sin tener cargado un tipo de cambio disponible (ni automático ni manual): pedir el tipo de cambio en ese momento antes de poder confirmar el aporte, mismo criterio que ya se usa en el modal de depósito de ahorro USD.
+Meta en dólares con aportes hechos en distintos tipos de cambio a lo largo del tiempo: el current acumulado debe ser la suma de cada aporte ya convertido en su momento — no se debe re-convertir retroactivamente todo el historial con el tipo de cambio actual, cada aporte usa el tipo de cambio vigente cuando se cargó.
+Eliminar una meta en USD que tiene depósitos de ahorro USD vinculados por goalId: definir qué pasa con esos depósitos (recomendado: quedan como aportes de ahorro USD sueltos, sin vínculo a ninguna meta, no se borran).
+
+Notas de implementación
+- `js/goals.js` reescrito. Variables nuevas: `editingGoalId`, `goalModalCurrency`, `addFundGoalId`, `fundCurrency`.
+- Migración en `state.js`: `state.goals.map(g => g.currency ? g : { ...g, currency: 'ARS' })`.
+- Modal de metas reutilizado para crear y editar: título dinámico, botón "eliminar" visible solo en edición. Selector de moneda (ARS/USD) deshabilitado en modo edición con hint explicativo.
+- `deleteGoal()`: desvincula depósitos USD orphans (sets `goalId: null`), no los borra.
+- Nuevo modal `#add-fund-modal-backdrop`: elige moneda del aporte, muestra campo TC solo si moneda ≠ moneda de meta. Preview de conversión en tiempo real.
+- `formatUSD()` helper local. `formatGoalAmount(amount, currency)` despacha a `formatMoney` o `formatUSD`.
+- Metas en USD muestran referencia ARS (`≈ X ARS (ref.)`) usando `getLastExchangeRate()`.
+- Bug corregido en `saveDollarDeposit()`: ahora suma `amountUSD` a metas USD y `amountARS` a metas ARS (antes sumaba siempre ARS).
+- CSS: `.btn-danger`, `.field-hint`, `.goal-top-right`, `.goal-currency-badge`, `.goal-edit-btn`, `.goal-ars-ref`, `.btn-add-fund` reemplaza `.goal-add-funds`.

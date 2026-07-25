@@ -391,10 +391,18 @@
 <div class="modal-backdrop" id="goal-modal-backdrop" hidden>
   <div class="modal-sheet">
     <div class="modal-handle"></div>
-    <h3 class="modal-title">nueva meta de ahorro</h3>
+    <h3 class="modal-title" id="goal-modal-title">nueva meta de ahorro</h3>
     <div class="field-group">
       <label class="field-label" for="goal-name">nombre</label>
       <input type="text" id="goal-name" class="text-input" placeholder="ej: vacaciones, notebook nueva...">
+    </div>
+    <div class="field-group">
+      <label class="field-label">moneda de la meta</label>
+      <div class="account-type-selector">
+        <button type="button" id="goal-currency-ars" class="account-type-btn selected">$ ARS</button>
+        <button type="button" id="goal-currency-usd" class="account-type-btn">USD $</button>
+      </div>
+      <p class="field-hint" id="goal-currency-hint" hidden>no se puede cambiar después de crear la meta</p>
     </div>
     <div class="field-group">
       <label class="field-label" for="goal-target">monto objetivo</label>
@@ -405,7 +413,34 @@
       <input type="number" inputmode="decimal" id="goal-current" class="text-input" placeholder="0">
     </div>
     <button class="btn-save" id="btn-save-goal">crear meta</button>
+    <button class="btn-danger" id="btn-delete-goal" hidden>eliminar meta</button>
     <button class="btn-cancel" id="btn-cancel-goal">cancelar</button>
+  </div>
+</div>
+
+<!-- ===== MODAL: SUMAR FONDOS A META ===== -->
+<div class="modal-backdrop" id="add-fund-modal-backdrop" hidden>
+  <div class="modal-sheet">
+    <div class="modal-handle"></div>
+    <p class="modal-section-title" id="add-fund-goal-name">sumar fondos</p>
+    <div class="field-group">
+      <label class="field-label">moneda del aporte</label>
+      <div class="account-type-selector">
+        <button type="button" id="fund-currency-ars" class="account-type-btn selected">$ ARS</button>
+        <button type="button" id="fund-currency-usd" class="account-type-btn">USD $</button>
+      </div>
+    </div>
+    <div class="field-group">
+      <label class="field-label" for="fund-amount">monto</label>
+      <input type="number" inputmode="decimal" id="fund-amount" class="text-input" placeholder="0">
+    </div>
+    <div class="field-group" id="fund-rate-group" hidden>
+      <label class="field-label" for="fund-exchange-rate">tipo de cambio</label>
+      <input type="number" inputmode="decimal" id="fund-exchange-rate" class="text-input" placeholder="ej: 1200">
+      <p id="fund-rate-preview" class="dollar-ars-preview" hidden></p>
+    </div>
+    <button class="btn-save" id="btn-save-fund">sumar</button>
+    <button class="btn-cancel" id="btn-cancel-fund">cancelar</button>
   </div>
 </div>
 
