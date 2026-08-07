@@ -184,7 +184,7 @@ function getAccountBalance(accountId) {
   const base = (acc && acc.initialBalance) || 0;
   const today = todayISO();
   const entriesBalance = state.entries
-    .filter(e => e.accountId === accountId && e.date <= today)
+    .filter(e => e.accountId === accountId && e.date <= today && !e.pending)
     .reduce((sum, e) => {
       if (e.type === 'income') return sum + e.amount;
       if (e.type === 'expense') return sum - e.amount;

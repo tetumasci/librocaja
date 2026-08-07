@@ -227,6 +227,33 @@ input { font-family: inherit; }
 }
 .summary-balance-amount.negative { color: var(--expense); }
 
+.summary-total {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin: 0 0 14px;
+  padding-top: 10px;
+  border-top: 1px dashed var(--paper-line);
+}
+
+.summary-total-label {
+  font-size: 10px;
+  color: var(--ink-faint);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  margin-bottom: 2px;
+}
+
+.summary-total-amount {
+  font-family: var(--font-mono);
+  font-size: 18px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  font-variant-numeric: tabular-nums;
+  color: var(--ink-soft);
+}
+.summary-total-amount.negative { color: var(--expense); }
+
 .summary-split {
   display: flex;
   align-items: center;
@@ -381,6 +408,8 @@ input { font-family: inherit; }
   position: relative;
 }
 .ledger-entry:active { background: rgba(31,27,22,0.02); }
+.ledger-entry.pending { opacity: 0.55; }
+.ledger-entry.pending .entry-amount { color: var(--ink-faint) !important; }
 
 .entry-icon {
   width: 34px;

@@ -232,6 +232,7 @@ function attachEventListeners() {
 function init() {
   loadState();
   attachEventListeners();
+  reconcilePendingRecurring();
   renderAll();
   processRecurringExpenses();
   closeAllOverlaysAndModals();
