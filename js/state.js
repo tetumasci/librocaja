@@ -55,6 +55,7 @@ let state = {
   investmentPlans: [],
   smallExpenseThreshold: 5000,
   transfers: [],
+  installmentPurchases: [],
 };
 
 let viewDate = new Date();
@@ -80,6 +81,10 @@ let editingRecurringId = null;
 let editingRecurringType = 'expense'; // 'expense' | 'income'
 let selectedSubcategoryId = null;
 let _activeSuggestion = null;
+let selectedCategoryIdForInstallment = null;
+let selectedAccountIdForInstallment = null;
+let editingInstallmentId = null;
+let installmentAmountMode = 'per-installment'; // 'per-installment' | 'total'
 
 /* ---------- Persistence ---------- */
 
@@ -101,6 +106,7 @@ function loadState() {
     if (!state.exchangeRates) state.exchangeRates = [];
     if (!state.investmentPlans) state.investmentPlans = [];
     if (!state.transfers) state.transfers = [];
+    if (!state.installmentPurchases) state.installmentPurchases = [];
     state.goals = state.goals.map(g => g.currency ? g : { ...g, currency: 'ARS' });
     state.categories = state.categories.map(c => c.subcategories ? c : { ...c, subcategories: [] });
     state.incomeCategories = state.incomeCategories.map(c => c.subcategories ? c : { ...c, subcategories: [] });
@@ -171,6 +177,7 @@ function monthLabel(date) {
 
 function getCategoryById(id, type) {
   if (id === 'ahorro-usd') return { id: 'ahorro-usd', name: 'Ahorro USD', icon: '💵' };
+  if (id === 'cuotas') return { id: 'cuotas', name: 'Compra en cuotas', icon: '🧾' };
   const list = type === 'income' ? state.incomeCategories : state.categories;
   return list.find(c => c.id === id) || { id, name: id, icon: '◆' };
 }

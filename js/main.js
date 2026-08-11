@@ -22,6 +22,7 @@ function showView(viewName) {
     renderAccountManager();
     renderRecurringManager();
     renderRecurringIncomeManager();
+    renderInstallmentManager();
     renderInflationSection();
     renderSmallExpenseThreshold();
   }
@@ -35,6 +36,13 @@ function hideAllOverlays() {
 
 function attachEventListeners() {
   // Action sheet
+  document.getElementById('action-pay').addEventListener('click', () => {
+    const entry = actionSheetEntry;
+    if (!entry) return;
+    closeActionSheet();
+    if (entry.installmentPurchaseId) confirmInstallmentPayment(entry.id);
+    else confirmPendingPayment(entry.id);
+  });
   document.getElementById('action-edit').addEventListener('click', () => {
     const entry = actionSheetEntry;
     closeActionSheet();
@@ -175,6 +183,19 @@ function attachEventListeners() {
   });
   document.getElementById('btn-save-recurring').addEventListener('click', saveRecurring);
 
+  // Settings: installment purchases (compras en cuotas)
+  document.getElementById('btn-add-installment').addEventListener('click', openInstallmentModal);
+  document.getElementById('btn-cancel-installment').addEventListener('click', closeInstallmentModal);
+  document.getElementById('installment-modal-backdrop').addEventListener('click', (e) => {
+    if (e.target.id === 'installment-modal-backdrop') closeInstallmentModal();
+  });
+  document.getElementById('btn-save-installment').addEventListener('click', saveInstallmentPurchase);
+  document.querySelectorAll('#installment-amount-mode-selector .account-type-btn').forEach(btn => {
+    btn.addEventListener('click', () => setInstallmentAmountMode(btn.dataset.mode));
+  });
+  document.getElementById('installment-amount').addEventListener('input', updateInstallmentAmountPreview);
+  document.getElementById('installment-count').addEventListener('input', updateInstallmentAmountPreview);
+
   // Settings: accounts
   document.getElementById('btn-add-account').addEventListener('click', openAccountModal);
   document.getElementById('btn-cancel-account').addEventListener('click', closeAccountModal);
@@ -235,6 +256,7 @@ function init() {
   reconcilePendingRecurring();
   renderAll();
   processRecurringExpenses();
+  processInstallmentPurchasesWithToast();
   closeAllOverlaysAndModals();
 }
 

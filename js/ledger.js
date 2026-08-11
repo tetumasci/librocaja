@@ -11,8 +11,9 @@ function getEntriesForMonth(date) {
 
 function renderSummary() {
   document.getElementById('current-month-label').textContent = monthLabel(viewDate);
-  // Los fijos autogenerados con pending:true todavía no llegaron a su día
-  // configurado — se listan pero no pesan en el balance del mes.
+  // Entries autogenerados con pending:true (ingresos fijos que todavía no
+  // llegaron a su día, o gastos fijos/cuotas sin confirmar con "pagar")
+  // se listan pero no pesan en el balance del mes.
   const monthEntries = getEntriesForMonth(viewDate).filter(e => !e.pending);
 
   const income = monthEntries.filter(e => e.type === 'income').reduce((s, e) => s + e.amount, 0);
@@ -127,9 +128,13 @@ function renderSuggestion() {
 
 function computeSuggestion() {
   const now = new Date();
-  const thisMonthEntries = getEntriesForMonth(now);
+  // Excluye pending:true (gastos fijos/cuotas sin confirmar, ingresos
+  // fijos que todavía no llegaron a su día) — mismo criterio que el
+  // balance del mes, para no sugerir en base a plata que todavía no
+  // se movió realmente.
+  const thisMonthEntries = getEntriesForMonth(now).filter(e => !e.pending);
   const lastMonthDate = new Date(now.getFullYear(), now.getMonth() - 1, 1);
-  const lastMonthEntries = getEntriesForMonth(lastMonthDate);
+  const lastMonthEntries = getEntriesForMonth(lastMonthDate).filter(e => !e.pending);
 
   if (thisMonthEntries.length === 0 && state.entries.length === 0) return null;
 
@@ -324,6 +329,7 @@ function openActionSheet(entry) {
   actionSheetEntry = entry;
   closeAllModals();
   document.getElementById('action-edit').hidden = entry.type === 'adjustment';
+  document.getElementById('action-pay').hidden = !entry.pending;
   document.getElementById('action-sheet-backdrop').hidden = false;
   history.pushState({ overlay: true }, '');
 }

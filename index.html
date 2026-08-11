@@ -236,6 +236,11 @@
     <div id="recurring-income-manager" class="recurring-manager"></div>
     <button class="text-btn" id="btn-add-recurring-income">+ agregar ingreso fijo</button>
 
+    <h3 class="section-label">compras en cuotas</h3>
+    <div class="installment-summary" id="installment-summary"></div>
+    <div id="installment-manager" class="recurring-manager"></div>
+    <button class="text-btn" id="btn-add-installment">+ nueva compra en cuotas</button>
+
     <h3 class="section-label">inflación (INDEC)</h3>
     <div class="inflation-row">
       <span class="inflation-month-label" id="inflation-month-label">—</span>
@@ -577,6 +582,50 @@
   </div>
 </div>
 
+<!-- ===== MODAL: ADD / EDIT INSTALLMENT PURCHASE ===== -->
+<div class="modal-backdrop" id="installment-modal-backdrop" hidden>
+  <div class="modal-sheet">
+    <div class="modal-handle"></div>
+    <h3 class="modal-title" id="installment-modal-title">nueva compra en cuotas</h3>
+    <div class="field-group">
+      <label class="field-label" for="installment-name">nombre</label>
+      <input type="text" id="installment-name" class="text-input" placeholder="ej: Heladera, Notebook...">
+    </div>
+    <div class="field-group">
+      <label class="field-label">¿cómo cargás el monto?</label>
+      <div class="account-type-selector" id="installment-amount-mode-selector">
+        <button type="button" class="account-type-btn selected" data-mode="per-installment">por cuota</button>
+        <button type="button" class="account-type-btn" data-mode="total">monto total</button>
+      </div>
+    </div>
+    <div class="recurring-amount-day">
+      <div class="field-group" style="flex:1">
+        <label class="field-label" id="installment-amount-label" for="installment-amount">monto por cuota</label>
+        <input type="number" inputmode="decimal" id="installment-amount" class="text-input" placeholder="ej: 10000">
+      </div>
+      <div class="field-group" style="flex:0 0 90px">
+        <label class="field-label" for="installment-count">cuotas</label>
+        <input type="number" inputmode="numeric" id="installment-count" class="text-input" placeholder="12" min="1">
+      </div>
+    </div>
+    <p class="field-hint" id="installment-per-unit-preview" hidden></p>
+    <div class="field-group">
+      <label class="field-label" for="installment-start-date">fecha de la primera cuota</label>
+      <input type="date" id="installment-start-date" class="text-input">
+    </div>
+    <div class="field-group">
+      <label class="field-label">categoría (opcional)</label>
+      <div class="category-grid" id="installment-category-grid"></div>
+    </div>
+    <div class="field-group">
+      <label class="field-label">cuenta</label>
+      <div class="account-grid" id="installment-account-grid"></div>
+    </div>
+    <button class="btn-save" id="btn-save-installment">guardar compra en cuotas</button>
+    <button class="btn-cancel" id="btn-cancel-installment">cancelar</button>
+  </div>
+</div>
+
 <!-- ===== MODAL: ADD / EDIT ACCOUNT ===== -->
 <div class="modal-backdrop" id="account-modal-backdrop" hidden>
   <div class="modal-sheet">
@@ -684,6 +733,9 @@
 <div class="modal-backdrop" id="action-sheet-backdrop" hidden>
   <div class="modal-sheet">
     <div class="modal-handle"></div>
+    <button class="action-sheet-btn action-sheet-primary" id="action-pay" hidden>
+      <span class="action-sheet-icon">✅</span> pagar
+    </button>
     <button class="action-sheet-btn" id="action-edit">
       <span class="action-sheet-icon">✏️</span> editar movimiento
     </button>
@@ -770,6 +822,7 @@
 <script src="js/ui.js"></script>
 <script src="js/ledger.js"></script>
 <script src="js/recurring.js"></script>
+<script src="js/installments.js"></script>
 <script src="js/accounts.js"></script>
 <script src="js/budgets.js"></script>
 <script src="js/goals.js"></script>

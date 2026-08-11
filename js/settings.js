@@ -362,6 +362,7 @@ function handleImportFile(e) {
       investmentPlans:        parsed.investmentPlans    || [],
       smallExpenseThreshold:  parsed.smallExpenseThreshold ?? 5000,
       transfers:              parsed.transfers          || [],
+      installmentPurchases:   parsed.installmentPurchases || [],
     };
 
     state.accounts = state.accounts.map(acc =>
@@ -383,6 +384,7 @@ function handleImportFile(e) {
     renderAccountManager();
     renderRecurringManager();
     renderRecurringIncomeManager();
+    renderInstallmentManager();
     renderInflationSection();
     showToast(`Datos importados: ${entryCount} movimientos`);
   };
@@ -422,6 +424,7 @@ function clearAllData() {
     investmentPlans: [],
     smallExpenseThreshold: 5000,
     transfers: [],
+    installmentPurchases: [],
   };
   saveState();
   renderAll();
@@ -431,5 +434,6 @@ function clearAllData() {
   renderAccountManager();
   renderRecurringManager();
   renderRecurringIncomeManager();
+  renderInstallmentManager();
   showToast('Todos los datos fueron borrados');
 }

@@ -1213,3 +1213,217 @@ Notas de implementación
 - Metas en USD muestran referencia ARS (`≈ X ARS (ref.)`) usando `getLastExchangeRate()`.
 - Bug corregido en `saveDollarDeposit()`: ahora suma `amountUSD` a metas USD y `amountARS` a metas ARS (antes sumaba siempre ARS).
 - CSS: `.btn-danger`, `.field-hint`, `.goal-top-right`, `.goal-currency-badge`, `.goal-edit-btn`, `.goal-ars-ref`, `.btn-add-fund` reemplaza `.goal-add-funds`.
+
+---
+## FEATURE: Gastos fijos — confirmación manual de pago (botón "pagar")
+**Estado: hecha**
+
+### Contexto / por qué se pide
+Ya existe la lógica de que un gasto fijo se auto-genera con `pending: true` si su `dayOfMonth` todavía no llegó, y pasa a `pending: false`
+automáticamente cuando la fecha llega o se supera (`reconcilePendingRecurring()` en `js/recurring.js`). El usuario reporta que ese
+disparador automático por fecha no refleja la realidad: paga sus gastos fijos (tarjeta, servicios) en fechas que varían según cuándo le
+pagan el sueldo, cuándo vence la tarjeta, etc. — no en un día fijo del calendario. Hoy, para que el gasto cuente en el momento correcto,
+tendría que estar editando la fecha configurada cada mes a mano, lo cual es justo la fricción que se quería evitar con la auto-generación.
+
+### Cambio de comportamiento que se pide
+Reemplazar el disparador automático por fecha por una confirmación manual explícita: un botón "pagar" en cada gasto fijo pendiente, que
+el usuario toca cuando realmente lo pagó — sin importar si eso pasa antes o después del `dayOfMonth` configurado. La fecha configurada
+pasa a ser solo una referencia/estimación visual (para recordar aproximadamente cuándo suele tocar), ya no dispara nada automáticamente.
+
+**Esto aplica solo a gastos fijos (`recurringExpenses`), no a ingresos fijos (`recurringIncomes`), que siguen funcionando exactamente
+igual que ahora (automáticos por fecha, sin cambios).**
+
+### Comportamiento esperado
+- El entry generado por un gasto fijo del mes en curso sigue naciendo con `pending: true` apenas se detecta que no existe uno para ese
+  mes (sin esperar ninguna fecha para generarlo, igual que ahora), pero **ya no hay ninguna lógica que lo pase a `pending: false` por el
+  solo paso del tiempo** — `reconcilePendingRecurring()` debe dejar de aplicar esta transición automática para gastos fijos (revisar si
+  sigue haciendo falta para algún otro caso, o si puede eliminarse esa función si ya no tiene otro uso).
+- En el listado de movimientos, cada entry de gasto fijo con `pending: true` debe mostrar, además de la marca visual "programado" ya
+  existente, un botón o acción **"pagar"**.
+- Al tocar "pagar": el entry pasa a `pending: false` (empieza a sumar/restar del balance del mes desde ese momento) y se le agrega la
+  fecha real en que se confirmó el pago (campo nuevo, `paidAt`, con `Date.now()`).
+- Opcional pero recomendable: al tocar "pagar", preguntar si la fecha de pago es hoy o si el usuario quiere indicar otra fecha (por si
+  carga el pago unos días después de haberlo hecho realmente) — un pequeño picker de fecha en vez de asumir siempre "ahora mismo". Si
+  esto agrega complejidad significativa, la versión mínima aceptable es simplemente usar la fecha de hoy sin preguntar, y dejarlo como
+  posible mejora futura.
+- El gasto fijo del mes siguiente vuelve a generarse con `pending: true` normalmente, esperando su propia confirmación de pago — el
+  estado de "pagado" es por mes, no cambia la configuración general del gasto fijo.
+
+### UI
+- Reusar el patrón visual ya existente para movimientos `pending` (opacidad reducida, badge "programado"), y agregar el botón "pagar"
+  visible en esa misma fila o accesible con un toque sobre la fila (similar al action sheet ya usado para editar/eliminar/dividir
+  movimientos — evaluar si conviene sumar "pagar" a ese mismo action sheet para los que estén pendientes, en vez de un botón separado
+  flotando en la fila).
+
+### Qué NO hacer
+- No tocar el comportamiento de ingresos fijos — siguen siendo automáticos por fecha, sin botón de confirmación.
+- No eliminar la fecha configurada (`dayOfMonth`) del gasto fijo — sigue sirviendo como referencia visual de cuándo suele tocar, solo
+  deja de ser el disparador que decide cuándo cuenta en el balance.
+- No afectar retroactivamente entries de meses anteriores que ya habían pasado a `pending: false` automáticamente antes de este cambio —
+  dejar esos como están, la migración no debe revertir pagos ya confirmados de forma automática en el pasado.
+
+### Casos de borde a probar
+- Crear un gasto fijo con `dayOfMonth` en una fecha ya pasada del mes en curso: el entry debe generarse igual como `pending: true` (a
+  diferencia del comportamiento viejo, que lo hubiera generado directamente como no pendiente) y debe seguir pendiente hasta que se
+  toque "pagar" explícitamente.
+- Tocar "pagar": confirmar que pasa a contar en el balance del mes inmediatamente, sin depender de la fecha.
+- Dejar un gasto fijo sin tocar "pagar" durante varios días, incluso pasando su `dayOfMonth`: confirmar que sigue sin sumar al balance
+  hasta que se confirme el pago manualmente.
+- Confirmar que los ingresos fijos siguen funcionando exactamente igual que antes, sin ningún botón de pagar ni cambio de comportamiento.
+- Confirmar que el saldo total real (ya implementado) tampoco cuenta gastos fijos pendientes de pago, mismo criterio que ya aplicaba a
+  pendientes por fecha.
+
+### Notas de implementación
+- Archivos modificados: `js/recurring.js`, `js/ledger.js`, `js/main.js`, `index.html`, `styles.css`, `sw.js`.
+- `processRecurring()`: para `entryType === 'expense'` ahora genera siempre `pending: true` sin importar `dayOfMonth`; para ingresos se
+  mantiene exactamente igual que antes (`pending` solo si el día configurado todavía no llegó).
+- `reconcilePendingRecurring()` ahora solo reconcilia entries de `type === 'income'` — ya no toca gastos. La función se mantiene (sigue
+  haciendo falta para ingresos fijos), no se eliminó.
+- Nueva función genérica `confirmPendingPayment(entryId)` en `js/recurring.js`: pone `pending: false`, agrega `paidAt: Date.now()`,
+  guarda y re-renderiza. Se diseñó genérica (no acoplada a "gasto fijo") a propósito para que la reuse directamente la feature de
+  "Compras en cuotas" sin duplicar el mecanismo.
+- UI: se agregó el botón "pagar" (`#action-pay`) al action sheet ya existente (`#action-sheet-backdrop`), en vez de un botón flotando en
+  la fila — reusa el mismo patrón de editar/eliminar. Se muestra solo si `entry.pending` es `true` (`openActionSheet()` en
+  `js/ledger.js` togglea su `hidden`). Estilo `.action-sheet-primary` (oliva, color de ingreso) nuevo en `styles.css` para distinguirlo
+  visualmente de "eliminar" (terracota).
+- Versión mínima del picker de fecha de pago (no se implementó selector de fecha custom): `paidAt` siempre usa `Date.now()`. Se dejó
+  documentado como mejora futura posible, tal como permitía el enunciado.
+- No se tocó `entry.date` al confirmar el pago — sigue siendo la fecha programada del mes (`dayOfMonth` clampeado). Esto es una decisión
+  de diseño no explícita en el enunciado: si el usuario paga *antes* de que llegue `dayOfMonth`, el entry queda con `pending:false` pero
+  con `date` todavía en el futuro. Esto lo cuenta inmediatamente en el "balance del mes" (que no filtra por fecha, solo por `!pending`),
+  pero el "saldo total real" por cuenta (`getAccountBalance()`) solo lo suma cuando esa fecha llega, porque ese cálculo sí filtra
+  `date <= today` — mismo criterio que ya se aplicaba a cualquier entry con fecha futura cargado a mano, no es un caso nuevo introducido
+  por esta feature.
+- Caso de borde no listado explícitamente pero cubierto: como `reconcilePendingRecurring()` ya no toca `type === 'expense'`, esto
+  también deja el terreno preparado para "Compras en cuotas" (que genera entries `type: 'expense'` con el mismo mecanismo) sin tener que
+  volver a tocar esta función.
+- Fila de gasto/ingreso fijo en Ajustes (`renderRecurringRows()`): el texto de detalle ahora dice "referencia día X" para gastos (ya no
+  dispara nada) vs "día X" para ingresos (sigue siendo el disparador real), para dejar la diferencia de comportamiento visible.
+- `CACHE_NAME` bumpeado a `libro-de-caja-v15`.
+
+---
+## FEATURE: Compras en cuotas
+**Estado: hecha**
+**Depende de: "Ingresos fijos / recurrentes" (hecha) y "Gastos fijos — confirmación manual de pago (botón pagar)" (agregada arriba en
+este mismo documento, todavía pendiente — implementar esa primero; comparte mecánica de auto-generación mensual y confirmación manual de
+pago, pero es una entidad propia, finita en el tiempo)**
+
+### Qué se pide
+Un tipo de gasto nuevo, distinto a los gastos fijos (que son indefinidos en el tiempo, ej. alquiler): una compra en cuotas tiene una
+cantidad finita de pagos mensuales conocida de antemano, y la app debe calcular sola cuándo termina y cuánto queda pendiente.
+
+### Modelo de datos
+Nueva entidad `installmentPurchases`:
+```
+{
+  id,
+  name,              // ej "Heladera", "Notebook"
+  totalInstallments, // cantidad total de cuotas, ej 12
+  installmentAmount, // monto de cada cuota
+  startDate,         // ISO, fecha de la primera cuota
+  accountId,         // de dónde sale la plata cada mes
+  categoryId,        // opcional, para que aparezca clasificado en reportes
+  payments: [
+    { id, installmentNumber, date, paid: true|false }
+  ]
+}
+```
+
+### Cálculo automático
+- Fecha estimada de fin: `startDate` + `totalInstallments` meses (mismo criterio de clamp de fin de mes ya usado en gastos fijos, ej. si
+  `startDate` es 31 de enero, las cuotas siguientes cierran el día disponible más cercano de cada mes, igual que ya se resolvió para
+  `dayOfMonth` en `recurring.js`).
+- Cuota actual / cuotas restantes: contar cuántos `payments` tienen `paid: true` para saber en qué número de cuota va, y cuántas faltan
+  (`totalInstallments - cuotasPagadas`).
+- Saldo pendiente total: `installmentAmount × cuotasRestantes` — este es el número principal que el usuario quiere ver ("cuánto me falta
+  pagar en total de todo lo que tengo en cuotas").
+
+### Generación mensual y confirmación de pago
+Igual que se resolvió para gastos fijos con el botón "pagar" (no depender de una fecha automática que no siempre coincide con la
+realidad de cuándo se paga la tarjeta): cada mes se genera automáticamente la cuota correspondiente marcada como pendiente de pago, y el
+usuario la confirma con un botón "pagar" cuando efectivamente la paga — no se auto-marca como pagada por el solo paso de la fecha.
+Reusar exactamente el mismo patrón ya implementado para gastos fijos (`pending`, badge visual, botón "pagar", action sheet), en vez de
+crear un mecanismo paralelo distinto.
+
+- Al confirmar el pago de una cuota, se genera un `entry` normal de tipo `expense` por el `installmentAmount`, con un flag que lo
+  identifique como proveniente de una compra en cuotas (similar a `autoGenerated`, ej. `installmentPurchaseId` apuntando a la compra
+  correspondiente) para poder filtrarlo o mostrarlo agrupado en reportes si hace falta.
+- Cuando se confirma la última cuota (`installmentNumber === totalInstallments`), la compra en cuotas queda completa — dejar de generar
+  nuevas cuotas para ese ítem, y mostrarlo como "pagado por completo" en vez de seguir apareciendo como pendiente mes a mes.
+
+### UI
+- Sección "compras en cuotas" dentro de Ajustes, o dentro de la misma sección donde ya conviven gastos fijos e ingresos fijos si quedó
+  unificada — con patrón visual consistente al resto (lista, botón "+ nueva compra en cuotas", modal de carga).
+- Modal de carga: nombre, cantidad de cuotas, monto por cuota (o alternativamente monto total y que calcule el monto por cuota
+  dividiendo, aceptar cualquiera de las dos formas de carga), fecha de la primera cuota, cuenta, categoría opcional.
+- Tarjeta o fila por cada compra en cuotas mostrando: nombre, progreso ("cuota 4 de 12"), saldo pendiente total, y fecha estimada de
+  finalización.
+- Resumen agregado en algún lugar visible (ej. en la misma sección, o como una métrica más en Reportes): "tenés $X comprometidos en
+  cuotas este mes" (suma de todas las cuotas pendientes de pago del mes en curso, pagadas o no) y "$Y en total pendiente" (suma de todo
+  el saldo pendiente de todas las compras en cuotas activas, sin importar el mes).
+
+### Casos de borde a probar
+- Compra con `totalInstallments: 1` (pago único, caso límite): debe funcionar igual, generando y permitiendo confirmar una sola cuota, y
+  quedando "completa" apenas se confirma esa cuota.
+- Confirmar la última cuota: la compra debe dejar de generar cuotas nuevas los meses siguientes, sin quedar generando cuotas fantasma más
+  allá del total configurado.
+- Editar una compra en cuotas ya en curso (ej. corregir el monto por cuota si se cargó mal): las cuotas ya confirmadas como pagadas no
+  deben recalcularse retroactivamente, solo las futuras deben usar el valor corregido — mismo criterio ya aplicado a la edición de
+  gastos/ingresos fijos.
+- Eliminar una compra en cuotas a mitad de camino: definir si se permite (con confirmación, dado que corta el registro de cuotas
+  restantes) o si se ofrece "marcar como cancelada" en vez de eliminar directamente, para no perder el historial de lo ya pagado.
+- Clamp de fin de mes en la fecha de cuotas (ej. primera cuota el 31 de enero): confirmar que el cálculo de fechas de cuotas siguientes
+  no rompe en meses más cortos, reusando la misma lógica de clamp ya validada para `dayOfMonth` en gastos fijos.
+
+### Notas de implementación
+- Archivos nuevos: `js/installments.js`. Archivos modificados: `index.html`, `styles.css`, `js/state.js`, `js/ui.js`, `js/main.js`,
+  `js/settings.js`, `js/stats.js`, `js/ledger.js`, `sw.js`.
+- `state.installmentPurchases[]` nuevo, con migración en `loadState()`, reset en `clearAllData()` e inclusión en
+  `handleImportFile()`/`exportData()` (este último ya serializa `state` completo sin cambios).
+- `processInstallmentPurchases()` genera, para el mes en curso, la cuota siguiente de cada compra activa (no cancelada, no completa, ya
+  llegó el mes de `startDate`) que todavía no tenga un entry generado ese mes — siempre con `pending: true`, sin importar el día (mismo
+  criterio que gastos fijos tras la feature anterior). Cada generación agrega un registro a `purchase.payments` (`paid: false`) y un
+  `entry` de tipo `expense` con `installmentPurchaseId` + `installmentNumber` apuntando de vuelta a la compra.
+- `confirmInstallmentPayment(entryId)`: marca el entry `pending: false` + `paidAt`, y el `payment` correspondiente en `purchase.payments`
+  como `paid: true`. El botón "pagar" del action sheet (compartido con gastos fijos, ver feature anterior) rutea a esta función o a
+  `confirmPendingPayment()` según si el entry tiene `installmentPurchaseId` — no se duplicó el mecanismo de action sheet/badge/pending.
+  Al confirmar la última cuota (`installmentNumber === totalInstallments`) muestra un toast distinto ("pagada por completo 🎉") y la
+  compra deja de generar cuotas nuevas (`processInstallmentPurchases` corta apenas `paidCount >= totalInstallments`).
+- Fecha estimada de fin: `addMonthsClamped(startDate, totalInstallments - 1)`, mismo criterio de clamp de fin de mes que ya usa
+  `recurring.js` para `dayOfMonth` (ej. 31 de enero + N meses cae en el último día disponible de cada mes destino).
+- Categoría opcional: si `purchase.categoryId` es `null`, el entry generado usa el id especial `'cuotas'` (nuevo caso en
+  `getCategoryById()`, mismo patrón ya usado para `'ahorro-usd'` → `{name: 'Compra en cuotas', icon: '🧾'}'`), así aparece agrupado y
+  clasificado en la barra de categorías de Reportes en vez de romper o quedar sin nombre.
+- Modal de carga acepta las dos formas de carga pedidas (toggle "por cuota" / "monto total", reusando visualmente `.account-type-btn`):
+  si el modo es "monto total", `installmentAmount = montoIngresado / cuotas` al guardar. El modal de **edición** siempre muestra y
+  guarda en modo "por cuota" (el valor canónico ya almacenado es el monto por cuota) — decisión de diseño no explícita en el enunciado,
+  para no reintroducir ambigüedad de "¿el monto que edito es el total o por cuota?" en una compra ya en curso.
+- Eliminar/cancelar: si la compra tiene al menos una cuota paga, ofrece elegir entre "cancelar" (`purchase.cancelled = true`, deja de
+  generar cuotas nuevas pero conserva historial y se muestra "cancelada · X de Y cuotas pagadas" en la lista) o eliminar la definición
+  por completo (los entries/movimientos ya generados quedan intactos en el historial de movimientos, igual que al eliminar un gasto fijo
+  con historial). Si no tiene ninguna cuota paga todavía, se borra directo con un solo confirm.
+- Edición de una compra en curso: el monto/cuotas/cuenta/categoría/fecha de inicio se pueden corregir libremente: como la generación
+  siempre lee `p.installmentAmount`/`p.categoryId`/etc. en el momento en que genera la cuota del mes, las cuotas ya generadas (pagadas o
+  no) no se recalculan retroactivamente — solo cambia lo que se usa para generar cuotas futuras. Al editar, se bloquea bajar
+  `totalInstallments` por debajo de la cantidad de cuotas ya pagadas (caso de borde no listado explícitamente pero necesario para no
+  dejar el progreso en un estado inconsistente, ej. "cuota 5 de 3").
+- **Bug encontrado y corregido en el camino** (no estaba en la lista de casos de borde de ninguna de las dos features, pero lo expone
+  directamente la feature anterior de confirmación manual de pago): `renderStats()` (Reportes), `renderTrendChart()` y
+  `computeSuggestion()` calculaban sus totales del mes a partir de `getEntriesForMonth()` **sin excluir `pending: true`** — antes de la
+  feature de "botón pagar" esto era casi invisible porque la ventana de `pending` duraba como mucho unos días (hasta que pasaba
+  `dayOfMonth`); con confirmación manual esa ventana puede durar el mes entero, así que un gasto fijo o una cuota sin confirmar ya
+  aparecía gastado en Reportes (gasto total, promedio diario, tasa de ahorro, gráfico de tendencia, barras por categoría, gastos
+  hormiga) aunque todavía no contara en el balance del mes ni en el saldo total real. Se agregó `.filter(e => !e.pending)` en los tres
+  lugares para que el criterio sea consistente en toda la app. `renderLedger()` (el listado en sí) se dejó sin tocar a propósito: ahí sí
+  tienen que seguir apareciendo los entries `pending` (con su badge "programado" y el botón "pagar"), solo no deben pesar en ningún
+  total agregado.
+- Caso de borde no listado: si el usuario edita manualmente (desde el action sheet "editar movimiento") un entry autogenerado de una
+  cuota, el cambio no se sincroniza con `purchase.payments` ni con el monto usado para "saldo pendiente" en la sección de Ajustes —
+  mismo comportamiento ya preexistente para entries `autoGenerated` de gastos/ingresos fijos editados a mano, no es una regresión nueva.
+- No se agregó un atajo para crear una cuenta nueva desde adentro del modal de compra en cuotas (sí existe ese atajo en el modal de
+  gastos/ingresos fijos vía `pendingRecurringData`) — se prefirió no duplicar ese flujo por tiempo/alcance; si el usuario no tiene
+  cuentas cargadas todavía, se le pide crear una primero desde Ajustes.
+- El resumen agregado ("comprometidos este mes" / "en total pendiente") se puso directamente arriba de la lista en la sección de
+  Ajustes (no en Reportes) — cumple igual el pedido ("en algún lugar visible... ej. en la misma sección"), y evita tocar `stats.js` más
+  de lo necesario para esta feature.
+- `CACHE_NAME` bumpeado a `libro-de-caja-v16` (incluye `js/installments.js` en el precache).

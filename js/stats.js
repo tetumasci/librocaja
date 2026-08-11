@@ -6,7 +6,10 @@ function renderStats() {
   const now = new Date();
   document.getElementById('stats-month-label').textContent = monthLabel(now);
 
-  const thisMonthEntries = getEntriesForMonth(now);
+  // Excluye entries pending:true (gastos fijos / cuotas sin confirmar,
+  // ingresos fijos que todavía no llegaron a su día) — mismo criterio ya
+  // aplicado al balance del mes en renderSummary().
+  const thisMonthEntries = getEntriesForMonth(now).filter(e => !e.pending);
   const expense = thisMonthEntries.filter(e => e.type === 'expense').reduce((s, e) => s + e.amount, 0);
   const income = thisMonthEntries.filter(e => e.type === 'income').reduce((s, e) => s + e.amount, 0);
 
@@ -22,7 +25,7 @@ function renderStats() {
   rateEl.classList.toggle('negative', savingsRate < 0);
 
   const lastMonthDate = new Date(now.getFullYear(), now.getMonth() - 1, 1);
-  const lastMonthEntries = getEntriesForMonth(lastMonthDate);
+  const lastMonthEntries = getEntriesForMonth(lastMonthDate).filter(e => !e.pending);
   const lastExpense = lastMonthEntries.filter(e => e.type === 'expense').reduce((s, e) => s + e.amount, 0);
   const vsEl = document.getElementById('metric-vs-last');
   if (lastExpense > 0) {
@@ -293,7 +296,7 @@ function renderTrendChart() {
   }
 
   const monthTotals = months.map(d => {
-    const entries = getEntriesForMonth(d);
+    const entries = getEntriesForMonth(d).filter(e => !e.pending);
     const income = entries.filter(e => e.type === 'income').reduce((s, e) => s + e.amount, 0);
     const expense = entries.filter(e => e.type === 'expense').reduce((s, e) => s + e.amount, 0);
     return { date: d, income, expense };

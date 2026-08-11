@@ -17,7 +17,7 @@ function escapeHtml(str) {
 }
 
 const VIEW_OVERLAY_IDS = ['view-stats', 'view-goals', 'view-settings', 'view-streak', 'view-plan'];
-const MODAL_OVERLAY_IDS = ['action-sheet-backdrop', 'dollar-modal-backdrop', 'modal-backdrop', 'quick-add-backdrop', 'goal-modal-backdrop', 'add-fund-modal-backdrop', 'cat-modal-backdrop', 'account-modal-backdrop', 'recurring-modal-backdrop', 'budget-modal-backdrop', 'plan-modal-backdrop', 'plan-payment-modal-backdrop', 'transfer-modal-backdrop'];
+const MODAL_OVERLAY_IDS = ['action-sheet-backdrop', 'dollar-modal-backdrop', 'modal-backdrop', 'quick-add-backdrop', 'goal-modal-backdrop', 'add-fund-modal-backdrop', 'cat-modal-backdrop', 'account-modal-backdrop', 'recurring-modal-backdrop', 'budget-modal-backdrop', 'plan-modal-backdrop', 'plan-payment-modal-backdrop', 'transfer-modal-backdrop', 'installment-modal-backdrop'];
 
 function updateNavForLedger() {
   document.querySelectorAll('.nav-item').forEach(item => {
@@ -64,5 +64,6 @@ function closeTopmostOverlay() {
   else if (id === 'quick-add-backdrop') closeQuickAddModal();
   else if (id === 'add-fund-modal-backdrop') closeAddFundModal();
   else if (id === 'transfer-modal-backdrop') closeTransferModal();
+  else if (id === 'installment-modal-backdrop') closeInstallmentModal();
   else { el.hidden = true; updateNavForLedger(); }
 }
