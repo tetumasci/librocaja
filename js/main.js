@@ -77,6 +77,9 @@ function attachEventListeners() {
   document.getElementById('btn-save-quick').addEventListener('click', saveQuickEntry);
   document.getElementById('quick-type-expense').addEventListener('click', () => _setQuickType('expense'));
   document.getElementById('quick-type-income').addEventListener('click', () => _setQuickType('income'));
+  document.getElementById('quick-category-chip').addEventListener('click', () => _toggleQuickPicker('category'));
+  document.getElementById('quick-subcategory-chip').addEventListener('click', () => _toggleQuickPicker('subcategory'));
+  document.getElementById('quick-account-chip').addEventListener('click', () => _toggleQuickPicker('account'));
   document.getElementById('modal-backdrop').addEventListener('click', (e) => {
     if (e.target.id === 'modal-backdrop') closeAddModal();
   });

@@ -1773,17 +1773,99 @@ input { font-family: inherit; }
   line-height: 1.4;
 }
 
-.quick-preview-header {
+/* compact preview card — deliberately smaller than the full add-movement
+   modal: single toggle chips instead of grids, no date field (defaults
+   to today), account preselected. See openQuickAddModal() in quickadd.js. */
+.modal-sheet-compact { max-width: 420px; }
+
+.quick-card { margin-top: 4px; }
+
+.quick-card-amount-row {
   display: flex;
   align-items: center;
-  gap: 12px;
-  margin-bottom: 16px;
+  justify-content: center;
+  gap: 4px;
+  margin-bottom: 12px;
 }
-.quick-amount-wrap {
-  flex: 1;
-}
-.quick-amount-wrap .amount-input {
+.quick-card-currency {
+  font-family: var(--font-display);
   font-size: 22px;
+  color: var(--ink-faint);
+}
+.quick-card-amount {
+  font-family: var(--font-display);
+  font-size: 32px;
+  font-weight: 600;
+  border: none;
+  background: none;
+  width: 160px;
+  text-align: center;
+  color: var(--ink);
+}
+.quick-card-amount:focus { outline: none; }
+.quick-card-amount::-webkit-outer-spin-button,
+.quick-card-amount::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+
+.quick-card-type-toggle { max-width: 220px; margin: 0 auto 18px; }
+
+.quick-chip-field { margin-bottom: 14px; }
+
+.quick-chip {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  width: 100%;
+  padding: 10px 12px;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--paper-line);
+  background: var(--paper-raised);
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--ink);
+  text-align: left;
+}
+.quick-chip .chip-icon { font-size: 16px; }
+.quick-chip::after {
+  content: '';
+  width: 7px;
+  height: 7px;
+  margin-left: auto;
+  border-right: 1.5px solid var(--ink-faint);
+  border-bottom: 1.5px solid var(--ink-faint);
+  transform: rotate(45deg);
+}
+.quick-chip-empty {
+  border-style: dashed;
+  color: var(--ink-faint);
+  font-style: italic;
+}
+
+.quick-chip-options {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  padding: 10px 2px 2px;
+  -webkit-overflow-scrolling: touch;
+}
+.quick-option-chip {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 8px 12px;
+  border-radius: 999px;
+  border: 1px solid var(--paper-line);
+  background: var(--paper-raised);
+  font-size: 12.5px;
+  font-weight: 500;
+  color: var(--ink-soft);
+  white-space: nowrap;
+}
+.quick-option-chip .chip-icon { font-size: 15px; }
+.quick-option-chip.selected {
+  border-color: var(--ink);
+  background: var(--ink);
+  color: var(--paper);
 }
 
 /* ============================================
