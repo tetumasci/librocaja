@@ -17,7 +17,7 @@ function escapeHtml(str) {
 }
 
 const VIEW_OVERLAY_IDS = ['view-stats', 'view-goals', 'view-settings', 'view-streak', 'view-plan'];
-const MODAL_OVERLAY_IDS = ['action-sheet-backdrop', 'dollar-modal-backdrop', 'modal-backdrop', 'quick-add-backdrop', 'goal-modal-backdrop', 'add-fund-modal-backdrop', 'cat-modal-backdrop', 'account-modal-backdrop', 'recurring-modal-backdrop', 'budget-modal-backdrop', 'plan-modal-backdrop', 'plan-payment-modal-backdrop', 'transfer-modal-backdrop', 'installment-modal-backdrop'];
+const MODAL_OVERLAY_IDS = ['action-sheet-backdrop', 'dollar-modal-backdrop', 'modal-backdrop', 'quick-add-backdrop', 'goal-modal-backdrop', 'add-fund-modal-backdrop', 'cat-modal-backdrop', 'account-modal-backdrop', 'recurring-modal-backdrop', 'budget-modal-backdrop', 'plan-modal-backdrop', 'plan-payment-modal-backdrop', 'transfer-modal-backdrop', 'installment-modal-backdrop', 'history-modal-backdrop'];
 
 function updateNavForLedger() {
   document.querySelectorAll('.nav-item').forEach(item => {
@@ -65,5 +65,57 @@ function closeTopmostOverlay() {
   else if (id === 'add-fund-modal-backdrop') closeAddFundModal();
   else if (id === 'transfer-modal-backdrop') closeTransferModal();
   else if (id === 'installment-modal-backdrop') closeInstallmentModal();
+  else if (id === 'history-modal-backdrop') closeHistoryModal();
   else { el.hidden = true; updateNavForLedger(); }
+}
+
+/* ---------- History modal (solo lectura) ----------
+   Modal genérico reusado tanto por gastos/ingresos fijos (recurring.js)
+   como por compras en cuotas (installments.js): recibe un título y una
+   lista de filas ya armadas por el dominio que corresponda, no conoce
+   nada de recurringId/installmentPurchaseId. */
+
+function openHistoryModal(title, rows) {
+  closeAllModals();
+  document.getElementById('history-modal-title').textContent = title;
+  renderHistoryList(rows);
+  document.getElementById('history-modal-backdrop').hidden = false;
+  history.pushState({ overlay: true }, '');
+}
+
+function closeHistoryModal() {
+  document.getElementById('history-modal-backdrop').hidden = true;
+}
+
+/* rows: [{ label: 'agosto 2026', amount: 310000, pending: false }, ...]
+   ya ordenadas de más reciente a más antigua. */
+function renderHistoryList(rows) {
+  const container = document.getElementById('history-list');
+  container.innerHTML = '';
+
+  if (!rows || rows.length === 0) {
+    container.innerHTML = `<p class="recurring-empty">todavía no hay movimientos generados</p>`;
+    return;
+  }
+
+  rows.forEach((row, i) => {
+    const prev = rows[i + 1]; // más antigua que la actual (mismo orden desc)
+    let trend = '';
+    if (prev && row.amount !== prev.amount) {
+      trend = row.amount > prev.amount
+        ? '<span class="history-trend up">▲</span>'
+        : '<span class="history-trend down">▼</span>';
+    }
+    const statusClass = row.pending ? 'pending' : 'paid';
+    const statusLabel = row.pending ? 'pendiente' : 'pagado ✓';
+
+    const el = document.createElement('div');
+    el.className = 'history-row';
+    el.innerHTML = `
+      <span class="history-month">${escapeHtml(row.label)}</span>
+      <span class="history-amount">${trend}${formatMoney(row.amount)}</span>
+      <span class="history-status ${statusClass}">${statusLabel}</span>
+    `;
+    container.appendChild(el);
+  });
 }

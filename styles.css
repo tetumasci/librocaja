@@ -1624,6 +1624,59 @@ input { font-family: inherit; }
 }
 
 /* ============================================
+   HISTORY MODAL — historial de montos (fijos y cuotas)
+   ============================================ */
+
+.history-list {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  max-height: 50vh;
+  overflow-y: auto;
+}
+
+.history-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 10px 2px;
+  border-bottom: 1px solid var(--paper-line);
+}
+
+.history-month {
+  font-size: 13px;
+  color: var(--ink-soft);
+  flex: 1;
+}
+
+.history-amount {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+.history-trend {
+  font-size: 10px;
+  margin-right: 3px;
+}
+.history-trend.up { color: var(--expense); }
+.history-trend.down { color: var(--income); }
+
+.history-status {
+  font-size: 10px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  padding: 3px 7px;
+  border-radius: 20px;
+  flex-shrink: 0;
+}
+.history-status.paid { background: var(--income-soft); color: var(--income); }
+.history-status.pending { background: var(--paper-line); color: var(--ink-faint); }
+
+/* ============================================
    ACCOUNT MANAGER — edit button + balance
    ============================================ */
 

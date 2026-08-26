@@ -1427,3 +1427,52 @@ crear un mecanismo paralelo distinto.
   Ajustes (no en Reportes) — cumple igual el pedido ("en algún lugar visible... ej. en la misma sección"), y evita tocar `stats.js` más
   de lo necesario para esta feature.
 - `CACHE_NAME` bumpeado a `libro-de-caja-v16` (incluye `js/installments.js` en el precache).
+
+---
+
+## FEATURE: Cuotas ya pagadas al cargar una compra en curso
+**Estado: hecha**
+**Depende de: "Compras en cuotas" (hecha, arriba)**
+
+### Qué se pide
+Bug real encontrado (no una feature nueva de cero): al dar de alta una compra en cuotas que ya venía pagándose desde antes de cargarla
+en la app (ej. algo que ya está en la cuota 3 de 6), no había forma de decirle eso al alta — siempre arrancaba de la cuota 1, generando
+un historial incorrecto. Se agrega un campo "cuotas ya pagadas" (default 0) solo en el modal de **alta**.
+
+### Notas de implementación
+- Archivos modificados: `index.html`, `js/installments.js`.
+- El campo (`installment-already-paid-field`) se oculta en edición (`_openInstallmentModalShared`) — solo tiene sentido al cargar una
+  compra nueva; las cuotas pagadas de una compra ya existente ya están reflejadas en `payments`.
+- `saveInstallmentPurchase()`, rama de alta: valida `0 ≤ alreadyPaid ≤ totalInstallments` y pre-carga esa cantidad en `payments` como
+  `paid: true` (fecha por cuota calculada con `addMonthsClamped()`, ya existente), **sin** generar `entries` para esas cuotas — ya
+  pasaron antes de cargar la compra, no son un pago pendiente de hoy. No se tocó `processInstallmentPurchases()` ni `installmentStats()`:
+  con `payments` precargado, `paidCount` da bien solo y la próxima cuota que se genera es la correcta.
+- No se tocó la rama de edición de una compra existente — cero impacto en compras ya cargadas antes de este fix.
+- **Pendiente, no atacado en esta pasada**: corregir el conteo de una compra ya cargada *incorrectamente* (que ya generó movimientos
+  reales arrancando en la cuota 1 cuando en realidad iba más avanzada) — requiere decidir qué hacer con los movimientos ya generados de
+  más, no es tan directo como el alta.
+- `CACHE_NAME` bumpeado a `libro-de-caja-v17`.
+
+---
+
+## FEATURE: Historial de precios de gastos/ingresos fijos y cuotas
+**Estado: hecha**
+**Depende de: "Ingresos fijos / recurrentes", "Gastos fijos — confirmación manual de pago" y "Compras en cuotas" (todas hechas, arriba)**
+
+### Qué se pide
+Ver mes a mes cuánto costó realmente un gasto/ingreso fijo (ej. la cuota de la facultad que aumenta con la inflación) o una compra en
+cuotas, sin depender del monto *actual* configurado — que puede ser distinto si ya se editó alguna vez. Solo lectura, cero cambios al
+modelo de datos: el dato ya existe en cada movimiento generado (guarda el monto que tenía el fijo/cuota ese mes puntual).
+
+### Notas de implementación
+- Archivos modificados: `index.html`, `styles.css`, `js/ui.js`, `js/recurring.js`, `js/installments.js`, `js/main.js`.
+- Modal genérico (`openHistoryModal`/`renderHistoryList` en `js/ui.js`, sin conocer `recurringId` ni `installmentPurchaseId`) reusado por
+  ambos dominios — cada uno arma sus propias filas (`openRecurringHistory()` en `recurring.js`, `openInstallmentHistory()` en
+  `installments.js`) filtrando `state.entries` por el campo de vínculo que corresponda, ordenadas de más reciente a más antigua.
+- Cada fila muestra mes/año, monto de ese movimiento puntual, y estado reusando el mismo lenguaje visual "pagado ✓"/"pendiente" que ya
+  usa el resto de la app. Nice-to-have agregado sin complicar lo esencial: flechita de tendencia (▲ rojo si subió, ▼ verde si bajó)
+  comparando contra el mes anterior — se omite si dos meses consecutivos tienen el mismo monto o si no hay mes anterior.
+- Probado con datos reales (`recurringId` de "Facultad", con un aumento real de $310.000 a $320.000 entre julio y agosto): el historial
+  mostró el monto que realmente se generó cada mes, no el `amount` actualmente configurado en el fijo (que en ese caso seguía en
+  $310.000 sin editar) — confirma que el historial es independiente de la configuración actual.
+- `CACHE_NAME` bumpeado a `libro-de-caja-v17` (mismo bump que la feature anterior, implementadas en la misma sesión).

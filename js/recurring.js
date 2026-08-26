@@ -120,6 +120,7 @@ function renderRecurringRows(container, list, entryType) {
         <span class="recurring-row-detail">${formatMoney(rec.amount)} · ${entryType === 'expense' ? 'referencia día' : 'día'} ${rec.dayOfMonth}</span>
       </div>
       <div class="recurring-row-actions">
+        <button class="cat-edit rec-history" data-rec-id="${rec.id}" data-rec-type="${entryType}">historial</button>
         <button class="cat-edit rec-edit" data-rec-id="${rec.id}" data-rec-type="${entryType}">editar</button>
         <button class="recurring-toggle${rec.active ? ' active' : ''}" data-rec-id="${rec.id}" data-rec-type="${entryType}">
           ${rec.active ? 'pausar' : 'activar'}
@@ -128,6 +129,15 @@ function renderRecurringRows(container, list, entryType) {
       </div>
     `;
     container.appendChild(row);
+  });
+
+  container.querySelectorAll('.rec-history').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const type = btn.dataset.recType;
+      const list = type === 'income' ? state.recurringIncomes : state.recurringExpenses;
+      const rec = list.find(r => r.id === btn.dataset.recId);
+      if (rec) openRecurringHistory(rec, type);
+    });
   });
 
   container.querySelectorAll('.rec-edit').forEach(btn => {
@@ -183,6 +193,19 @@ function renderRecurringRows(container, list, entryType) {
       renderRecurringIncomeManager();
     });
   });
+}
+
+/* Historial de montos (solo lectura): recorre los movimientos ya
+   generados para este fijo — cada uno guardó el monto que tenía el fijo
+   ese mes puntual, así que sirve para ver cómo fue variando (ej. un
+   aumento de la facultad) sin depender del monto actual configurado. */
+function openRecurringHistory(rec, entryType) {
+  const rows = state.entries
+    .filter(e => e.recurringId === rec.id)
+    .sort((a, b) => b.date.localeCompare(a.date))
+    .map(e => ({ label: monthLabel(dateFromISO(e.date)), amount: e.amount, pending: !!e.pending }));
+  const icon = getCategoryById(rec.categoryId, entryType).icon;
+  openHistoryModal(`${icon} ${rec.name}`, rows);
 }
 
 function renderRecurringManager() {

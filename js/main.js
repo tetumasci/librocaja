@@ -183,6 +183,12 @@ function attachEventListeners() {
   });
   document.getElementById('btn-save-recurring').addEventListener('click', saveRecurring);
 
+  // Historial (gastos/ingresos fijos y compras en cuotas)
+  document.getElementById('btn-close-history').addEventListener('click', closeHistoryModal);
+  document.getElementById('history-modal-backdrop').addEventListener('click', (e) => {
+    if (e.target.id === 'history-modal-backdrop') closeHistoryModal();
+  });
+
   // Settings: installment purchases (compras en cuotas)
   document.getElementById('btn-add-installment').addEventListener('click', openInstallmentModal);
   document.getElementById('btn-cancel-installment').addEventListener('click', closeInstallmentModal);
