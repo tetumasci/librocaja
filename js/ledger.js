@@ -512,6 +512,25 @@ function renderAccountGrid() {
   });
 }
 
+// Crea un movimiento nuevo y lo persiste. Único punto de guardado para
+// entries nuevas — lo usan tanto el modal grande (saveEntry, abajo) como
+// la tarjeta compacta de carga rápida (quickadd.js: saveQuickEntry).
+function createEntry(data) {
+  state.entries.push({
+    id: uid(),
+    type: data.type,
+    amount: data.amount,
+    categoryId: data.categoryId,
+    subcategoryId: data.subcategoryId || null,
+    accountId: data.accountId,
+    note: data.note || '',
+    date: data.date || todayISO(),
+    createdAt: Date.now(),
+  });
+  invalidateSuggestionCache();
+  saveState();
+}
+
 function saveEntry() {
   const amountRaw = document.getElementById('input-amount').value;
   const amount = parseFloat(amountRaw);
@@ -545,20 +564,16 @@ function saveEntry() {
     return;
   }
 
-  state.entries.push({
-    id: uid(),
+  createEntry({
     type: currentEntryType,
     amount,
     categoryId: selectedCategoryId,
-    subcategoryId: selectedSubcategoryId || null,
+    subcategoryId: selectedSubcategoryId,
     accountId: selectedAccountId,
     note,
     date,
-    createdAt: Date.now(),
   });
 
-  invalidateSuggestionCache();
-  saveState();
   closeAddModal();
   renderAll();
   showToast(currentEntryType === 'expense' ? 'Gasto anotado' : 'Ingreso anotado');

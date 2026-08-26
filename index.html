@@ -300,7 +300,7 @@
 
 <!-- ===== MODAL: QUICK ADD ===== -->
 <div class="modal-backdrop" id="quick-add-backdrop" hidden>
-  <div class="modal-sheet">
+  <div class="modal-sheet modal-sheet-compact">
     <div class="modal-handle"></div>
     <p class="modal-section-title">carga rápida</p>
 
@@ -313,40 +313,43 @@
       </p>
     </div>
 
-    <div id="quick-preview" hidden>
-      <div class="quick-preview-header">
-        <div class="modal-type-toggle">
-          <button class="type-btn expense active" id="quick-type-expense">gasto</button>
-          <button class="type-btn income" id="quick-type-income">ingreso</button>
-        </div>
-        <div class="amount-input-wrap quick-amount-wrap">
-          <span class="amount-currency">$</span>
-          <input type="number" inputmode="decimal" id="quick-input-amount" class="amount-input" placeholder="0" autocomplete="off">
-        </div>
+    <!-- tarjeta de confirmación compacta -->
+    <div id="quick-preview" class="quick-card" hidden>
+      <div class="quick-card-amount-row">
+        <span class="quick-card-currency">$</span>
+        <input type="number" inputmode="decimal" id="quick-input-amount" class="quick-card-amount" placeholder="0" autocomplete="off">
       </div>
 
-      <div class="field-group">
+      <div class="modal-type-toggle quick-card-type-toggle">
+        <button class="type-btn expense active" id="quick-type-expense">gasto</button>
+        <button class="type-btn income" id="quick-type-income">ingreso</button>
+      </div>
+
+      <div class="quick-chip-field">
         <label class="field-label">categoría</label>
-        <div class="category-grid" id="quick-category-grid"></div>
+        <button type="button" class="quick-chip quick-chip-empty" id="quick-category-chip"></button>
+        <div class="quick-chip-options" id="quick-category-picker" hidden></div>
+      </div>
+
+      <div class="quick-chip-field" id="quick-subcategory-field" hidden>
+        <label class="field-label">subcategoría</label>
+        <button type="button" class="quick-chip quick-chip-empty" id="quick-subcategory-chip"></button>
+        <div class="quick-chip-options" id="quick-subcategory-picker" hidden></div>
+      </div>
+
+      <div class="quick-chip-field">
+        <label class="field-label">cuenta</label>
+        <button type="button" class="quick-chip" id="quick-account-chip"></button>
+        <div class="quick-chip-options" id="quick-account-picker" hidden></div>
       </div>
 
       <div class="field-group">
         <label class="field-label">nota</label>
         <input type="text" id="quick-input-note" class="text-input" placeholder="(opcional)">
       </div>
-
-      <div class="field-group">
-        <label class="field-label">cuenta</label>
-        <div class="category-grid" id="quick-account-grid"></div>
-      </div>
-
-      <div class="field-group">
-        <label class="field-label">fecha</label>
-        <input type="date" id="quick-input-date" class="text-input">
-      </div>
     </div>
 
-    <button class="btn-save" id="btn-save-quick">guardar</button>
+    <button class="btn-save" id="btn-save-quick" hidden>confirmar</button>
     <button class="btn-cancel" id="btn-cancel-quick">cancelar</button>
   </div>
 </div>
