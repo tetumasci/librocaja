@@ -1,4 +1,4 @@
-const CACHE_NAME = 'libro-de-caja-v17';
+const CACHE_NAME = 'libro-de-caja-v18';
 const ASSETS_TO_CACHE = [
   './',
   './index.html',
