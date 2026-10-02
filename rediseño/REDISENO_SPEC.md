@@ -19,6 +19,7 @@ este documento salen de esos archivos; si hay una duda de medida o color, **el m
    variante azul/celeste en el lienzo de diseño, **no se implementa** (queda como alternativa).
 4. Se abandona la identidad "papel crema + dorado + serif". Tipografía única: Plus Jakarta Sans.
 5. El modo oscuro es una opción en Ajustes: Claro / Oscuro / Automático (por defecto Automático).
+6. El Inicio tiene accesos directos Gasto / Ingreso / Carga rápida en el medio; no hay botones flotantes.
 
 ## 2. Tokens (variables CSS)
 
@@ -105,8 +106,7 @@ Ingresos y gastos **nunca se distinguen solo por color**: siempre signo (+/−) 
 - Barra inferior flotante: `left/right 20px`, `bottom 16px`, alto 68, radio 34, 5 pestañas
   (Libro, Reportes, Metas, Ajustes, Plan; mismo orden que hoy), ícono 20 + etiqueta 11. Pestaña
   activa: pastilla 64 × 54 con `--nav-active-bg`. El contenido necesita `padding-bottom ≥ 110px`.
-- Botones flotantes (sobre la barra, a la derecha): **+** (`#btn-add`, 58 px, `--primary`) y **⚡**
-  (`#btn-quick-add`, 48 px, `--surface` con borde 1.5 px `--primary`), separados 6 px.
+- Accesos directos (reemplazan a los botones flotantes): fila de 3 botones circulares de 56 px con etiqueta debajo (12/600), en columnas iguales, entre la tarjeta del mes y el banner. Gasto (`#btn-add-expense`, flecha ↗ en `--expense`), Ingreso (`#btn-add-income`, flecha ↙ en `--income`) y Carga rápida (`#btn-quick-add`, ícono ⚡ en `--text`). Círculo `--surface`; en oscuro con borde 1 px `--line`. Ya no hay botón + flotante.
 
 ## 5. Componentes
 
@@ -140,7 +140,7 @@ contenedores y clases, no ids.
 
 | Pantalla | Mockups | Ids / clases actuales a respetar | Cambios |
 |---|---|---|---|
-| Inicio (libro) | `Real-L-1-inicio`, `Real-D-1-inicio` | `#prev-month`, `#current-month-label`, `#next-month`, `#streak-bar`, `#streak-count`, `#streak-today-badge`, `#total-balance`, `#account-breakdown`, `#btn-open-transfer`, `#month-income`, `#month-expense`, `#month-balance`, `#suggestion-banner`, `#filter-pills` (`data-filter`), `#ledger-list`, `#empty-state`, `#btn-add`, `#btn-quick-add`, `.bottom-nav .nav-item[data-view]` | navegación de mes y racha pasan a la barra superior (píldora + chip); hero con total + cuentas + transferir; tarjeta chica con ingresos/gastos/saldo del mes; filtro como control segmentado; filas nuevas |
+| Inicio (libro) | `Real-L-1-inicio`, `Real-D-1-inicio` | `#prev-month`, `#current-month-label`, `#next-month`, `#streak-bar`, `#streak-count`, `#streak-today-badge`, `#total-balance`, `#account-breakdown`, `#btn-open-transfer`, `#month-income`, `#month-expense`, `#month-balance`, `#suggestion-banner`, `#filter-pills` (`data-filter`), `#ledger-list`, `#empty-state`, `#btn-add-expense`, `#btn-add-income`, `#btn-quick-add`, `.bottom-nav .nav-item[data-view]` | navegación de mes y racha pasan a la barra superior (píldora + chip); hero con total + cuentas + transferir; tarjeta chica con ingresos/gastos/saldo del mes; filtro como control segmentado; filas nuevas; fila de accesos directos que reemplaza a los botones flotantes |
 | Reportes | `Real-L-2-reportes`, `Real-D-2-reportes` | `#stats-month-label`, `#metric-*`, `#category-bars`, `#trend-chart`, `#ants-section-label`, `#ants-category-bars` | hero "Saldo del mes" nuevo (`#stats-month-balance`); métricas en grilla de 2; barras con emoji; gráfico de 6 meses con mes actual resaltado |
 | Metas | `Real-L-3-metas`, `Real-D-3-metas` | `#goals-body`, `#btn-add-goal`, `.goal-card`, sección de ahorro en dólares (`renderDollarSavings`) | tarjeta por meta con badge ARS/USD, "Sumar", `≈ $ … (ref.)` en metas USD; sección de dólares con total, equivalente y depósitos |
 | Plan | `Real-L-4-plan`, `Real-D-4-plan` | `#plan-list`, `#btn-add-plan`, `.plan-card`, `#plan-chart-<id>` (canvas) | tarjeta con 3 datos, curva y botón de pago; **el canvas debe leer colores de las variables CSS y redibujarse al cambiar de tema** |
@@ -177,5 +177,5 @@ de racha. Los `confirm()` nativos se mantienen.
 
 ## 9. Fuera de alcance
 
-Variante azul/celeste, gráficos nuevos, cambios de datos o de lógica salvo los dos de REDISEÑO-A1 y A2,
+Variante azul/celeste, gráficos nuevos, cambios de datos o de lógica salvo los de REDISEÑO-A1, A2 y A3,
 nuevas pestañas, y reordenar la barra inferior.

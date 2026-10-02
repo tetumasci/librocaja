@@ -151,9 +151,29 @@ vista ya usa.
 - El valor de Reportes coincide con el del Inicio para el mismo mes.
 
 ---
-## FEATURE: REDISEÑO-B0 — Tokens, tipografía y tema claro/oscuro
+## FEATURE: REDISEÑO-A3 — Accesos directos Gasto / Ingreso / Carga rápida en el Inicio
 **Estado: pendiente**
 **Depende de:** REDISEÑO-A2
+
+### Qué se pide
+En el Inicio, entre la tarjeta del mes y el banner de sugerencias, agregar una fila de accesos directos: Gasto, Ingreso y Carga rápida. Gasto e Ingreso abren la hoja de carga de movimiento de hoy con el tipo ya elegido. Reemplazan a los botones flotantes (+ y ⚡).
+
+### Comportamiento esperado
+- `openAddModal()` acepta un tipo opcional (`'expense' | 'income'`); sin argumento se comporta como hoy. Con tipo, deja elegido el toggle de tipo y las categorías de ese tipo. Leé cómo `setEntryType()` maneja `selectedCategoryId` y reusá esa lógica, sin duplicarla.
+- Nueva fila en `index.html` con tres `<button>`: `#btn-add-expense`, `#btn-add-income` y `#btn-quick-add` (el ⚡ conserva su id y su listener; solo se mueve de lugar). Cada uno con ícono y etiqueta visible ("Gasto", "Ingreso", "Carga rápida") y área táctil de al menos 44 px.
+- Quitar el botón flotante `#btn-add`. Migrar todas sus referencias (listener en `main.js`, CSS, textos). El texto de `#empty-state` pasa a "tocá Gasto o Ingreso para cargar tu primer movimiento".
+- Estilo provisorio simple con clases existentes; el estilo final se hace en REDISEÑO-B1.
+
+### Casos de borde a probar
+- Gasto → guardar: se crea un gasto. Ingreso → guardar: se crea un ingreso con categorías de ingreso.
+- Abrir con Ingreso, cancelar, abrir con Gasto: no quedan el tipo ni la categoría anteriores.
+- Editar un movimiento existente (`openEditModal`) y la carga rápida siguen funcionando.
+- El botón atrás del celu cierra la hoja y nunca quedan dos overlays abiertos.
+
+---
+## FEATURE: REDISEÑO-B0 — Tokens, tipografía y tema claro/oscuro
+**Estado: pendiente**
+**Depende de:** REDISEÑO-A3
 
 ### Qué se pide
 Montar la base del rediseño sin cambiar todavía el diseño de ninguna pantalla: tokens nuevos, fuente
@@ -196,7 +216,7 @@ nueva, mecanismo de tema claro/oscuro y la opción en Ajustes. Seguir `REDISENO_
 
 ### Qué se pide
 Aplicar el diseño nuevo al Inicio, en claro y en oscuro. Referencia: `Real-L-1-inicio` y
-`Real-D-1-inicio`. Es también el momento de migrar la **barra inferior** y los **botones flotantes**
+`Real-D-1-inicio`. Es también el momento de migrar la **barra inferior** y la **fila de accesos directos**
 (componentes globales, ver spec sección 4), que quedan para el resto de la app.
 
 ### Comportamiento esperado
@@ -211,7 +231,7 @@ Aplicar el diseño nuevo al Inicio, en claro y en oscuro. Referencia: `Real-L-1-
 - Movimientos: título + control segmentado de filtro (`#filter-pills` conserva `data-filter` y
   la lógica); filas nuevas (avatar con tinte, título, subtítulo, monto) para entries, transferencias (↔),
   ajustes (⚖️) y pendientes (opacidad .6 + tag "pendiente"); etiquetas de día.
-- Barra inferior flotante con 5 pestañas y botones flotantes **+** y **⚡**, según la spec.
+- Fila de accesos directos (Gasto, Ingreso, Carga rápida) entre la tarjeta del mes y el banner, según el mockup; barra inferior flotante con 5 pestañas.
 - `padding-bottom` del contenido ≥ 110 px para que nada quede tapado.
 - Sin colores ni medidas hardcodeadas: solo tokens.
 
@@ -221,7 +241,7 @@ Aplicar el diseño nuevo al Inicio, en claro y en oscuro. Referencia: `Real-L-1-
 - Textos largos de nota/categoría: truncan con puntos suspensivos, no rompen la fila.
 - Cambiar de claro a oscuro con la pantalla abierta.
 - Pantalla angosta (320 px) y celu con barra de gestos.
-- Que los botones flotantes no tapen el último movimiento (se puede scrollear por debajo).
+- Que la barra inferior no tape el último movimiento (se puede scrollear por debajo).
 
 ---
 ## FEATURE: REDISEÑO-B2 — Reportes
