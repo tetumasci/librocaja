@@ -8,8 +8,8 @@ Este es un backlog vivo. Cada feature tiene un estado: `pendiente`,
 **Instrucciones de trabajo:**
 1. Buscar la primera feature en estado `pendiente` (de arriba hacia
    abajo — el orden importa, respeta dependencias entre features).
-2. Antes de tocar código, leer `index.html`, `styles.css` y `app.js`
-   completos para entender el estado actual real (no asumir que el
+2. Antes de tocar código, leer `index.html`, `styles.css` y los archivos
+   de `js/` que toque la feature para entender el estado actual real (no asumir que el
    código quedó exactamente como se describe en features anteriores).
 3. Cambiar el estado de esa feature a `en progreso` en este mismo
    archivo.

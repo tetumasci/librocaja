@@ -46,16 +46,23 @@ function renderAccountBreakdown() {
   const container = document.getElementById('account-breakdown');
   const transferBtn = document.getElementById('btn-open-transfer');
   if (!container) return;
-  if (state.accounts.length <= 1) {
+
+  // El botón de transferir depende de cuántas cuentas existen (se puede
+  // transferir hacia una cuenta vacía); el desglose solo muestra las
+  // cuentas con saldo, y únicamente si hay 2 o más.
+  if (transferBtn) transferBtn.hidden = state.accounts.length < 2;
+
+  const withMoney = state.accounts
+    .map(acc => ({ acc, balance: getAccountBalance(acc.id) }))
+    .filter(({ balance }) => Math.round(balance) !== 0);
+  if (withMoney.length < 2) {
     container.hidden = true;
-    if (transferBtn) transferBtn.hidden = true;
     return;
   }
 
   container.hidden = false;
   container.innerHTML = '';
-  state.accounts.forEach(acc => {
-    const balance = getAccountBalance(acc.id);
+  withMoney.forEach(({ acc, balance }) => {
     const row = document.createElement('div');
     row.className = 'account-balance-row';
     row.innerHTML = `
@@ -64,7 +71,6 @@ function renderAccountBreakdown() {
     `;
     container.appendChild(row);
   });
-  if (transferBtn) transferBtn.hidden = false;
 }
 
 /* ---------- Streak ---------- */

@@ -48,13 +48,11 @@
       </div>
     </div>
     <div class="summary-balance">
-      <span class="summary-balance-label">saldo del mes</span>
-      <span class="summary-balance-amount" id="month-balance">$ 0</span>
+      <span class="summary-balance-label">tenés ahora (todas las cuentas)</span>
+      <span class="summary-balance-amount" id="total-balance">$ 0</span>
     </div>
-    <div class="summary-total">
-      <span class="summary-total-label">tenés ahora (todas las cuentas)</span>
-      <span class="summary-total-amount" id="total-balance">$ 0</span>
-    </div>
+    <div class="account-breakdown" id="account-breakdown" hidden></div>
+    <button class="transfer-trigger-btn" id="btn-open-transfer" hidden>↔ transferir</button>
     <div class="summary-split">
       <div class="split-item split-income">
         <span class="split-label">ingresos</span>
@@ -65,9 +63,12 @@
         <span class="split-label">gastos</span>
         <span class="split-amount" id="month-expense">$ 0</span>
       </div>
+      <div class="split-divider"></div>
+      <div class="split-item split-balance">
+        <span class="split-label">saldo del mes</span>
+        <span class="split-amount" id="month-balance">$ 0</span>
+      </div>
     </div>
-    <div class="account-breakdown" id="account-breakdown" hidden></div>
-    <button class="transfer-trigger-btn" id="btn-open-transfer" hidden>↔ transferir</button>
   </section>
 
   <!-- ===== SUGGESTION BANNER (dynamic) ===== -->

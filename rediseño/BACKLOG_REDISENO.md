@@ -65,7 +65,7 @@ cambios de código de la app.
 
 ---
 ## FEATURE: REDISEÑO-A1 — "Tenés ahora" como saldo principal y cuentas con saldo
-**Estado: pendiente**
+**Estado: hecha**
 **Depende de:** REDISEÑO-A0
 
 ### Qué se pide
@@ -101,6 +101,29 @@ las cuentas que tienen dinero.
 - Cuenta con saldo negativo: se muestra con el estilo de negativo.
 - Navegar a otro mes: "tenés ahora" no cambia; el saldo del mes sí.
 - Un gasto fijo con día posterior a hoy (`pending`): no modifica "tenés ahora".
+
+### Notas de implementación
+- Archivos modificados: `index.html` (reorden del DOM de `.summary-card`), `styles.css`,
+  `js/ledger.js` (`renderAccountBreakdown`), `sw.js`, `BACKLOG_FEATURES.md`. Ningún id renombrado.
+- DOM de la tarjeta: navegación de mes → `#total-balance` (reusa las clases grandes
+  `.summary-balance-*`, etiqueta "tenés ahora (todas las cuentas)") → `#account-breakdown` →
+  `#btn-open-transfer` → fila de 3 columnas (`#month-income`, `#month-expense`, `#month-balance`
+  con etiqueta "saldo del mes"). `renderSummary()` y `renderTotalBalance()` no se tocaron: sus
+  fórmulas y el toggle de `negative` siguen igual.
+- CSS: se borraron las reglas huérfanas `.summary-total*`; `.split-amount` bajó de 15 a 13 px para que
+  entren 3 columnas; se agregó `.split-balance` (color neutro, `negative` en rojo) y `margin-top` a
+  `.summary-split`.
+- `renderAccountBreakdown()`: botón de transferir visible si hay 2+ cuentas en total; desglose solo con
+  cuentas cuyo `Math.round(saldo) !== 0`, y solo si hay 2+. Probada la condición con casos simulados
+  (`[100,0,0]`, `[100,50]`, `[0,0]`, `[100]`, `[-30,0]`, `[0.4,200]`, 5 cuentas con saldo).
+- Verificado: `getAccountBalance()` excluye `pending: true` (`!e.pending` en `js/state.js`), no hizo
+  falta tocarlo. Ajustes > Cuentas sigue listando todas.
+- `sw.js`: verificados los 15 archivos de `js/` cargados en `index.html` contra `ASSETS_TO_CACHE`; el
+  único faltante era `js/plan.js`, ya agregado. `CACHE_NAME` v23 → v24.
+- `BACKLOG_FEATURES.md`: paso 2 de las instrucciones ya no menciona `app.js`.
+- Decisión propia: una cuenta con saldo entre -0,5 y 0,5 cuenta como "sin saldo" por el redondeo.
+- Caso a mirar en el celu: con una cuenta negativa y otra positiva el desglose aparece (2 cuentas con
+  saldo distinto de cero).
 
 ---
 ## FEATURE: REDISEÑO-A2 — Saldo del mes en Reportes
