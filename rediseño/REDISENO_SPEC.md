@@ -59,6 +59,7 @@ El `:root` actual usa `--paper`, `--paper-raised`, `--paper-line`, `--ink`, `--i
 | `--hero-tile` | `#1E5148` | `#1B4D42` | mosaicos dentro de hero (Reportes) |
 | `--hero-border` | `#123B33` | `#1F5448` | borde 1 px de hero (en oscuro la despega del fondo) |
 | `--hero-icon` | `#D3F26A` | `#8FDCC0` | íconos y botón de transferir sobre hero |
+| `--hero-negative` | `#FF9A73` | `#FF9A73` | importes negativos sobre `--hero` (la tarjeta hero es igual en ambos temas) |
 | `--primary` | `#123B33` | `#8FDCC0` | botones primarios, botón + |
 | `--primary-text` | `#F4F7F1` | `#07231B` | texto sobre `--primary` |
 | `--highlight` | `#D3F26A` | `#8FDCC0` | chip de racha, botón "Sumar", badge USD |

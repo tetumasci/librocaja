@@ -370,12 +370,22 @@ Aplicar el diseño nuevo al Inicio, en claro y en oscuro. Referencia: `Real-L-1-
 - `var(--font-ui)`: se eliminó con las reglas de `.entry-icon.transfer` y `.transfer-trigger-btn`
   (migradas). Quedan 3 referencias en pantallas no migradas (`.dollar-type-chip`, `.dollar-rate-status`,
   `.subcat-toggle-btn`).
-- Probado en navegador a 390 y 320 px: monto de $ 13.387.678 (el monto del hero baja a 34,5 px a 320 px y
+- Probado en navegador a 390 y 320 px (y, tras la revisión, la pestaña Pendientes y el saldo negativo): monto de $ 13.387.678 (el monto del hero baja a 34,5 px a 320 px y
   no desborda), nota larga (se trunca con "…"), estado vacío, una cuenta, saldo negativo, filtro, mes
   anterior/siguiente, racha, Gasto/Ingreso/Carga rápida, y que no queden overlays abiertos.
-- Limitación conocida: un saldo negativo dentro del hero (fondo verde oscuro) no se pinta de rojo, porque
-  ningún token de color de gasto se lee bien sobre `--hero` en los dos temas; se distingue por el signo
-  "-". A confirmar.
+- **Decisiones tras la revisión de B1:**
+  1. *Pendientes:* el filtro del Inicio tiene una cuarta pestaña "Pendientes" (`data-filter="pending"`) que
+     lista solo los movimientos sin confirmar del mes visible (gastos e ingresos fijos y cuotas). Siguen
+     apareciendo también en "Todos", "Ingresos" y "Gastos" (por tipo), con su tag "pendiente". Con la pestaña
+     vacía el estado vacío dice "No tenés movimientos pendientes". En pantallas de menos de 360 px las
+     pestañas pasan a 2 × 2 para que "Pendientes" no se corte. Al confirmar un pago con "pagar", el
+     movimiento sale de la pestaña. Limitación: es por mes visible; un pendiente de un mes anterior solo se
+     ve al navegar a ese mes.
+  2. *Saldo negativo sobre el hero:* se pinta en rojo, además del signo "-" (no solo color). Token nuevo
+     `--hero-negative` (`#FF9A73`, igual en los dos temas porque la tarjeta hero es la misma en claro y
+     oscuro; contraste ≈ 5,6:1 sobre `--hero`). Se aplica al "Tenés ahora", a las cuentas del desglose y al
+     "Saldo del mes" de Reportes (`.report-hero-amount.negative`). Agregado también a la tabla 2.2 de la spec.
+  3. *Título del renglón = nota, categoría en el subtítulo:* confirmado.
 - Limitación conocida: con las pantallas viejas todavía sin migrar, los modales (hojas crema) se ven
   claros incluso con el Inicio en oscuro, hasta B6.
 

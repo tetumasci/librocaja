@@ -245,11 +245,20 @@ function renderLedger() {
   listEl.innerHTML = '';
 
   let entries = getEntriesForMonth(viewDate);
-  if (currentFilter !== 'all') entries = entries.filter(e => e.type === currentFilter);
+  // 'pending' junta los movimientos sin confirmar del mes (fijos y cuotas); los demás filtros son por tipo.
+  if (currentFilter === 'pending') entries = entries.filter(e => e.pending);
+  else if (currentFilter !== 'all') entries = entries.filter(e => e.type === currentFilter);
 
   const transfers = currentFilter === 'all' ? getTransfersForMonth(viewDate) : [];
 
   if (entries.length === 0 && transfers.length === 0) {
+    const isPending = currentFilter === 'pending';
+    emptyEl.querySelector('.empty-state-title').textContent = isPending
+      ? 'No tenés movimientos pendientes'
+      : 'Todavía no anotaste nada este mes';
+    emptyEl.querySelector('.empty-state-sub').textContent = isPending
+      ? 'Los gastos e ingresos fijos y las cuotas aparecen acá hasta que se confirman'
+      : 'Tocá Gasto o Ingreso para cargar tu primer movimiento';
     emptyEl.hidden = false;
     return;
   }
