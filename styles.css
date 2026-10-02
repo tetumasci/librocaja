@@ -388,84 +388,6 @@ input { font-family: inherit; }
 .home-month-value.negative { color: var(--expense-new); }
 
 /* ============================================
-   SUMMARY CARD
-   ============================================ */
-
-.summary-card {
-  background: var(--paper-raised);
-  border: 1px solid var(--paper-line);
-  border-radius: var(--radius-lg);
-  padding: 18px 20px 16px;
-  box-shadow: var(--shadow-card);
-  margin-bottom: 16px;
-  position: relative;
-}
-
-.summary-balance {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  margin: 10px 0 16px;
-}
-
-.summary-balance-label {
-  font-size: 11px;
-  color: var(--ink-faint);
-  text-transform: uppercase;
-  letter-spacing: 0.06em;
-  margin-bottom: 2px;
-}
-
-.summary-balance-amount {
-  font-family: var(--font-display);
-  font-size: 38px;
-  font-weight: 600;
-  letter-spacing: -0.01em;
-  font-variant-numeric: tabular-nums;
-}
-.summary-balance-amount.negative { color: var(--expense); }
-
-.summary-split {
-  display: flex;
-  align-items: center;
-  border-top: 1px dashed var(--paper-line);
-  padding-top: 12px;
-  margin-top: 12px;
-}
-
-.split-item {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-}
-
-.split-label {
-  font-size: 10px;
-  text-transform: uppercase;
-  letter-spacing: 0.06em;
-  color: var(--ink-faint);
-  margin-bottom: 2px;
-}
-
-.split-amount {
-  font-family: var(--font-mono);
-  font-size: 13px;
-  font-weight: 600;
-  font-variant-numeric: tabular-nums;
-}
-.split-income .split-amount { color: var(--income); }
-.split-expense .split-amount { color: var(--expense); }
-.split-balance .split-amount { color: var(--ink); }
-.split-balance .split-amount.negative { color: var(--expense); }
-
-.split-divider {
-  width: 1px;
-  height: 28px;
-  background: var(--paper-line);
-}
-
-/* ============================================
    SUGGESTION BANNER
    ============================================ */
 
@@ -506,8 +428,9 @@ input { font-family: inherit; }
   font-weight: 700;
 }
 
-/* control segmentado del filtro (Todos / Ingresos / Gastos) */
-.filter-pills {
+/* control segmentado (filtro del Inicio, selector del gráfico de Reportes) */
+.filter-pills,
+.seg-control {
   margin-top: 12px;
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -516,14 +439,17 @@ input { font-family: inherit; }
   border-radius: 26px;
   background: var(--bg);
 }
-.pill {
+.seg-control.seg-cols-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.pill,
+.seg-btn {
   height: 44px;
   border-radius: 22px;
   font-size: 13px;
   font-weight: 600;
   color: var(--muted);
 }
-.pill.active {
+.pill.active,
+.seg-btn[aria-pressed="true"] {
   background: var(--seg-selected-bg);
   color: var(--seg-selected-fg);
   font-weight: 700;
@@ -686,7 +612,7 @@ input { font-family: inherit; }
   justify-content: space-around;
   padding: 0 6px;
   font-family: var(--font-sans);
-  z-index: 30;
+  z-index: 60; /* sobre las pantallas (.view-overlay, 50) y bajo los modales (100) */
 }
 
 .nav-item {
@@ -721,7 +647,7 @@ input { font-family: inherit; }
   background: var(--paper);
   z-index: 50;
   overflow-y: auto;
-  padding-bottom: 40px;
+  padding-bottom: calc(110px + env(safe-area-inset-bottom)); /* deja lugar a la barra inferior flotante */
 }
 
 .view-header {
@@ -746,16 +672,6 @@ input { font-family: inherit; }
   padding: 0 16px;
 }
 
-.stats-month-label {
-  text-align: center;
-  font-size: 12px;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.06em;
-  color: var(--ink-faint);
-  margin-bottom: 16px;
-}
-
 .section-label {
   font-family: var(--font-display);
   font-size: 14px;
@@ -765,91 +681,6 @@ input { font-family: inherit; }
   margin: 28px 0 12px;
 }
 
-/* metric grid */
-.metric-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 10px;
-}
-.metric-card {
-  background: var(--paper-raised);
-  border: 1px solid var(--paper-line);
-  border-radius: var(--radius-md);
-  padding: 12px 14px;
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-}
-.metric-label {
-  font-size: 10px;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  color: var(--ink-faint);
-}
-.metric-value {
-  font-family: var(--font-mono);
-  font-size: 19px;
-  font-weight: 600;
-  font-variant-numeric: tabular-nums;
-}
-.metric-value.positive { color: var(--income); }
-.metric-value.negative { color: var(--expense); }
-.metric-sub {
-  font-size: 10px;
-  color: var(--ink-faint);
-  line-height: 1.2;
-}
-
-/* category bars */
-.category-bars {
-  display: flex;
-  flex-direction: column;
-  gap: 14px;
-}
-.category-bar-row {
-  display: flex;
-  flex-direction: column;
-  gap: 5px;
-}
-.category-bar-top {
-  display: flex;
-  justify-content: space-between;
-  align-items: baseline;
-  font-size: 13px;
-}
-.category-bar-name {
-  display: flex;
-  align-items: center;
-  gap: 7px;
-  font-weight: 500;
-}
-.category-bar-amount {
-  font-family: var(--font-mono);
-  font-size: 12.5px;
-  color: var(--ink-soft);
-}
-.category-bar-track {
-  height: 8px;
-  background: var(--paper-line);
-  border-radius: 4px;
-  overflow: hidden;
-}
-.category-bar-fill {
-  height: 100%;
-  background: var(--expense);
-  border-radius: 4px;
-  transition: width 0.3s ease;
-}
-.category-bar-fill.near-budget { background: var(--accent); }
-.category-bar-fill.over-budget { background: var(--expense); }
-
-.budget-overflow {
-  font-size: 10.5px;
-  font-weight: 600;
-  color: var(--expense);
-  margin-top: 3px;
-  display: block;
-}
 .budget-limit-tag {
   font-family: var(--font-mono);
   font-size: 11px;
@@ -857,46 +688,269 @@ input { font-family: inherit; }
   margin-left: 8px;
 }
 
-/* trend chart (simple bar chart, css only) */
+/* ============================================
+   REPORTES (REDISEÑO-B2)
+   ============================================ */
+
+.view-overlay.themed {
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font-sans);
+}
+
+.report-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 44px;
+  max-width: 480px;
+  margin: 0 auto;
+  padding: 20px 20px 0;
+  box-sizing: content-box;
+}
+.report-header h1 {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 700;
+}
+.report-back {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: var(--surface);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.report-back svg { width: 20px; height: 20px; }
+.report-header-spacer { width: 44px; }
+
+.view-body.report-body { padding: 0 20px; }
+
+.report-month {
+  margin-top: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+}
+.report-month-btn {
+  width: 44px;
+  height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text);
+}
+.report-month-btn svg { width: 18px; height: 18px; }
+.report-month-btn:disabled { opacity: 0.3; cursor: default; }
+.report-month-label {
+  min-width: 120px;
+  text-align: center;
+  font-size: 15px;
+  font-weight: 700;
+  text-transform: capitalize;
+}
+
+.report-hero {
+  margin-top: 4px;
+  background: var(--hero);
+  color: var(--hero-text);
+  border: 1px solid var(--hero-border);
+  border-radius: 28px;
+  padding: 20px;
+}
+.report-hero-label {
+  font-size: 13px;
+  font-weight: 500;
+  opacity: 0.8;
+}
+.report-hero-amount {
+  margin-top: 2px;
+  font-size: min(36px, 9.4vw);
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  font-variant-numeric: tabular-nums;
+  overflow-wrap: anywhere;
+}
+.report-hero-tiles {
+  margin-top: 14px;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+.report-hero-tile {
+  background: var(--hero-tile);
+  border-radius: 16px;
+  padding: 10px 12px;
+}
+.report-hero-tile-label {
+  font-size: 12px;
+  opacity: 0.85;
+}
+.report-hero-tile-value {
+  margin-top: 2px;
+  font-size: 15px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  overflow-wrap: anywhere;
+}
+
+/* métricas en grilla de 2; la última ocupa todo el ancho */
+.metric-grid {
+  margin-top: 12px;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+.metric-card {
+  background: var(--surface);
+  border-radius: 22px;
+  padding: 14px 16px;
+}
+.metric-card-wide { grid-column: span 2; }
+.metric-label {
+  display: block;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--muted);
+}
+.metric-value {
+  display: block;
+  margin-top: 4px;
+  font-size: 20px;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  font-variant-numeric: tabular-nums;
+  overflow-wrap: anywhere;
+}
+.metric-sub {
+  display: block;
+  margin-top: 2px;
+  font-size: 12px;
+  color: var(--muted);
+}
+.metric-sub:empty { display: none; }
+
+/* tarjetas de contenido */
+.report-card {
+  margin-top: 12px;
+  background: var(--surface);
+  border-radius: 28px;
+  padding: 16px 18px 6px;
+}
+.report-card-title {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 700;
+}
+.report-card-sub {
+  margin: 2px 0 0;
+  font-size: 12px;
+  color: var(--muted);
+}
+.report-subtitle {
+  margin: 6px 0 0;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+.category-bars > .report-subtitle:first-child { margin-top: 0; }
+.report-empty {
+  margin: 0;
+  padding: 20px 0 14px;
+  text-align: center;
+  font-size: 13px;
+  color: var(--muted);
+}
+
+/* filas de categoría */
+.category-bar-row {
+  padding: 12px 0;
+  border-bottom: 1px solid var(--divider);
+}
+.category-bars > .category-bar-row:last-child { border-bottom: 0; }
+.category-bar-top {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+}
+.category-bar-name {
+  font-size: 14px;
+  font-weight: 600;
+  min-width: 0;
+}
+.category-bar-icon { margin-right: 6px; }
+.category-bar-amount {
+  font-size: 14px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  flex-shrink: 0;
+}
+.category-bar-meta {
+  margin-top: 2px;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--muted);
+}
+.category-bar-meta.warn { color: var(--warn); }
+.category-bar-track {
+  margin-top: 8px;
+  height: 10px;
+  border-radius: 5px;
+  background: var(--track);
+  overflow: hidden;
+}
+.category-bar-fill {
+  height: 10px;
+  border-radius: 5px;
+  background: var(--bar-fill);
+  transition: width 0.3s ease;
+}
+.category-bar-fill.warn { background: var(--warn); }
+.category-bar-budget {
+  margin-top: 6px;
+  font-size: 12px;
+  color: var(--muted);
+}
+
+/* gráfico de los últimos 6 meses (barras de gasto) */
 .trend-chart {
+  margin-top: 14px;
+  height: 190px;
   display: flex;
   align-items: flex-end;
-  justify-content: space-between;
-  gap: 8px;
-  height: 140px;
-  padding: 0 4px 24px;
-  position: relative;
+  gap: 10px;
+  padding-bottom: 14px;
 }
 .trend-month {
   flex: 1;
+  min-width: 0;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: flex-end;
-  height: 100%;
-  position: relative;
+  gap: 6px;
 }
-.trend-bars {
-  display: flex;
-  align-items: flex-end;
-  gap: 3px;
-  height: 100%;
-  width: 100%;
-  justify-content: center;
+.trend-value {
+  font-size: 11px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
 }
 .trend-bar {
-  width: 9px;
-  border-radius: 3px 3px 0 0;
-  min-height: 2px;
+  width: 100%;
+  min-height: 4px;
+  border-radius: 10px 10px 4px 4px;
+  background: var(--track);
 }
-.trend-bar.income { background: var(--income); opacity: 0.85; }
-.trend-bar.expense { background: var(--expense); opacity: 0.85; }
+.trend-bar.current { background: var(--bar-fill); }
 .trend-month-label {
-  position: absolute;
-  bottom: -20px;
-  font-size: 10px;
-  color: var(--ink-faint);
-  text-transform: lowercase;
+  font-size: 11px;
+  color: var(--muted);
+  text-transform: capitalize;
 }
 
 /* ============================================
@@ -1786,17 +1840,6 @@ input { font-family: inherit; }
 .dollar-rate-status.ok   { color: var(--income); }
 .dollar-rate-status.error { color: var(--expense); }
 
-/* separator in category bars */
-.savings-section-label {
-  font-size: 10px;
-  text-transform: uppercase;
-  letter-spacing: .05em;
-  color: var(--ink-faint);
-  padding: 10px 0 4px;
-  border-top: 1px dashed var(--paper-line);
-  margin-top: 6px;
-}
-
 /* ============================================
    HISTORY MODAL — historial de montos (fijos y cuotas)
    ============================================ */
@@ -1910,20 +1953,20 @@ input { font-family: inherit; }
 /* subcategory drill-down in stats */
 .subcat-toggle-btn {
   display: block;
-  margin-top: 4px;
+  min-height: 44px;
+  padding: 0;
   background: none;
   border: none;
-  font-size: 11px;
-  font-weight: 600;
-  font-family: var(--font-ui);
-  color: var(--ink-faint);
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--link);
   cursor: pointer;
-  padding: 2px 0;
 }
-.subcat-breakdown { margin-top: 6px; padding-left: 12px; }
-.subcat-bar-row { margin-bottom: 6px; }
-.subcat-name { font-size: 12px !important; color: var(--ink) !important; }
+.subcat-breakdown { margin-top: 2px; padding-left: 12px; }
+.subcat-bar-row { margin-bottom: 8px; }
+.subcat-name { font-size: 12px !important; color: var(--text) !important; }
 .subcat-amount { font-size: 12px !important; }
+.subcat-muted { color: var(--muted) !important; }
 
 /* category suggestion highlight + hint */
 .category-chip.suggested {

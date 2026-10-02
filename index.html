@@ -143,77 +143,98 @@
 </nav>
 
 <!-- ===== VIEW: STATS (full screen overlay) ===== -->
-<div class="view-overlay" id="view-stats" hidden>
-  <header class="view-header">
-    <button class="icon-btn" id="stats-back" aria-label="Volver">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M15 18l-6-6 6-6"/></svg>
+<div class="view-overlay themed" id="view-stats" hidden>
+  <header class="report-header">
+    <button class="report-back" id="stats-back" aria-label="Volver">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
     </button>
-    <h2>reportes</h2>
-    <div style="width:36px"></div>
+    <h1>Reportes</h1>
+    <div class="report-header-spacer"></div>
   </header>
-  <div class="view-body">
-    <div class="stats-month-label" id="stats-month-label">junio 2026</div>
+  <div class="view-body report-body">
+    <div class="report-month">
+      <button class="report-month-btn" id="stats-prev-month" aria-label="Mes anterior">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
+      </button>
+      <span class="report-month-label" id="stats-month-label">junio 2026</span>
+      <button class="report-month-btn" id="stats-next-month" aria-label="Mes siguiente">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg>
+      </button>
+    </div>
 
-    <section class="summary-card stats-month-summary">
-      <div class="summary-balance">
-        <span class="summary-balance-label">saldo del mes</span>
-        <span class="summary-balance-amount" id="stats-month-balance">$ 0</span>
-      </div>
-      <div class="summary-split">
-        <div class="split-item split-income">
-          <span class="split-label">ingresos</span>
-          <span class="split-amount" id="stats-month-income">$ 0</span>
+    <section class="report-hero">
+      <div class="report-hero-label">Saldo del mes</div>
+      <div class="report-hero-amount" id="stats-month-balance">$ 0</div>
+      <div class="report-hero-tiles">
+        <div class="report-hero-tile">
+          <div class="report-hero-tile-label">Ingresos</div>
+          <div class="report-hero-tile-value" id="stats-month-income">$ 0</div>
         </div>
-        <div class="split-divider"></div>
-        <div class="split-item split-expense">
-          <span class="split-label">gastos</span>
-          <span class="split-amount" id="stats-month-expense">$ 0</span>
+        <div class="report-hero-tile">
+          <div class="report-hero-tile-label">Gastos</div>
+          <div class="report-hero-tile-value" id="stats-month-expense">$ 0</div>
         </div>
       </div>
     </section>
 
     <div class="metric-grid">
       <div class="metric-card">
-        <span class="metric-label">promedio diario</span>
+        <span class="metric-label">Promedio diario</span>
         <span class="metric-value" id="metric-avg-daily">$ 0</span>
       </div>
       <div class="metric-card">
-        <span class="metric-label">tasa de ahorro</span>
-        <span class="metric-value" id="metric-savings-rate">0%</span>
+        <span class="metric-label">Tasa de ahorro</span>
+        <span class="metric-value" id="metric-savings-rate">0 %</span>
       </div>
       <div class="metric-card">
-        <span class="metric-label">vs mes anterior</span>
+        <span class="metric-label">Vs mes anterior</span>
         <span class="metric-value" id="metric-vs-last">—</span>
+        <span class="metric-sub" id="metric-vs-last-sub"></span>
       </div>
       <div class="metric-card">
-        <span class="metric-label">días anotados</span>
-        <span class="metric-value" id="metric-days-logged">0/30</span>
+        <span class="metric-label">Días anotados</span>
+        <span class="metric-value" id="metric-days-logged">0 / 30</span>
       </div>
       <div class="metric-card">
-        <span class="metric-label">var. real vs mes ant.</span>
+        <span class="metric-label">Real vs mes ant.</span>
         <span class="metric-value" id="metric-real-var">—</span>
+        <span class="metric-sub" id="metric-real-var-sub"></span>
       </div>
       <div class="metric-card">
-        <span class="metric-label">proyección este mes</span>
+        <span class="metric-label">Proyección este mes</span>
         <span class="metric-value" id="metric-projection">—</span>
         <span class="metric-sub" id="metric-projection-sub"></span>
       </div>
-      <div class="metric-card">
-        <span class="metric-label">gastos hormiga</span>
+      <div class="metric-card metric-card-wide">
+        <span class="metric-label">Gastos hormiga</span>
         <span class="metric-value" id="metric-ants">—</span>
         <span class="metric-sub" id="metric-ants-sub"></span>
       </div>
     </div>
 
-    <h3 class="section-label">gastos por categoría</h3>
-    <div id="category-bars" class="category-bars"></div>
+    <section class="report-card">
+      <h2 class="report-card-title">Gastos por categoría</h2>
+      <div id="category-bars" class="category-bars"></div>
+    </section>
 
-    <h3 class="section-label">últimos 6 meses</h3>
-    <div class="trend-chart" id="trend-chart"></div>
+    <section class="report-card" id="savings-card" hidden>
+      <div id="savings-bars" class="category-bars"></div>
+    </section>
 
-    <h3 class="section-label" id="ants-section-label" hidden>gastos hormiga por categoría</h3>
-    <div id="ants-category-bars" class="category-bars"></div>
+    <section class="report-card">
+      <h2 class="report-card-title">Últimos 6 meses</h2>
+      <p class="report-card-sub" id="trend-subtitle">Gastos por mes, en miles de pesos</p>
+      <div class="seg-control seg-cols-2" id="trend-mode" role="group" aria-label="Qué mostrar en el gráfico">
+        <button type="button" class="seg-btn" data-mode="expense" aria-pressed="true">Gastos</button>
+        <button type="button" class="seg-btn" data-mode="income" aria-pressed="false">Ingresos</button>
+      </div>
+      <div class="trend-chart" id="trend-chart"></div>
+    </section>
 
+    <section class="report-card" id="ants-card" hidden>
+      <h2 class="report-card-title" id="ants-section-label">Gastos hormiga por categoría</h2>
+      <div id="ants-category-bars" class="category-bars"></div>
+    </section>
   </div>
 </div>
 

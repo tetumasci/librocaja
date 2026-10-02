@@ -322,7 +322,7 @@ function renderEntryRow(entry) {
   const title = isAdj ? cat.name : (note || cat.name);
   const subtitleParts = [];
   if (isAdj) {
-    subtitleParts.push(`Cuenta ${escapeHtml(acc.name)}`);
+    subtitleParts.push(`Cuenta ${escapeHtml(acc.name)}`, 'diferencia no identificada');
   } else {
     if (note) subtitleParts.push(escapeHtml(cat.name));
     if (entry.subcategoryId) {

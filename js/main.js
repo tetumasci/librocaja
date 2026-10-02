@@ -3,17 +3,20 @@
    ============================================ */
 
 function showView(viewName) {
+  // Cambiar de pestaña con una pantalla ya abierta no apila otra entrada de historial.
+  const viewAlreadyOpen = VIEW_OVERLAY_IDS.some(id => !document.getElementById(id).hidden);
   closeAllModals();
   document.getElementById('view-stats').hidden = viewName !== 'stats';
   document.getElementById('view-goals').hidden = viewName !== 'goals';
   document.getElementById('view-settings').hidden = viewName !== 'settings';
   document.getElementById('view-plan').hidden = viewName !== 'plan';
+  document.getElementById('view-streak').hidden = true;
 
   document.querySelectorAll('.nav-item').forEach(item => {
     item.classList.toggle('active', item.dataset.view === viewName);
   });
 
-  if (viewName === 'stats') renderStats();
+  if (viewName === 'stats') { resetStatsMonth(); renderStats(); }
   if (viewName === 'goals') renderGoals();
   if (viewName === 'settings') {
     renderCategoryManager();
@@ -28,7 +31,8 @@ function showView(viewName) {
     renderThemeSelector();
   }
   if (viewName === 'plan') renderPlan();
-  history.pushState({ overlay: true }, '');
+  if (viewAlreadyOpen) history.replaceState({ overlay: true }, '');
+  else history.pushState({ overlay: true }, '');
 }
 
 function hideAllOverlays() {
@@ -122,6 +126,11 @@ function attachEventListeners() {
 
   // Back buttons
   document.getElementById('stats-back').addEventListener('click', hideAllOverlays);
+  document.getElementById('stats-prev-month').addEventListener('click', () => shiftStatsMonth(-1));
+  document.getElementById('stats-next-month').addEventListener('click', () => shiftStatsMonth(1));
+  document.querySelectorAll('#trend-mode button').forEach(btn => {
+    btn.addEventListener('click', () => setStatsTrendMode(btn.dataset.mode));
+  });
   document.getElementById('goals-back').addEventListener('click', hideAllOverlays);
   document.getElementById('settings-back').addEventListener('click', hideAllOverlays);
   document.getElementById('plan-back').addEventListener('click', hideAllOverlays);

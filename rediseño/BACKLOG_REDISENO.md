@@ -381,7 +381,7 @@ Aplicar el diseño nuevo al Inicio, en claro y en oscuro. Referencia: `Real-L-1-
 
 ---
 ## FEATURE: REDISEÑO-B2 — Reportes
-**Estado: pendiente**
+**Estado: hecha**
 **Depende de:** REDISEÑO-B1
 
 ### Qué se pide
@@ -402,6 +402,64 @@ Aplicar el diseño nuevo a `view-stats`. Referencia: `Real-L-2-reportes` / `Real
 - Categoría sin presupuesto (sin barra), con presupuesto superado (>100 %: la barra no se desborda).
 - Subcategorías (`.subcat-*`) siguen funcionando y se ven bien en ambos temas.
 - Lectura en oscuro de todas las barras y del gráfico.
+
+### Notas de implementación
+- Archivos modificados: `index.html` (todo `view-stats`), `styles.css`, `js/stats.js`, `sw.js`
+  (`CACHE_NAME` v28 → v30). Ningún id existente se renombró (verificado por script). Ids nuevos:
+  `#metric-vs-last-sub`, `#metric-real-var-sub`, `#savings-card`, `#savings-bars`, `#ants-card`.
+- **Verificación contra `Real-L-2-reportes` / `Real-D-2-reportes`:** corrí la app en un navegador real a
+  390 px con datos de ejemplo (presupuestos al 52 %, 77 % y 127 %, ahorro, ajuste, gastos hormiga y 6 meses
+  de historia) y medí con JS: botón volver 44 px, título 18/700, hero con monto 36/800 y mosaicos de 16 px
+  de radio, tarjetas de métrica de radio 22 con valor 20/800, alturas de las barras del gráfico (96, 109,
+  112, 103, 118 px frente a 96, 109, 113, 104, 118 del mockup); capturas en claro y oscuro. Sin colores
+  fijos ni tokens viejos en el CSS nuevo (revisado por script). No probado en un celu real.
+- Encabezado: botón volver circular (`#stats-back`), título "Reportes" y fila del mes. Hero "Saldo del mes"
+  (`#stats-month-balance`, con signo) y mosaicos de Ingresos y Gastos. Métricas en grilla de 2 columnas, con
+  las líneas secundarias del mockup ("gastaste menos/más/igual", "ajustado por inflación", "a este ritmo",
+  "N gastos chicos"); los porcentajes ahora llevan espacio y signo "−" ("−6 %", "58 %", `formatPercent` en
+  `stats.js`) y "Días anotados" se muestra como "12 / 31". Gastos hormiga ocupa el ancho completo.
+- Gastos por categoría: cada fila muestra emoji, monto, "N % del gasto" y, solo si hay presupuesto, la barra
+  de avance contra el presupuesto con "de $ X de presupuesto". Desde el 90 % la barra y el porcentaje pasan a
+  `--warn` y el texto dice "casi al límite"; arriba del 100 % la barra queda llena (no se desborda) y el texto
+  dice "superaste el límite (+N %)". Sin presupuesto no hay barra.
+- "Ahorros" y "Ajustes de saldo" salieron de la lista de categorías y van en una tarjeta propia
+  (`#savings-card`), sin barras, como en el mockup; la tarjeta se oculta si no hay ninguno de los dos.
+- "Últimos 6 meses": barras de gasto con el valor en miles ("520k") arriba y el mes abajo; el mes actual con
+  `--bar-fill`, los demás con `--track`; altura máxima 118 px. Gastos hormiga por categoría: tarjeta propia
+  (`#ants-card`, se oculta si no hay), filas con porcentaje y barra.
+- Subcategorías (`.subcat-*`): mismos nombres de clase, ahora con tokens; el botón "ver por subcategoría"
+  mide 44 px de alto. Se reemplazaron los estilos inline que usaban `var(--ink-faint)` por la clase
+  `.subcat-muted`. Verificado el desplegable.
+- Limpieza: se borraron `.summary-card`, `.summary-balance*`, `.summary-split`, `.split-*` (los usaba el bloque
+  provisorio de A2 y el Inicio de antes de B1), `.stats-month-label`, `.savings-section-label`,
+  `.budget-overflow` y los estilos viejos del gráfico y las métricas. `.section-label` y `.budget-limit-tag`
+  se conservan porque Ajustes, Metas y presupuestos los usan. Se sacó `var(--font-ui)` de
+  `.subcat-toggle-btn` (quedan 2 referencias en pantallas no migradas: `.dollar-type-chip` y
+  `.dollar-rate-status`).
+- **Decisiones tras la primera revisión** (el mockup es referencia: no se pierde funcionalidad que la app ya tenía):
+  1. *Navegación de mes en Reportes:* se agregaron las flechas del mockup (`#stats-prev-month`,
+     `#stats-next-month`). Antes Reportes solo mostraba el mes actual, así que el reporte del mes anterior no
+     existía. Ahora todo se calcula para el mes elegido (`statsViewDate`, `shiftStatsMonth()` en `stats.js`): en
+     un mes cerrado el promedio diario usa todos sus días, "Proyección" muestra "—" con "mes cerrado", y el
+     gráfico termina en ese mes. No se puede avanzar más allá del mes actual; al abrir Reportes siempre empieza
+     en el mes actual (`resetStatsMonth()` desde `showView`).
+  2. *Gráfico de 6 meses:* se conserva el estilo del mockup, pero con un selector Gastos / Ingresos
+     (`#trend-mode`) para no perder las barras de ingresos que la app ya tenía. Control segmentado nuevo
+     `.seg-control` / `.seg-btn`, con el mismo aspecto que el filtro del Inicio.
+  3. *Datos que el mockup omitía y se restituyeron:* "N mov." en gastos hormiga por categoría, "% usado" del
+     presupuesto, "% de lo que salió" en Ahorros y "diferencia no identificada" en el renglón del ajuste de saldo
+     del Inicio (`js/ledger.js`).
+  4. *Barra inferior en todas las pantallas:* `.bottom-nav` pasó a `z-index: 60` (sobre las pantallas, `.view-overlay`
+     = 50, y bajo los modales, 100) y `.view-overlay` tiene `padding-bottom` de 110 px + safe-area para que no
+     tape contenido. Sirve para ir de una pantalla a otra sin pasar por el Inicio; el botón volver sigue. Al
+     cambiar de pestaña con una pantalla abierta no se apila otra entrada de historial (`replaceState`), y
+     `showView` también cierra el calendario de racha. Sobre el calendario de racha la barra marca "Libro".
+     Las pantallas aún no migradas (Metas, Plan, Ajustes) quedan con su estilo viejo debajo de la barra nueva.
+- Casos de borde probados: mes sin datos (métricas en "—", barras de 4 px, mensaje "No hay gastos en este mes",
+  tarjetas de ahorro y hormiga ocultas), categoría con presupuesto superado, categoría sin presupuesto,
+  subcategorías, lectura en oscuro, mes anterior / dos meses atrás / tope en el mes actual, selector del gráfico,
+  recorrido de todas las pantallas con la barra inferior (una sola abierta a la vez) y barra por encima del contenido.
+- `CACHE_NAME` queda en v30.
 
 ---
 ## FEATURE: REDISEÑO-B3 — Metas y ahorro en dólares
