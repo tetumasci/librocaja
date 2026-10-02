@@ -1755,7 +1755,8 @@ input { font-family: inherit; }
 .subcat-amount { font-size: 12px !important; }
 
 /* category suggestion highlight + hint */
-.category-chip.suggested {
+.category-chip.suggested,
+.quick-option-chip.suggested {
   border: 2px dashed var(--accent);
   color: var(--accent);
 }
