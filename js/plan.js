@@ -3,6 +3,7 @@
    ============================================ */
 
 let payingPlanId = null;
+let payingAccountId = null; // null = no descontar de ninguna cuenta
 
 /* ---------- Calculations ---------- */
 
@@ -229,13 +230,44 @@ function openPaymentModal(planId) {
   document.getElementById('payment-ars-input').value = '';
   document.getElementById('payment-rate-input').value = '';
   document.getElementById('payment-date-input').value = todayISO();
-  const accSelect = document.getElementById('payment-account-select');
-  accSelect.innerHTML = '<option value="">no descontar de ninguna</option>' +
-    state.accounts.map(a => `<option value="${a.id}">${a.icon} ${escapeHtml(a.name)}</option>`).join('');
-  accSelect.value = state.accounts.length > 0 ? state.accounts[0].id : '';
+  payingAccountId = state.accounts.length > 0 ? state.accounts[0].id : null;
+  document.getElementById('payment-account-picker').hidden = true;
+  renderPaymentAccountChip();
   document.getElementById('plan-payment-modal-backdrop').hidden = false;
   history.pushState({ overlay: true }, '');
   setTimeout(() => document.getElementById('payment-ars-input').focus(), 200);
+}
+
+function renderPaymentAccountChip() {
+  const chip = document.getElementById('payment-account-chip');
+  if (!chip) return;
+  const acc = state.accounts.find(a => a.id === payingAccountId);
+  chip.classList.toggle('quick-chip-empty', !acc);
+  chip.innerHTML = acc
+    ? `<span class="chip-icon">${acc.icon}</span><span>${escapeHtml(acc.name)}</span>`
+    : `<span>no descontar de ninguna</span>`;
+}
+
+function togglePaymentAccountPicker() {
+  const wrap = document.getElementById('payment-account-picker');
+  if (!wrap.hidden) { wrap.hidden = true; return; }
+  wrap.innerHTML = '';
+  const options = [{ id: null, html: '<span>ninguna</span>' }].concat(
+    state.accounts.map(a => ({ id: a.id, html: `<span class="chip-icon">${a.icon}</span><span>${escapeHtml(a.name)}</span>` }))
+  );
+  options.forEach(opt => {
+    const chip = document.createElement('button');
+    chip.type = 'button';
+    chip.className = 'quick-option-chip' + (payingAccountId === opt.id ? ' selected' : '');
+    chip.innerHTML = opt.html;
+    chip.addEventListener('click', () => {
+      payingAccountId = opt.id;
+      wrap.hidden = true;
+      renderPaymentAccountChip();
+    });
+    wrap.appendChild(chip);
+  });
+  wrap.hidden = false;
 }
 
 function closePaymentModal() {
@@ -252,7 +284,7 @@ function savePayment() {
   const rate = parseFloat(document.getElementById('payment-rate-input').value) || null;
   const date = document.getElementById('payment-date-input').value || todayISO();
 
-  const accountId = document.getElementById('payment-account-select').value;
+  const accountId = payingAccountId;
   if (accountId && !ars) { showToast('Ingresá el monto en pesos para descontarlo'); return; }
 
   if (!plan.contributions) plan.contributions = [];

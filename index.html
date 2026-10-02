@@ -814,9 +814,10 @@
       <label class="field-label" for="payment-ars-input">monto en pesos pagado</label>
       <input type="number" inputmode="decimal" id="payment-ars-input" class="text-input" placeholder="0">
     </div>
-    <div class="field-group">
-      <label class="field-label" for="payment-account-select">descontar de la cuenta</label>
-      <select id="payment-account-select" class="text-input"></select>
+    <div class="quick-chip-field">
+      <label class="field-label">descontar de la cuenta</label>
+      <button type="button" class="quick-chip" id="payment-account-chip" onclick="togglePaymentAccountPicker()"></button>
+      <div class="quick-chip-options" id="payment-account-picker" hidden></div>
     </div>
     <div class="field-group">
       <label class="field-label" for="payment-rate-input">tipo de cambio usado (opcional · 1 USD = $)</label>
