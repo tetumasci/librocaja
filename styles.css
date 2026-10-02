@@ -36,7 +36,141 @@
   --font-body: 'Inter', -apple-system, sans-serif;
   --font-mono: 'JetBrains Mono', monospace;
 
+  /* ---- tokens del rediseño (spec 2.2), tema claro ----
+     --income-new, --expense-new y --shadow-card-new llevan sufijo porque
+     --income, --expense y --shadow-card ya existen con otro valor y las
+     pantallas viejas dependen de ellos. En REDISEÑO-B7 se borran los viejos
+     y se renombran estos. */
+  --bg: #EEF2EC;
+  --surface: #FFFFFF;
+  --text: #14231F;
+  --muted: #55645E;
+  --line: #CBD6C8;
+  --divider: #EEF2EC;
+  --input-bg: #F7FAF6;
+  --track: #DDE6DA;
+  --hero: #123B33;
+  --hero-text: #F4F7F1;
+  --hero-divider: #2B5A50;
+  --hero-tile: #1E5148;
+  --hero-border: #123B33;
+  --hero-icon: #D3F26A;
+  --primary: #123B33;
+  --primary-text: #F4F7F1;
+  --highlight: #D3F26A;
+  --highlight-text: #14231F;
+  --nav-active-bg: #D3F26A;
+  --nav-active-fg: #14231F;
+  --link: #0F5A4A;
+  --bar-fill: #123B33;
+  --income-new: #14532D;
+  --expense-new: #9A3412;
+  --income-tint: #DCEFD9;
+  --expense-tint: #FBE3D6;
+  --neutral-tint: #E4EBE1;
+  --warn: #C2410C;
+  --banner-bg: #DCEFD9;
+  --banner-fg: #14532D;
+  --seg-selected-bg: #123B33;
+  --seg-selected-fg: #F4F7F1;
+  --chip-selected-bg: #123B33;
+  --chip-selected-fg: #F4F7F1;
+  --chip-selected-border: #123B33;
+  --expense-solid: #B4451F;
+  --income-solid: #14532D;
+  --overlay: rgba(18,35,31,.55);
+  --shadow-card-new: 0 8px 24px rgba(18,59,51,.14);
+  --font-sans: 'Plus Jakarta Sans', system-ui, sans-serif;
+
   color-scheme: light;
+}
+
+/* tema oscuro forzado desde Ajustes */
+:root[data-theme="dark"] {
+  --bg: #0A0A0A;
+  --surface: #161817;
+  --text: #ECEEED;
+  --muted: #A2AAA6;
+  --line: #2E3231;
+  --divider: #232625;
+  --input-bg: #1D201F;
+  --track: #262A29;
+  --hero: #123B33;
+  --hero-text: #F2F7F4;
+  --hero-divider: #2A5A4F;
+  --hero-tile: #1B4D42;
+  --hero-border: #1F5448;
+  --hero-icon: #8FDCC0;
+  --primary: #8FDCC0;
+  --primary-text: #07231B;
+  --highlight: #8FDCC0;
+  --highlight-text: #07231B;
+  --nav-active-bg: #1D3A32;
+  --nav-active-fg: #8FDCC0;
+  --link: #8FDCC0;
+  --bar-fill: #8FDCC0;
+  --income-new: #7FD99B;
+  --expense-new: #FF9A73;
+  --income-tint: #183524;
+  --expense-tint: #3A241C;
+  --neutral-tint: #262A29;
+  --warn: #FF9A73;
+  --banner-bg: #183524;
+  --banner-fg: #7FD99B;
+  --seg-selected-bg: #123B33;
+  --seg-selected-fg: #F2F7F4;
+  --chip-selected-bg: #123B33;
+  --chip-selected-fg: #F2F7F4;
+  --chip-selected-border: #2F6A5C;
+  --expense-solid: #B4451F;
+  --income-solid: #2E7D4A;
+  --overlay: rgba(0,0,0,.65);
+  --shadow-card-new: 0 8px 24px rgba(0,0,0,.55);
+}
+
+/* tema automático: sigue al sistema salvo que se haya forzado el claro */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0A0A0A;
+    --surface: #161817;
+    --text: #ECEEED;
+    --muted: #A2AAA6;
+    --line: #2E3231;
+    --divider: #232625;
+    --input-bg: #1D201F;
+    --track: #262A29;
+    --hero: #123B33;
+    --hero-text: #F2F7F4;
+    --hero-divider: #2A5A4F;
+    --hero-tile: #1B4D42;
+    --hero-border: #1F5448;
+    --hero-icon: #8FDCC0;
+    --primary: #8FDCC0;
+    --primary-text: #07231B;
+    --highlight: #8FDCC0;
+    --highlight-text: #07231B;
+    --nav-active-bg: #1D3A32;
+    --nav-active-fg: #8FDCC0;
+    --link: #8FDCC0;
+    --bar-fill: #8FDCC0;
+    --income-new: #7FD99B;
+    --expense-new: #FF9A73;
+    --income-tint: #183524;
+    --expense-tint: #3A241C;
+    --neutral-tint: #262A29;
+    --warn: #FF9A73;
+    --banner-bg: #183524;
+    --banner-fg: #7FD99B;
+    --seg-selected-bg: #123B33;
+    --seg-selected-fg: #F2F7F4;
+    --chip-selected-bg: #123B33;
+    --chip-selected-fg: #F2F7F4;
+    --chip-selected-border: #2F6A5C;
+    --expense-solid: #B4451F;
+    --income-solid: #2E7D4A;
+    --overlay: rgba(0,0,0,.65);
+    --shadow-card-new: 0 8px 24px rgba(0,0,0,.55);
+  }
 }
 
 * { box-sizing: border-box; }
@@ -2087,4 +2221,34 @@ input { font-family: inherit; }
   font-weight: 700;
   color: var(--income);
   font-variant-numeric: tabular-nums;
+}
+
+/* ============================================
+   APARIENCIA (selector de tema, REDISEÑO-B0)
+   ============================================ */
+
+.theme-selector {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 4px;
+  padding: 4px;
+  margin-bottom: 8px;
+  border-radius: 26px;
+  background: var(--bg);
+}
+.theme-selector button {
+  height: 44px;
+  border-radius: 22px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--muted);
+}
+.theme-selector button[aria-pressed="true"] {
+  background: var(--seg-selected-bg);
+  color: var(--seg-selected-fg);
+  font-weight: 700;
+}
+.theme-selector button:focus-visible {
+  outline: 2px solid var(--link);
+  outline-offset: 2px;
 }

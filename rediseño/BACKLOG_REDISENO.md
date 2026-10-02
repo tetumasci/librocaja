@@ -206,7 +206,7 @@ En el Inicio, entre la tarjeta del mes y el banner de sugerencias, agregar una f
 
 ---
 ## FEATURE: REDISEÑO-B0 — Tokens, tipografía y tema claro/oscuro
-**Estado: pendiente**
+**Estado: hecha**
 **Depende de:** REDISEÑO-A3
 
 ### Qué se pide
@@ -242,6 +242,49 @@ nueva, mecanismo de tema claro/oscuro y la opción en Ajustes. Seguir `REDISENO_
 - Cambiar el tema desde Ajustes se aplica al instante, sin recargar, y persiste al reabrir.
 - Importar un JSON de backup viejo: no rompe y deja `theme: 'auto'`.
 - Las pantallas todavía con el diseño viejo siguen viéndose igual que antes en claro.
+
+### Notas de implementación
+- Archivos modificados: `styles.css`, `index.html`, `manifest.json`, `js/state.js`, `js/settings.js`,
+  `js/main.js`, `sw.js` (`CACHE_NAME` v26 → v27), `BACKLOG_FEATURES.md` y `PROMPT_FEATURES_CLAUDE_CODE.md`
+  (regla "Identidad visual" ahora apunta a `REDISENO_SPEC.md`).
+- **Colisión de nombres (decisión propia, a confirmar):** la spec define `--income`, `--expense` y
+  `--shadow-card`, pero `:root` ya los tiene con otro valor y todas las pantallas viejas los usan.
+  Redefinirlos cambiaría las pantallas viejas (y en oscuro los gastos quedarían ilegibles sobre
+  crema). Se agregaron con sufijo: `--income-new`, `--expense-new`, `--shadow-card-new`. Las pantallas
+  de B1–B6 usan esos nombres; en B7 se borran los viejos y se renombran. Los otros 36 tokens de la
+  tabla 2.2 se agregaron con el nombre exacto de la spec.
+- Tokens: los 39 nuevos están en `:root` (claro), en `:root[data-theme="dark"]` y en
+  `@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) }` (los dos bloques oscuros
+  están duplicados a mano: CSS no permite compartirlos). Verificado por script que los tres bloques
+  tienen exactamente los mismos nombres y que los tokens viejos conservan su valor.
+- Fuente: Plus Jakarta Sans 400–800 agregada a la URL de Google Fonts existente (las fuentes viejas se
+  siguen cargando porque las pantallas viejas las usan) y token `--font-sans`. Nadie lo usa todavía.
+- `var(--font-ui)`: se usa en 5 reglas (`.dollar-type-chip`, `.dollar-rate-status`,
+  `.subcat-toggle-btn`, `.transfer-trigger-btn` y `.entry-icon.transfer`) y **no está definido**, así que
+  esas declaraciones son inválidas: `font-family` hereda la fuente del cuerpo y los dos `font:` abreviados
+  (`.dollar-type-chip`, `.dollar-rate-status`) se ignoran por completo. No se tocó para no cambiar
+  el aspecto de pantallas viejas; se corrige (con `--font-sans`) cuando cada una migre.
+- Tema: `state.settings = { theme: 'auto' | 'light' | 'dark' }` con default en el estado inicial,
+  `loadState()` (normaliza si falta o es inválido), importación (un backup sin `settings` o con un
+  valor inválido queda en `auto`; uno con `light`/`dark` lo conserva) y `clearAllData()` (vuelve a `auto`).
+  Script inline en `<head>` que lee `localStorage['libro-caja-data-v1']` y fija `data-theme` antes del
+  primer pintado. `applyTheme()`, `renderThemeSelector()` y `setTheme()` están en `js/settings.js`;
+  `applyTheme()` corre en `init()` y tras importar o borrar datos.
+- `<meta name="theme-color">`: dos metas con `media` claro/oscuro. Al elegir Claro u Oscuro, `applyTheme()`
+  fuerza las dos al mismo color; en Automático vuelven a su valor por media. `manifest.json` →
+  `#EEF2EC` en `theme_color` y `background_color`.
+- Ajustes > "apariencia" (`#theme-selector`, tres botones con `aria-pressed`) entre inflación/umbrales y
+  datos; estilo del mockup `Real-L-5-ajustes` con tokens (alto 44, píldora, opción activa
+  `--seg-selected-*`).
+- `color-scheme` (decisión propia): se dejó en `light`. Las pantallas viejas son claras en cualquier
+  tema, y `color-scheme: dark` oscurecería controles nativos sobre fondo crema. Debe pasar a seguir el
+  tema cuando migre la primera pantalla (B1).
+- Efecto visible esperado en oscuro hasta B1: solo el selector de tema cambia; el resto de la app se ve
+  igual que en claro. La barra de estado del celu sí cambia de color (`theme-color`).
+- Probado con simulación (Node): alternar entre claro, oscuro, automático y un valor inválido
+  (data-theme y metas correctos, guardado una vez por cambio); normalización de `settings` ausente,
+  vacío, inválido y válido.
+- Sin probar en navegador real: destello al abrir, SO en oscuro con `auto`, y cambio al instante.
 
 ---
 ## FEATURE: REDISEÑO-B1 — Inicio (libro)

@@ -31,10 +31,12 @@ al usuario en vez de implementarla fuera de orden.
 
 ## Reglas generales (aplican a TODAS las features de este documento)
 
-- **Identidad visual intocable**: papel crema (`--paper: #FAF6EF`), tinta
-  (`--ink: #1F1B16`), terracota gastos (`--expense: #B8512F`), oliva
-  ingresos (`--income: #4A5D3A`), dorado acento (`--accent: #C99A3D`).
-  Tipografía: Source Serif 4 display, Inter UI, JetBrains Mono números.
+- **Identidad visual**: la define `rediseño/REDISENO_SPEC.md` (estilo "E":
+  verde, Plus Jakarta Sans, tokens semánticos, tema claro y oscuro). Todo
+  lo nuevo usa esos tokens y no colores ni medidas fijas. Las pantallas que
+  todavía no migraron conservan el diseño anterior (papel crema, tinta,
+  terracota/oliva/dorado, Source Serif 4 / Inter / JetBrains Mono) hasta que
+  les toque su ítem REDISEÑO-B*; los tokens viejos se borran en REDISEÑO-B7.
 - **Sin frameworks ni build step** — sigue siendo HTML/CSS/JS vanilla
   servido como archivos estáticos, salvo que una feature puntual diga lo
   contrario explícitamente.

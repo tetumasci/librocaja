@@ -25,6 +25,7 @@ function showView(viewName) {
     renderInstallmentManager();
     renderInflationSection();
     renderSmallExpenseThreshold();
+    renderThemeSelector();
   }
   if (viewName === 'plan') renderPlan();
   history.pushState({ overlay: true }, '');
@@ -233,6 +234,9 @@ function attachEventListeners() {
   document.getElementById('btn-import').addEventListener('click', importData);
   document.getElementById('import-file-input').addEventListener('change', handleImportFile);
   document.getElementById('btn-clear-data').addEventListener('click', clearAllData);
+  document.querySelectorAll('#theme-selector button').forEach(btn => {
+    btn.addEventListener('click', () => setTheme(btn.dataset.themeOption));
+  });
 
   // Streak calendar view
   document.getElementById('streak-bar').addEventListener('click', openStreakView);
@@ -262,6 +266,7 @@ function attachEventListeners() {
 
 function init() {
   loadState();
+  applyTheme();
   attachEventListeners();
   reconcilePendingRecurring();
   renderAll();

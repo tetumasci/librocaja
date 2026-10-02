@@ -56,6 +56,7 @@ let state = {
   smallExpenseThreshold: 5000,
   transfers: [],
   installmentPurchases: [],
+  settings: { theme: 'auto' }, // theme: 'auto' | 'light' | 'dark'
 };
 
 let viewDate = new Date();
@@ -107,6 +108,8 @@ function loadState() {
     if (!state.investmentPlans) state.investmentPlans = [];
     if (!state.transfers) state.transfers = [];
     if (!state.installmentPurchases) state.installmentPurchases = [];
+    state.settings = Object.assign({ theme: 'auto' }, state.settings);
+    if (!['auto', 'light', 'dark'].includes(state.settings.theme)) state.settings.theme = 'auto';
     state.goals = state.goals.map(g => g.currency ? g : { ...g, currency: 'ARS' });
     state.categories = state.categories.map(c => c.subcategories ? c : { ...c, subcategories: [] });
     state.incomeCategories = state.incomeCategories.map(c => c.subcategories ? c : { ...c, subcategories: [] });

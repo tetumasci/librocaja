@@ -3,7 +3,17 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, maximum-scale=1.0">
-<meta name="theme-color" content="#FAF6EF">
+<meta name="theme-color" content="#EEF2EC" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0A0A0A" media="(prefers-color-scheme: dark)">
+<script>
+  /* Aplica el tema guardado antes del primer pintado (sin destello).
+     En "auto" no setea nada y manda el @media de styles.css. */
+  try {
+    var s = JSON.parse(localStorage.getItem('libro-caja-data-v1') || '{}');
+    var th = s && s.settings && s.settings.theme;
+    if (th === 'light' || th === 'dark') document.documentElement.dataset.theme = th;
+  } catch (e) {}
+</script>
 <meta name="description" content="Libro de Caja — organizá tus gastos e ingresos todos los días">
 <title>Libro de Caja</title>
 <link rel="manifest" href="manifest.json">
@@ -12,7 +22,7 @@
 <link rel="stylesheet" href="styles.css">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,400;8..60,500;8..60,600;8..60,700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,400;8..60,500;8..60,600;8..60,700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 </head>
 <body>
 
@@ -289,6 +299,13 @@
       <button class="text-btn" id="btn-save-threshold">guardar</button>
     </div>
     <p style="font-size:11px;color:var(--ink-faint);margin:0 0 8px">gastos por debajo de este monto se agrupan como "gastos hormiga" en Reportes</p>
+
+    <h3 class="section-label">apariencia</h3>
+    <div class="theme-selector" id="theme-selector" role="group" aria-label="Tema de la app">
+      <button type="button" data-theme-option="light" aria-pressed="false">Claro</button>
+      <button type="button" data-theme-option="dark" aria-pressed="false">Oscuro</button>
+      <button type="button" data-theme-option="auto" aria-pressed="true">Automático</button>
+    </div>
 
     <h3 class="section-label">datos</h3>
     <button class="settings-row" id="btn-export">

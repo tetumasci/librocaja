@@ -237,6 +237,43 @@ function saveSmallExpenseThreshold() {
   showToast('Umbral actualizado');
 }
 
+/* ---------- Tema (claro / oscuro / automático) ---------- */
+
+const THEME_COLORS = { light: '#EEF2EC', dark: '#0A0A0A' };
+
+/* Aplica state.settings.theme al documento. En 'auto' no fija data-theme y
+   manda el @media (prefers-color-scheme) de styles.css. Las dos metas
+   theme-color (claro/oscuro, con media) se fuerzan al mismo color cuando el
+   usuario elige un tema, y vuelven a sus valores por media en 'auto'. */
+function applyTheme() {
+  const theme = (state.settings && state.settings.theme) || 'auto';
+  const root = document.documentElement;
+  if (theme === 'light' || theme === 'dark') root.dataset.theme = theme;
+  else delete root.dataset.theme;
+
+  document.querySelectorAll('meta[name="theme-color"]').forEach(meta => {
+    const isDarkMeta = (meta.getAttribute('media') || '').includes('dark');
+    meta.setAttribute('content', theme === 'auto'
+      ? (isDarkMeta ? THEME_COLORS.dark : THEME_COLORS.light)
+      : THEME_COLORS[theme]);
+  });
+}
+
+function renderThemeSelector() {
+  const current = (state.settings && state.settings.theme) || 'auto';
+  document.querySelectorAll('#theme-selector button').forEach(btn => {
+    btn.setAttribute('aria-pressed', String(btn.dataset.themeOption === current));
+  });
+}
+
+function setTheme(theme) {
+  if (!['auto', 'light', 'dark'].includes(theme)) return;
+  state.settings = Object.assign({}, state.settings, { theme });
+  saveState();
+  applyTheme();
+  renderThemeSelector();
+}
+
 /* ---------- Streak calendar ---------- */
 
 function openStreakView() {
@@ -363,6 +400,7 @@ function handleImportFile(e) {
       smallExpenseThreshold:  parsed.smallExpenseThreshold ?? 5000,
       transfers:              parsed.transfers          || [],
       installmentPurchases:   parsed.installmentPurchases || [],
+      settings:               { theme: ['light', 'dark'].includes(parsed.settings?.theme) ? parsed.settings.theme : 'auto' },
     };
 
     state.accounts = state.accounts.map(acc =>
@@ -377,6 +415,8 @@ function handleImportFile(e) {
     }
 
     saveState();
+    applyTheme();
+    renderThemeSelector();
     renderAll();
     renderCategoryManager();
     renderIncomeCategoryManager();
@@ -425,8 +465,11 @@ function clearAllData() {
     smallExpenseThreshold: 5000,
     transfers: [],
     installmentPurchases: [],
+    settings: { theme: 'auto' },
   };
   saveState();
+  applyTheme();
+  renderThemeSelector();
   renderAll();
   renderCategoryManager();
   renderIncomeCategoryManager();

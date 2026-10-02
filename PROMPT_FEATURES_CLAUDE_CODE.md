@@ -7,12 +7,12 @@ código JS modularizado en `js/` (`state.js`, `ui.js`, `ledger.js`,
 `recurring.js`, `installments.js`, `accounts.js`, `budgets.js`, `goals.js`,
 `stats.js`, `settings.js`, `plan.js`, `suggestions.js`, `quickadd.js`,
 `transfers.js`, `main.js`). Persistencia 100% local con `localStorage`, clave
-`libro-caja-data-v1`. Identidad visual "libro de caja": papel crema
-(`--paper: #FAF6EF`), tinta (`--ink: #1F1B16`), terracota para gastos
-(`--expense: #B8512F`), oliva para ingresos (`--income: #4A5D3A`), dorado
-de acento (`--accent: #C99A3D`). Tipografía: Source Serif 4 para display,
-Inter para UI, JetBrains Mono para números. Mantené esta identidad en todo
-lo nuevo — no introduzcas paletas o tipografías distintas.
+`libro-caja-data-v1`. Identidad visual: estilo "E" definido en
+`rediseño/REDISENO_SPEC.md` (verde, Plus Jakarta Sans, tokens semánticos,
+tema claro y oscuro). Usá esos tokens en todo lo nuevo — no introduzcas
+paletas, tipografías ni colores fijos. Las pantallas que todavía no migraron
+conservan el diseño anterior (papel crema, Source Serif 4 / Inter /
+JetBrains Mono) hasta su ítem REDISEÑO-B*.
 
 Antes de tocar código, leé `index.html`, `styles.css` y los archivos de `js/`
 que toque la feature para entender la estructura actual (vistas tipo overlay full-screen,
