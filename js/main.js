@@ -13,7 +13,10 @@ function showView(viewName) {
   document.getElementById('view-streak').hidden = true;
 
   document.querySelectorAll('.nav-item').forEach(item => {
-    item.classList.toggle('active', item.dataset.view === viewName);
+    const isActive = item.dataset.view === viewName;
+    item.classList.toggle('active', isActive);
+    if (isActive) item.setAttribute('aria-current', 'page');
+    else item.removeAttribute('aria-current');
   });
 
   if (viewName === 'stats') { resetStatsMonth(); renderStats(); }

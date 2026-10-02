@@ -10,9 +10,8 @@ código JS modularizado en `js/` (`state.js`, `ui.js`, `ledger.js`,
 `libro-caja-data-v1`. Identidad visual: estilo "E" definido en
 `rediseño/REDISENO_SPEC.md` (verde, Plus Jakarta Sans, tokens semánticos,
 tema claro y oscuro). Usá esos tokens en todo lo nuevo — no introduzcas
-paletas, tipografías ni colores fijos. Las pantallas que todavía no migraron
-conservan el diseño anterior (papel crema, Source Serif 4 / Inter /
-JetBrains Mono) hasta su ítem REDISEÑO-B*.
+paletas, tipografías ni colores fijos. El diseño anterior (papel crema,
+Source Serif 4 / Inter / JetBrains Mono) ya no existe.
 
 Antes de tocar código, leé `index.html`, `styles.css` y los archivos de `js/`
 que toque la feature para entender la estructura actual (vistas tipo overlay full-screen,

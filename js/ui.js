@@ -21,7 +21,10 @@ const MODAL_OVERLAY_IDS = ['action-sheet-backdrop', 'dollar-modal-backdrop', 'mo
 
 function updateNavForLedger() {
   document.querySelectorAll('.nav-item').forEach(item => {
-    item.classList.toggle('active', item.dataset.view === 'ledger');
+    const isActive = item.dataset.view === 'ledger';
+    item.classList.toggle('active', isActive);
+    if (isActive) item.setAttribute('aria-current', 'page');
+    else item.removeAttribute('aria-current');
   });
 }
 

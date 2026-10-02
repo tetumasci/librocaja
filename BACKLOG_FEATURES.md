@@ -33,10 +33,12 @@ al usuario en vez de implementarla fuera de orden.
 
 - **Identidad visual**: la define `rediseño/REDISENO_SPEC.md` (estilo "E":
   verde, Plus Jakarta Sans, tokens semánticos, tema claro y oscuro). Todo
-  lo nuevo usa esos tokens y no colores ni medidas fijas. Las pantallas que
-  todavía no migraron conservan el diseño anterior (papel crema, tinta,
-  terracota/oliva/dorado, Source Serif 4 / Inter / JetBrains Mono) hasta que
-  les toque su ítem REDISEÑO-B*; los tokens viejos se borran en REDISEÑO-B7.
+  lo nuevo usa esos tokens (`--bg`, `--surface`, `--text`, `--muted`,
+  `--income`, `--expense`, `--link`, etc., definidos en `:root` y en los dos
+  bloques oscuros de `styles.css`) y nunca colores fijos. Los tokens y la
+  tipografía del diseño anterior (papel crema, Source Serif 4, Inter,
+  JetBrains Mono) ya no existen. Toda pantalla nueva debe verse bien en claro
+  y en oscuro, con contraste AA y con áreas táctiles de al menos 44 px.
 - **Sin frameworks ni build step** — sigue siendo HTML/CSS/JS vanilla
   servido como archivos estáticos, salvo que una feature puntual diga lo
   contrario explícitamente.

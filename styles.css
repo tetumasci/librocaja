@@ -1,6 +1,7 @@
 /* ============================================
    LIBRO DE CAJA — design tokens
-   Paper ledger aesthetic, warm & functional
+   Estilo "E": verde, Plus Jakarta Sans, tema claro y oscuro.
+   Especificación: rediseño/REDISENO_SPEC.md
    ============================================ */
 
 /* Needed: author CSS (e.g. display:flex on .modal-backdrop) has same specificity
@@ -9,38 +10,7 @@
 [hidden] { display: none !important; }
 
 :root {
-  /* paper & ink */
-  --paper: #FAF6EF;
-  --paper-raised: #FFFFFF;
-  --paper-line: #E4DCC8;
-  --ink: #1F1B16;
-  --ink-soft: #6B6356;
-  --ink-faint: #A39B8B;
-
-  /* money semantics */
-  --income: #4A5D3A;
-  --income-soft: #E7EDDD;
-  --expense: #B8512F;
-  --expense-soft: #F7E5DB;
-  --accent: #C99A3D;
-  --accent-soft: #F4E8CC;
-
-  /* structure */
-  --radius-sm: 6px;
-  --radius-md: 10px;
-  --radius-lg: 16px;
-  --shadow-card: 0 1px 2px rgba(31,27,22,0.06), 0 1px 0 rgba(31,27,22,0.03);
-  --shadow-modal: 0 -4px 24px rgba(31,27,22,0.18);
-
-  --font-display: 'Source Serif 4', Georgia, serif;
-  --font-body: 'Inter', -apple-system, sans-serif;
-  --font-mono: 'JetBrains Mono', monospace;
-
-  /* ---- tokens del rediseño (spec 2.2), tema claro ----
-     --income-new, --expense-new y --shadow-card-new llevan sufijo porque
-     --income, --expense y --shadow-card ya existen con otro valor y las
-     pantallas viejas dependen de ellos. En REDISEÑO-B7 se borran los viejos
-     y se renombran estos. */
+  /* tema claro (spec 2.2) */
   --bg: #EEF2EC;
   --surface: #FFFFFF;
   --text: #14231F;
@@ -64,8 +34,8 @@
   --nav-active-fg: #14231F;
   --link: #0F5A4A;
   --bar-fill: #123B33;
-  --income-new: #14532D;
-  --expense-new: #9A3412;
+  --income: #14532D;
+  --expense: #9A3412;
   --income-tint: #DCEFD9;
   --expense-tint: #FBE3D6;
   --neutral-tint: #E4EBE1;
@@ -80,7 +50,7 @@
   --expense-solid: #B4451F;
   --income-solid: #14532D;
   --overlay: rgba(18,35,31,.55);
-  --shadow-card-new: 0 8px 24px rgba(18,59,51,.14);
+  --shadow-card: 0 8px 24px rgba(18,59,51,.14);
   --font-sans: 'Plus Jakarta Sans', system-ui, sans-serif;
 
   color-scheme: light;
@@ -88,6 +58,7 @@
 
 /* tema oscuro forzado desde Ajustes */
 :root[data-theme="dark"] {
+  color-scheme: dark;
   --bg: #0A0A0A;
   --surface: #161817;
   --text: #ECEEED;
@@ -111,8 +82,8 @@
   --nav-active-fg: #8FDCC0;
   --link: #8FDCC0;
   --bar-fill: #8FDCC0;
-  --income-new: #7FD99B;
-  --expense-new: #FF9A73;
+  --income: #7FD99B;
+  --expense: #FF9A73;
   --income-tint: #183524;
   --expense-tint: #3A241C;
   --neutral-tint: #262A29;
@@ -127,12 +98,13 @@
   --expense-solid: #B4451F;
   --income-solid: #2E7D4A;
   --overlay: rgba(0,0,0,.65);
-  --shadow-card-new: 0 8px 24px rgba(0,0,0,.55);
+  --shadow-card: 0 8px 24px rgba(0,0,0,.55);
 }
 
 /* tema automático: sigue al sistema salvo que se haya forzado el claro */
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
+    color-scheme: dark;
     --bg: #0A0A0A;
     --surface: #161817;
     --text: #ECEEED;
@@ -156,8 +128,8 @@
     --nav-active-fg: #8FDCC0;
     --link: #8FDCC0;
     --bar-fill: #8FDCC0;
-    --income-new: #7FD99B;
-    --expense-new: #FF9A73;
+    --income: #7FD99B;
+    --expense: #FF9A73;
     --income-tint: #183524;
     --expense-tint: #3A241C;
     --neutral-tint: #262A29;
@@ -172,7 +144,7 @@
     --expense-solid: #B4451F;
     --income-solid: #2E7D4A;
     --overlay: rgba(0,0,0,.65);
-    --shadow-card-new: 0 8px 24px rgba(0,0,0,.55);
+    --shadow-card: 0 8px 24px rgba(0,0,0,.55);
   }
 }
 
@@ -182,8 +154,8 @@ html, body {
   margin: 0;
   padding: 0;
   background: var(--bg);
-  color: var(--ink);
-  font-family: var(--font-body);
+  color: var(--text);
+  font-family: var(--font-sans);
   -webkit-tap-highlight-color: transparent;
   overscroll-behavior-y: none;
 }
@@ -213,7 +185,6 @@ input { font-family: inherit; }
 
 /* ============================================
    INICIO (REDISEÑO-B1): barra superior, hero, tarjeta del mes
-   Tokens nuevos; las tres variantes -new evitan chocar con los viejos.
    ============================================ */
 
 .home-top {
@@ -238,6 +209,13 @@ input { font-family: inherit; }
   align-items: center;
   justify-content: center;
   color: var(--text);
+}
+.month-pill-btn { position: relative; }
+/* el botón se ve de 36 px de ancho (mockup), pero el área táctil llega a 44 px */
+.month-pill-btn::after {
+  content: '';
+  position: absolute;
+  inset: 0 -4px;
 }
 .month-pill-btn svg { width: 18px; height: 18px; }
 .month-pill-label {
@@ -377,9 +355,9 @@ input { font-family: inherit; }
   font-variant-numeric: tabular-nums;
   overflow-wrap: anywhere;
 }
-.home-month-value.income { color: var(--income-new); }
-.home-month-value.expense { color: var(--expense-new); }
-.home-month-value.negative { color: var(--expense-new); }
+.home-month-value.income { color: var(--income); }
+.home-month-value.expense { color: var(--expense); }
+.home-month-value.negative { color: var(--expense); }
 
 /* ============================================
    SUGGESTION BANNER
@@ -483,7 +461,10 @@ input { font-family: inherit; }
 }
 .ledger-list > .ledger-day-group:last-child > .ledger-entry:last-child { border-bottom: 0; }
 .ledger-entry:active { background: var(--bg); }
-.ledger-entry.pending { opacity: 0.6; }
+/* pendiente: se atenúa el ícono (decorativo) y el monto pasa a --muted; el texto mantiene el contraste AA
+   y el estado lo dice la etiqueta "pendiente" */
+.ledger-entry.pending .entry-icon { opacity: 0.6; }
+.ledger-entry.pending .entry-amount { color: var(--muted); }
 
 .entry-icon {
   width: 38px;
@@ -536,8 +517,8 @@ input { font-family: inherit; }
   font-variant-numeric: tabular-nums;
   flex-shrink: 0;
 }
-.entry-amount.expense { color: var(--expense-new); }
-.entry-amount.income { color: var(--income-new); }
+.entry-amount.expense { color: var(--expense); }
+.entry-amount.income { color: var(--income); }
 .entry-amount.adjustment,
 .entry-amount.transfer { color: var(--muted); }
 
@@ -588,8 +569,8 @@ input { font-family: inherit; }
 }
 .quick-action-circle svg { width: 22px; height: 22px; }
 .quick-action:active .quick-action-circle { transform: scale(0.94); }
-.quick-action-expense .quick-action-circle { color: var(--expense-new); }
-.quick-action-income .quick-action-circle { color: var(--income-new); }
+.quick-action-expense .quick-action-circle { color: var(--expense); }
+.quick-action-income .quick-action-circle { color: var(--income); }
 /* en oscuro el círculo lleva borde para despegarse del fondo */
 :root[data-theme="dark"] .quick-action-circle { border-color: var(--line); }
 @media (prefers-color-scheme: dark) {
@@ -611,7 +592,7 @@ input { font-family: inherit; }
   margin: 0 auto;
   border-radius: 34px;
   background: var(--surface);
-  box-shadow: var(--shadow-card-new);
+  box-shadow: var(--shadow-card);
   display: flex;
   align-items: center;
   justify-content: space-around;
@@ -1298,7 +1279,7 @@ input { font-family: inherit; }
 .settings-row:last-of-type { border-bottom: 0; }
 .settings-row.danger {
   font-weight: 700;
-  color: var(--expense-new);
+  color: var(--expense);
 }
 .settings-row svg { flex-shrink: 0; }
 
@@ -1820,11 +1801,11 @@ input { font-family: inherit; }
   width: 100%;
   height: 44px;
   margin-top: 8px;
-  border: 1.5px solid var(--expense-new);
+  border: 1.5px solid var(--expense);
   border-radius: 22px;
   font-size: 14px;
   font-weight: 700;
-  color: var(--expense-new);
+  color: var(--expense);
 }
 .btn-danger:active { opacity: 0.75; }
 .btn-save::first-letter,
@@ -1909,8 +1890,8 @@ input { font-family: inherit; }
   font-size: 12px;
   color: var(--muted);
 }
-.dollar-rate-status.ok { color: var(--income-new); }
-.dollar-rate-status.error { color: var(--expense-new); }
+.dollar-rate-status.ok { color: var(--income); }
+.dollar-rate-status.error { color: var(--expense); }
 
 /* historial de montos */
 .history-list {
@@ -1939,8 +1920,8 @@ input { font-family: inherit; }
   font-variant-numeric: tabular-nums;
 }
 .history-trend { margin-right: 3px; font-size: 11px; }
-.history-trend.up { color: var(--expense-new); }
-.history-trend.down { color: var(--income-new); }
+.history-trend.up { color: var(--expense); }
+.history-trend.down { color: var(--income); }
 .history-status {
   flex-shrink: 0;
   padding: 3px 8px;
@@ -1950,7 +1931,7 @@ input { font-family: inherit; }
   letter-spacing: 0.03em;
   text-transform: uppercase;
 }
-.history-status.paid { background: var(--income-tint); color: var(--income-new); }
+.history-status.paid { background: var(--income-tint); color: var(--income); }
 .history-status.pending { background: var(--neutral-tint); color: var(--muted); }
 
 /* menú de acciones del movimiento */
@@ -1968,8 +1949,8 @@ input { font-family: inherit; }
 }
 .action-sheet-btn::first-letter { text-transform: uppercase; }
 .action-sheet-btn:active { background: var(--bg); }
-.action-sheet-danger { color: var(--expense-new); }
-.action-sheet-primary { color: var(--income-new); }
+.action-sheet-danger { color: var(--expense); }
+.action-sheet-primary { color: var(--income); }
 .action-sheet-icon {
   width: 24px;
   font-size: 18px;
@@ -1981,7 +1962,7 @@ input { font-family: inherit; }
   margin: 6px 0 0;
   font-size: 13px;
   line-height: 1.4;
-  color: var(--expense-new);
+  color: var(--expense);
 }
 .quick-card { margin-top: 4px; }
 .quick-card-amount-row {
@@ -2137,7 +2118,7 @@ input { font-family: inherit; }
   border-radius: 28px;
   background: var(--hero);
   color: var(--hero-text);
-  box-shadow: var(--shadow-card-new);
+  box-shadow: var(--shadow-card);
   font-family: var(--font-sans);
   z-index: 300;
 }

@@ -30,12 +30,7 @@ Reglas que aplican a **todos** los ítems REDISEÑO-*:
   sigue vigente para los ítems del Bloque A.
 - Antes de escribir código, leer `index.html`, `styles.css` y los archivos de `js/` que toque el ítem,
   y decir en una línea a qué archivo de `js/` pertenece cada cambio.
-- **Tokens con sufijo `-new` (desde B0):** en los ítems B1–B6 usar `var(--income-new)`,
-  `var(--expense-new)` y `var(--shadow-card-new)` donde la spec diga `--income`, `--expense` o
-  `--shadow-card`. Los nombres sin sufijo siguen siendo los viejos hasta B7.
-- **`color-scheme` no se toca en B1–B6** (queda en `light`); se cambia recién en B7.
-- Si una pantalla migrada usa una regla con `var(--font-ui)` (token que no existe), reemplazarla por
-  `var(--font-sans)` en esa misma pantalla.
+- *(Resuelto en B7)* Los tokens `-new`, `color-scheme` y `--font-ui` fueron reglas provisorias de B0 a B6; ya no aplican.
 
 ---
 ## FEATURE: REDISEÑO-A0 — Poner la documentación al día
@@ -707,7 +702,7 @@ carga de movimiento, carga rápida, transferir, depositar USD, acciones del movi
 
 ---
 ## FEATURE: REDISEÑO-B7 — Cierre: limpiar tokens viejos y revisión final
-**Estado: pendiente**
+**Estado: hecha**
 **Depende de:** REDISEÑO-B6
 
 ### Qué se pide
@@ -739,3 +734,50 @@ Eliminar lo que quedó del diseño viejo y hacer una revisión completa en ambos
   estilos mezclados.
 - Recorrido completo de todas las pantallas y modales en claro, oscuro y automático.
 - Lighthouse / revisión de accesibilidad básica sin errores nuevos.
+
+### Notas de implementación
+- Archivos modificados: `styles.css`, `index.html`, `js/ui.js`, `js/main.js`, `sw.js` (`CACHE_NAME` v35 → v36),
+  `BACKLOG_FEATURES.md`, `PROMPT_FEATURES_CLAUDE_CODE.md`, `rediseño/REDISENO_SPEC.md` y este archivo.
+- **Tokens:** se borraron de `:root` los 20 tokens viejos (`--paper*`, `--ink*`, `--accent*`, `--income-soft`,
+  `--expense-soft`, `--radius-*`, `--shadow-modal`, `--font-display|body|mono`; ya no tenían ningún uso) y se
+  renombraron `--income-new`, `--expense-new` y `--shadow-card-new` a `--income`, `--expense` y `--shadow-card` (en
+  `:root`, en los dos bloques oscuros y en todos los `var(...)`). Verificado por script: ningún `var(--…)` apunta a un
+  token inexistente, ningún token definido queda sin usar, no queda ningún token viejo ni `-new` en `styles.css`,
+  `index.html` ni `js/` (lo único que contiene "-new" es la clase `add-new-chip`), cero referencias a `--font-ui` y
+  ninguna regla con colores fijos fuera de `:root` (tampoco estilos en línea con colores).
+- **Fuentes:** `html, body` pasaron a `--text` y `--font-sans`; se quitaron Source Serif 4, Inter y JetBrains Mono del
+  enlace de Google Fonts. Verificado en el navegador que la única familia cargada es Plus Jakarta Sans.
+- **`color-scheme`:** ahora es `light` en `:root`, `dark` en `:root[data-theme="dark"]` y `dark` dentro del bloque
+  automático (`@media (prefers-color-scheme: dark)`). Verificado: el selector de fecha y los controles nativos pasan a
+  oscuro en el tema oscuro y en el automático con el sistema en oscuro.
+- **Contraste AA (calculado con las fórmulas WCAG sobre los valores reales de los tokens, claro y oscuro):** los 24
+  pares de texto cumplen 4,5:1 en los dos temas (el más justo es el texto blanco sobre `--expense-solid` en claro:
+  5,10:1, y sobre `--income-solid` en oscuro: 4,67:1); el aviso de "casi al límite" (`--warn` sobre `--surface`) da
+  5,18:1 en claro y 8,60:1 en oscuro, y la barra al 90 % contra su pista 4,05:1 / 7,00:1 (se pide 3:1).
+- **Un hallazgo corregido:** los movimientos pendientes usaban `opacity: .6` en toda la fila, lo que bajaba el
+  subtítulo a 2,62:1 en claro. Ahora solo se atenúa el ícono (decorativo) y el monto pasa a `--muted`; el texto conserva
+  el contraste y el estado lo dicen la etiqueta "pendiente" y la etiqueta del día. Quedan con opacidad los estados
+  deshabilitados (flecha de "mes siguiente" en el mes actual), que están exentos de contraste.
+- **Fuera de AA, para tener presente:** los bordes de campos y chips (`--line` sobre `--surface` / `--input-bg`) dan
+  ~1,5:1 en claro y ~1,3:1 en oscuro, por debajo del 3:1 que pide WCAG 1.4.11 para componentes de interfaz. Son los
+  valores del mockup y los campos se reconocen igual por su fondo y su etiqueta; no se tocó. Tampoco se tocó el
+  `<meta viewport>` con `maximum-scale=1.0` (de antes del rediseño, evita el zoom automático de iOS al enfocar un
+  campo) que impide el zoom con dos dedos; sería un cambio aparte (campos de 16 px y quitar `maximum-scale`).
+- **Iconografía (nada depende solo del color):** los montos llevan signo + / − (en filas, tarjeta del mes, saldo del mes,
+  hero y reportes); el presupuesto al 90 % dice "casi al límite" y al superarse "superaste el límite"; los
+  pendientes y los fijos pausados tienen etiqueta ("pendiente", "pausado"); la racha de hoy se marca con aro vacío o
+  tilde y el `aria-label` lo dice; Gasto / Ingreso y las pestañas tienen texto y forma de flecha; el historial de
+  montos usa flechas ▲ ▼ además del color; el estado de la cotización del depósito se explica con texto ("actualizada" / "sin conexión · ingresá el TC manualmente").
+- **Accesibilidad básica (revisión por script en todas las pantallas):** ningún botón sin nombre, ningún campo sin
+  etiqueta, ningún id duplicado, `lang="es-AR"`. Dos arreglos: las flechas de mes del Inicio medían 36 px de ancho (el
+  área táctil ahora llega a 44 px con un `::after`, sin cambiar lo que se ve) y el Inicio no tenía `h1` (se agregó
+  uno visualmente oculto, "Libro de caja"). Además `<nav>` lleva `aria-label` y la pestaña activa `aria-current="page"`.
+  No se corrió Lighthouse (no hay forma de ejecutarlo acá); el criterio equivalente que sí quedaría marcado es el
+  `maximum-scale` del viewport, mencionado arriba.
+- **Documentación:** la regla "Identidad visual" de `BACKLOG_FEATURES.md` y de `PROMPT_FEATURES_CLAUDE_CODE.md` ahora
+  describe solo el diseño nuevo; la spec dice que los nombres de tokens son los definitivos; en las reglas del bloque
+  REDISEÑO se marcaron como resueltas las tres excepciones provisorias de B0 a B6.
+- **Recorrido completo:** en claro, oscuro y automático abrí las 5 pantallas, el calendario de racha y las 15 hojas sin
+  errores de consola ni estilos mezclados (fondo de pantallas y hojas con los tokens del tema). No se pudo probar la
+  actualización desde la versión anterior en un iPhone real: el service worker no cambió (el `CACHE_NAME` nuevo hace
+  que el banner de actualización aparezca y que se borre el caché viejo); conviene mirarlo la primera vez que se deploye.
