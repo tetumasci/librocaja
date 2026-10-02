@@ -616,6 +616,10 @@
       <label class="field-label" for="installment-start-date">fecha de la primera cuota</label>
       <input type="date" id="installment-start-date" class="text-input">
     </div>
+    <div class="field-group" id="installment-already-paid-field">
+      <label class="field-label" for="installment-already-paid">cuotas ya pagadas (si la compra ya venía en curso)</label>
+      <input type="number" inputmode="numeric" id="installment-already-paid" class="text-input" placeholder="0" min="0" value="0">
+    </div>
     <div class="field-group">
       <label class="field-label">categoría (opcional)</label>
       <div class="category-grid" id="installment-category-grid"></div>
@@ -626,6 +630,16 @@
     </div>
     <button class="btn-save" id="btn-save-installment">guardar compra en cuotas</button>
     <button class="btn-cancel" id="btn-cancel-installment">cancelar</button>
+  </div>
+</div>
+
+<!-- ===== MODAL: HISTORIAL (gastos/ingresos fijos y compras en cuotas) ===== -->
+<div class="modal-backdrop" id="history-modal-backdrop" hidden>
+  <div class="modal-sheet">
+    <div class="modal-handle"></div>
+    <h3 class="modal-title" id="history-modal-title">historial</h3>
+    <div id="history-list" class="history-list"></div>
+    <button class="btn-cancel" id="btn-close-history">cerrar</button>
   </div>
 </div>
 

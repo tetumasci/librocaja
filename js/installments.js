@@ -184,6 +184,7 @@ function renderInstallmentManager() {
         <span class="recurring-row-detail">${statusLine}</span>
       </div>
       <div class="recurring-row-actions">
+        <button class="cat-edit inst-history" data-inst-id="${p.id}">historial</button>
         <button class="cat-edit inst-edit" data-inst-id="${p.id}">editar</button>
         <button class="cat-remove inst-remove" data-inst-id="${p.id}">quitar</button>
       </div>
@@ -198,6 +199,12 @@ function renderInstallmentManager() {
     `;
   }
 
+  container.querySelectorAll('.inst-history').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const p = state.installmentPurchases.find(x => x.id === btn.dataset.instId);
+      if (p) openInstallmentHistory(p);
+    });
+  });
   container.querySelectorAll('.inst-edit').forEach(btn => {
     btn.addEventListener('click', () => {
       const p = state.installmentPurchases.find(x => x.id === btn.dataset.instId);
@@ -207,6 +214,18 @@ function renderInstallmentManager() {
   container.querySelectorAll('.inst-remove').forEach(btn => {
     btn.addEventListener('click', () => removeInstallmentPurchase(btn.dataset.instId));
   });
+}
+
+/* Historial de cuotas confirmadas/pendientes de esta compra — mismo
+   modal genérico que usan los gastos/ingresos fijos. */
+function openInstallmentHistory(p) {
+  const rows = state.entries
+    .filter(e => e.installmentPurchaseId === p.id)
+    .sort((a, b) => b.date.localeCompare(a.date))
+    .map(e => ({ label: monthLabel(dateFromISO(e.date)), amount: e.amount, pending: !!e.pending }));
+  const cat = p.categoryId ? getCategoryById(p.categoryId, 'expense') : null;
+  const icon = cat ? cat.icon : '🧾';
+  openHistoryModal(`${icon} ${p.name}`, rows);
 }
 
 function formatShortDate(d) {
@@ -253,6 +272,12 @@ function _openInstallmentModalShared(title, saveLabel, p) {
   document.getElementById('installment-amount').value = p ? p.installmentAmount : '';
   document.getElementById('installment-count').value = p ? p.totalInstallments : '';
   document.getElementById('installment-start-date').value = p ? p.startDate : todayISO();
+  // "cuotas ya pagadas" solo tiene sentido al cargar una compra nueva que
+  // ya venía en curso — en edición no se toca (las cuotas pagadas de una
+  // compra existente ya están en payments, reflejadas por paidCount).
+  const alreadyPaidField = document.getElementById('installment-already-paid-field');
+  if (alreadyPaidField) alreadyPaidField.hidden = !!p;
+  document.getElementById('installment-already-paid').value = '0';
   selectedCategoryIdForInstallment = p ? (p.categoryId || null) : null;
   selectedAccountIdForInstallment = p
     ? p.accountId
@@ -390,6 +415,28 @@ function saveInstallmentPurchase() {
     return;
   }
 
+  const alreadyPaid = parseInt(document.getElementById('installment-already-paid').value, 10) || 0;
+  if (alreadyPaid < 0 || alreadyPaid > count) {
+    showToast('Las cuotas ya pagadas no pueden ser más que el total de cuotas');
+    return;
+  }
+
+  // Si la compra ya venía en curso, precargamos las cuotas ya pagadas como
+  // historial (paid:true) sin generar movimientos para ellas — ya pasaron
+  // antes de cargar la compra en la app, no son un pago pendiente de hoy.
+  // No tocamos processInstallmentPurchases() ni installmentStats(): con
+  // esto en `payments`, paidCount ya da bien y la próxima cuota que se
+  // genera es la correcta (alreadyPaid + 1).
+  const prefilledPayments = [];
+  for (let i = 1; i <= alreadyPaid; i++) {
+    prefilledPayments.push({
+      id: uid(),
+      installmentNumber: i,
+      date: isoFromDate(addMonthsClamped(startDate, i - 1)),
+      paid: true,
+    });
+  }
+
   state.installmentPurchases.push({
     id: uid(),
     name,
@@ -398,7 +445,7 @@ function saveInstallmentPurchase() {
     startDate,
     accountId: selectedAccountIdForInstallment,
     categoryId: selectedCategoryIdForInstallment || null,
-    payments: [],
+    payments: prefilledPayments,
   });
   // Genera la cuota 1 al toque (no esperar al próximo init() de la app)
   // para que el usuario la vea aparecer de inmediato.
