@@ -30,6 +30,8 @@ function formatGoalAmount(amount, currency) {
 
 /* ---------- Goals render ---------- */
 
+const EDIT_ICON_SVG = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20l4-1 11-11-3-3L5 16z"/></svg>';
+
 function renderGoals() {
   const body = document.getElementById('goals-body');
   body.innerHTML = '';
@@ -38,38 +40,41 @@ function renderGoals() {
     const emptyDiv = document.createElement('div');
     emptyDiv.className = 'empty-goals';
     emptyDiv.innerHTML = `
-      <p>todavía no tenés metas de ahorro</p>
-      <p style="font-size:13px;">tocá + arriba para crear la primera</p>`;
+      <p class="empty-goals-title">Todavía no tenés metas de ahorro</p>
+      <p class="empty-goals-sub">Tocá + arriba para crear la primera</p>`;
     body.appendChild(emptyDiv);
   } else {
     const lastRate = getLastExchangeRate();
     state.goals.forEach(goal => {
       const currency = goal.currency || 'ARS';
-      const pct = goal.target > 0 ? Math.min(100, Math.round((goal.current / goal.target) * 100)) : 0;
+      const hasTarget = goal.target > 0;
+      const pct = hasTarget ? Math.min(100, Math.round((goal.current / goal.target) * 100)) : 0;
 
-      let refHTML = '';
-      if (currency === 'USD' && lastRate) {
-        refHTML = `<p class="goal-ars-ref">≈ ${formatMoney(goal.current * lastRate)} ARS (ref.)</p>`;
-      }
+      // Las metas en dólares muestran su equivalente en pesos solo como referencia y solo si hay tipo de cambio.
+      const refHTML = (currency === 'USD' && lastRate)
+        ? `<div class="goal-ars-ref">≈ ${formatMoney(goal.current * lastRate)} (ref.)</div>`
+        : '';
 
-      const card = document.createElement('div');
+      const card = document.createElement('section');
       card.className = 'goal-card';
       card.innerHTML = `
         <div class="goal-top">
-          <p class="goal-name">${escapeHtml(goal.name)}</p>
-          <div class="goal-top-right">
-            <span class="goal-currency-badge">${currency}</span>
-            <span class="goal-pct">${pct}%</span>
-            <button class="goal-edit-btn" data-goal-id="${goal.id}" aria-label="Editar meta">✏️</button>
+          <div class="goal-title">
+            <h2 class="goal-name">${escapeHtml(goal.name)}</h2>
+            <span class="goal-currency-badge ${currency === 'USD' ? 'usd' : 'ars'}">${currency}</span>
           </div>
+          <button class="goal-edit-btn" data-goal-id="${goal.id}" aria-label="Editar meta ${escapeHtml(goal.name)}">${EDIT_ICON_SVG}</button>
         </div>
-        <div class="goal-track"><div class="goal-fill" style="width:${pct}%"></div></div>
         <div class="goal-amounts">
-          <span><strong>${formatGoalAmount(goal.current, currency)}</strong> ahorrado</span>
-          <span>meta: <strong>${formatGoalAmount(goal.target, currency)}</strong></span>
+          <span class="goal-current">${formatGoalAmount(goal.current, currency)}</span>
+          <span class="goal-target">de ${formatGoalAmount(goal.target, currency)}</span>
         </div>
         ${refHTML}
-        <button class="btn-add-fund" data-goal-id="${goal.id}">+ sumar fondos</button>
+        <div class="goal-track" role="progressbar" aria-label="Avance de ${escapeHtml(goal.name)}" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${pct}"><div class="goal-fill" style="width:${pct}%"></div></div>
+        <div class="goal-bottom">
+          <span class="goal-pct">${hasTarget ? `${pct} % logrado` : 'Sin objetivo definido'}</span>
+          <button class="btn-add-fund" data-goal-id="${goal.id}">Sumar</button>
+        </div>
       `;
       body.appendChild(card);
     });
@@ -285,65 +290,57 @@ function getLastExchangeRate() {
   return state.exchangeRates[state.exchangeRates.length - 1].rate;
 }
 
+// "28 sep": día y mes abreviado, para la lista de depósitos.
+function formatDepositDate(iso) {
+  const d = dateFromISO(iso);
+  return `${d.getDate()} ${MONTH_NAMES[d.getMonth()].slice(0, 3)}`;
+}
+
 function renderDollarSavings(container) {
   const totalUSD = state.dollarSavings.reduce((s, d) => s + d.amountUSD, 0);
   const lastRate = getLastExchangeRate();
 
-  const heading = document.createElement('h3');
-  heading.className = 'section-label';
-  heading.textContent = 'ahorro en dólares';
-  container.appendChild(heading);
-
-  const card = document.createElement('div');
+  const card = document.createElement('section');
   card.className = 'dollar-savings-card';
 
-  const totalsEl = document.createElement('div');
-  totalsEl.className = 'dollar-savings-totals';
-  const arsTotal = lastRate ? totalUSD * lastRate : null;
-  totalsEl.innerHTML = `
-    <div class="dollar-total-item">
-      <span class="dollar-total-label">total USD</span>
-      <span class="dollar-total-usd">${formatUSD(totalUSD)}</span>
+  // Equivalente en pesos: solo referencia, y se omite si no hay tipo de cambio cargado.
+  const refLine = lastRate
+    ? `<div class="dollar-total-ref">≈ ${formatMoney(totalUSD * lastRate)} al tipo de cambio $ ${lastRate.toLocaleString('es-AR')} (ref.)</div>`
+    : '';
+
+  card.innerHTML = `
+    <div class="dollar-savings-head">
+      <h2 class="dollar-savings-title">Ahorro en dólares</h2>
+      <button class="dollar-deposit-btn" id="btn-open-dollar">+ Depositar</button>
     </div>
-    <div class="dollar-total-item">
-      <span class="dollar-total-label">equiv. en ARS</span>
-      <span class="dollar-total-ars">${arsTotal !== null ? formatMoney(arsTotal) : '—'}</span>
-      ${lastRate ? `<span class="dollar-total-label">TC $ ${lastRate.toLocaleString('es-AR')}</span>` : ''}
-    </div>
+    <div class="dollar-total-usd">${formatUSD(totalUSD)}</div>
+    ${refLine}
   `;
-  card.appendChild(totalsEl);
 
   const list = document.createElement('div');
   list.className = 'dollar-deposit-list';
   if (state.dollarSavings.length === 0) {
-    list.innerHTML = '<p class="dollar-savings-empty">todavía no registraste ningún depósito</p>';
+    list.innerHTML = '<p class="dollar-savings-empty">Todavía no registraste ningún depósito</p>';
   } else {
     [...state.dollarSavings].reverse().forEach(dep => {
       const acc = getAccountById(dep.sourceAccountId);
+      const subtitle = [formatDepositDate(dep.date), escapeHtml(acc.name)];
+      if (dep.note) subtitle.push(escapeHtml(dep.note));
       const row = document.createElement('div');
       row.className = 'dollar-deposit-row';
-      const subtitle = dep.note || `${acc.icon} ${escapeHtml(acc.name)}`;
       row.innerHTML = `
+        <div class="dollar-deposit-avatar">💵</div>
         <div class="dollar-deposit-left">
-          <span class="dollar-deposit-date">${formatDayLabel(dep.date)}</span>
-          <span class="dollar-deposit-note">${subtitle}</span>
-        </div>
-        <div class="dollar-deposit-right">
           <span class="dollar-deposit-usd">${formatUSD(dep.amountUSD)}</span>
-          <span class="dollar-deposit-ars">${formatMoney(dep.amountARS)} ARS</span>
+          <span class="dollar-deposit-note">${subtitle.join(' · ')}</span>
         </div>
+        <span class="dollar-deposit-ars">${formatMoney(dep.amountARS)}</span>
       `;
       list.appendChild(row);
     });
   }
   card.appendChild(list);
-
-  const addBtn = document.createElement('button');
-  addBtn.className = 'text-btn';
-  addBtn.textContent = '+ depositar';
-  addBtn.addEventListener('click', openDollarModal);
-  card.appendChild(addBtn);
-
+  card.querySelector('#btn-open-dollar').addEventListener('click', openDollarModal);
   container.appendChild(card);
 }
 

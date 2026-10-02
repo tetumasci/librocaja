@@ -145,14 +145,14 @@
 
 <!-- ===== VIEW: STATS (full screen overlay) ===== -->
 <div class="view-overlay themed" id="view-stats" hidden>
-  <header class="report-header">
-    <button class="report-back" id="stats-back" aria-label="Volver">
+  <header class="screen-header">
+    <button class="screen-back" id="stats-back" aria-label="Volver">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
     </button>
     <h1>Reportes</h1>
-    <div class="report-header-spacer"></div>
+    <div class="screen-header-spacer"></div>
   </header>
-  <div class="view-body report-body">
+  <div class="view-body screen-body">
     <div class="report-month">
       <button class="report-month-btn" id="stats-prev-month" aria-label="Mes anterior">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
@@ -240,17 +240,17 @@
 </div>
 
 <!-- ===== VIEW: GOALS ===== -->
-<div class="view-overlay" id="view-goals" hidden>
-  <header class="view-header">
-    <button class="icon-btn" id="goals-back" aria-label="Volver">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M15 18l-6-6 6-6"/></svg>
+<div class="view-overlay themed" id="view-goals" hidden>
+  <header class="screen-header">
+    <button class="screen-back" id="goals-back" aria-label="Volver">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
     </button>
-    <h2>metas de ahorro</h2>
-    <button class="icon-btn" id="btn-add-goal" aria-label="Nueva meta">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>
+    <h1>Metas de ahorro</h1>
+    <button class="screen-add" id="btn-add-goal" aria-label="Nueva meta">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg>
     </button>
   </header>
-  <div class="view-body" id="goals-body">
+  <div class="view-body screen-body" id="goals-body">
     <!-- goals injected here -->
   </div>
 </div>

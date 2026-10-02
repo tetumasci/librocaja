@@ -473,7 +473,7 @@ Aplicar el diseño nuevo a `view-stats`. Referencia: `Real-L-2-reportes` / `Real
 
 ---
 ## FEATURE: REDISEÑO-B3 — Metas y ahorro en dólares
-**Estado: pendiente**
+**Estado: hecha**
 **Depende de:** REDISEÑO-B2
 
 ### Qué se pide
@@ -492,6 +492,39 @@ Aplicar el diseño nuevo a `view-goals`. Referencia: `Real-L-3-metas` / `Real-D-
 - Sin tipo de cambio disponible (se omite la referencia en pesos sin romper).
 - Sin depósitos de USD.
 - Nunca mezclar `$` y `USD` sin rotular.
+
+### Notas de implementación
+- Archivos modificados: `index.html` (`view-goals`), `styles.css`, `js/goals.js`, `js/plan.js` (solo un
+  renombre, ver abajo), `sw.js` (`CACHE_NAME` v31 → v32). Ningún id existente se renombró (`#goals-back`,
+  `#btn-add-goal`, `#goals-body`, y las clases `.btn-add-fund` / `.goal-edit-btn` con su `data-goal-id`
+  se conservan). Id nuevo: `#btn-open-dollar` (botón "+ Depositar").
+- **Verificación contra `Real-L-3-metas` / `Real-D-3-metas`:** corrí la app en un navegador real a 390 px con
+  metas en pesos y en dólares y depósitos de ejemplo; medí con JS: botones volver, nueva meta y editar de
+  44 × 44, "Sumar" y "+ Depositar" de 44 px de alto, barra de 12 px, tarjeta de radio 28, monto de meta
+  24/800, total en dólares 30/800 y avatares de 38 px; capturas en claro y oscuro. Sin colores fijos ni
+  tokens viejos en el CSS nuevo (revisado por script). No probado en un celu real.
+- Encabezado compartido: las clases `report-header`, `report-back` y `report-body` pasaron a `screen-header`,
+  `screen-back` y `screen-body` (ahora las usan Reportes y Metas), y se agregó `.screen-add` (botón + circular
+  de 44 px con `--primary`). `view-goals` lleva la clase `themed`.
+- Tarjeta de meta: nombre, badge ARS (`--neutral-tint`) o USD (`--highlight`), lápiz de 44 × 44 con
+  `aria-label="Editar meta <nombre>"` (reemplaza al emoji ✏️), monto actual y "de <objetivo>" en la moneda de la
+  meta (`formatGoalAmount`), barra con `role="progressbar"`, "N % logrado" y botón "Sumar". Las metas en USD
+  muestran "≈ $ … (ref.)" con el último tipo de cambio y se omite si no hay ninguno. Nombres largos se cortan
+  con "…" sin romper la tarjeta (probado a 320 px).
+- Sección "Ahorro en dólares": tarjeta con título, "+ Depositar", total en USD, "≈ $ … al tipo de cambio $ …
+  (ref.)" (se omite sin tipo de cambio) y lista de depósitos con avatar 💵, "USD X", "28 sep · Banco" (más la nota
+  si hay) y el equivalente en pesos. Reemplaza al `<h3>` suelto "ahorro en dólares" y al botón de texto. El
+  equivalente en pesos de cada depósito ahora se muestra como "$ X" (antes "X ARS"); sigue rotulado por el "$".
+- Decisiones propias: meta con objetivo 0 muestra "Sin objetivo definido" en vez de "0 % logrado"; una meta
+  por encima del 100 % muestra "100 % logrado" con la barra llena (no se desborda).
+- **Bug previo corregido (a confirmar):** `formatUSD` estaba definida dos veces (`goals.js` y `plan.js`) y la
+  de `plan.js`, que carga después, pisaba a la otra, así que todos los dólares se veían como "USD 1,240" (sin
+  decimales y con coma) en vez de "USD 1.240,00". Se renombró la de Plan a `formatPlanUSD` (sus 7 usos en
+  `plan.js`), de modo que Plan sigue viéndose igual y Metas/ahorro en dólares/modal de depósito usan el
+  formato argentino con decimales.
+- Casos de borde probados: sin metas, sin depósitos, sin tipo de cambio, meta al 100 % y por encima, meta con
+  objetivo 0, nombre muy largo a 320 px, y que "Sumar", el lápiz, "+" y "+ Depositar" abren su modal. Sin errores
+  de consola.
 
 ---
 ## FEATURE: REDISEÑO-B4 — Plan

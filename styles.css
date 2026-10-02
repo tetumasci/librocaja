@@ -715,7 +715,7 @@ input { font-family: inherit; }
   font-family: var(--font-sans);
 }
 
-.report-header {
+.screen-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -725,12 +725,12 @@ input { font-family: inherit; }
   padding: 20px 20px 0;
   box-sizing: content-box;
 }
-.report-header h1 {
+.screen-header h1 {
   margin: 0;
   font-size: 18px;
   font-weight: 700;
 }
-.report-back {
+.screen-back {
   width: 44px;
   height: 44px;
   border-radius: 50%;
@@ -739,10 +739,21 @@ input { font-family: inherit; }
   align-items: center;
   justify-content: center;
 }
-.report-back svg { width: 20px; height: 20px; }
-.report-header-spacer { width: 44px; }
+.screen-back svg { width: 20px; height: 20px; }
+.screen-header-spacer { width: 44px; }
+.screen-add {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: var(--primary);
+  color: var(--primary-text);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.screen-add svg { width: 20px; height: 20px; }
 
-.view-body.report-body { padding: 0 20px; }
+.view-body.screen-body { padding: 0 20px; }
 
 .report-month {
   margin-top: 8px;
@@ -972,100 +983,126 @@ input { font-family: inherit; }
 }
 
 /* ============================================
-   GOALS
+   GOALS (REDISEÑO-B3)
    ============================================ */
 
 .goal-card {
-  background: var(--paper-raised);
-  border: 1px solid var(--paper-line);
-  border-radius: var(--radius-lg);
-  padding: 16px 18px;
-  margin-bottom: 14px;
-  box-shadow: var(--shadow-card);
+  margin-top: 12px;
+  background: var(--surface);
+  border-radius: 28px;
+  padding: 18px 18px 12px;
 }
 .goal-top {
   display: flex;
-  justify-content: space-between;
   align-items: center;
-  margin-bottom: 10px;
+  justify-content: space-between;
 }
-.goal-top-right {
+.goal-title {
   display: flex;
   align-items: center;
   gap: 8px;
+  min-width: 0;
+}
+.goal-name {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 700;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 .goal-currency-badge {
-  font-family: var(--font-mono);
-  font-size: 10px;
+  flex-shrink: 0;
+  font-size: 11px;
   font-weight: 700;
-  color: var(--ink-faint);
-  background: var(--paper-line);
-  border-radius: 4px;
-  padding: 1px 5px;
-  letter-spacing: 0.04em;
+  border-radius: 10px;
+  padding: 3px 8px;
 }
+.goal-currency-badge.ars { background: var(--neutral-tint); color: var(--muted); }
+.goal-currency-badge.usd { background: var(--highlight); color: var(--highlight-text); }
 .goal-edit-btn {
-  font-size: 14px;
-  padding: 0 2px;
-  color: var(--ink-faint);
-  line-height: 1;
+  width: 44px;
+  height: 44px;
+  margin: -10px -10px -10px 0;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--muted);
 }
-.goal-edit-btn:active { opacity: 0.6; }
-.goal-name {
-  font-family: var(--font-display);
-  font-size: 16px;
-  font-weight: 600;
-  margin: 0;
+.goal-edit-btn svg { width: 18px; height: 18px; }
+.goal-amounts {
+  margin-top: 8px;
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px;
+  font-variant-numeric: tabular-nums;
 }
-.goal-pct {
-  font-family: var(--font-mono);
+.goal-current {
+  font-size: 24px;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  overflow-wrap: anywhere;
+}
+.goal-target {
   font-size: 13px;
-  color: var(--accent);
-  font-weight: 600;
+  color: var(--muted);
+  text-align: right;
+}
+.goal-ars-ref {
+  margin-top: 4px;
+  font-size: 12px;
+  color: var(--muted);
 }
 .goal-track {
-  height: 10px;
-  background: var(--accent-soft);
-  border-radius: 5px;
+  margin-top: 10px;
+  height: 12px;
+  border-radius: 6px;
+  background: var(--track);
   overflow: hidden;
-  margin-bottom: 8px;
 }
 .goal-fill {
-  height: 100%;
-  background: var(--accent);
-  border-radius: 5px;
+  height: 12px;
+  border-radius: 6px;
+  background: var(--bar-fill);
 }
-.goal-amounts {
+.goal-bottom {
+  margin-top: 10px;
   display: flex;
+  align-items: center;
   justify-content: space-between;
-  font-size: 12px;
-  color: var(--ink-soft);
+  gap: 8px;
 }
-.goal-amounts strong { color: var(--ink); font-family: var(--font-mono); }
-
-.goal-ars-ref {
-  font-size: 11px;
-  color: var(--ink-faint);
-  font-style: italic;
-  margin: 4px 0 0;
+.goal-pct {
+  font-size: 13px;
+  font-weight: 700;
 }
 .btn-add-fund {
-  margin-top: 12px;
-  width: 100%;
-  height: 34px;
-  font-size: 12px;
-  font-weight: 600;
-  color: var(--ink);
-  border: 1px dashed var(--paper-line);
-  border-radius: var(--radius-sm);
+  height: 44px;
+  padding: 0 20px;
+  border-radius: 22px;
+  background: var(--highlight);
+  color: var(--highlight-text);
+  font-size: 14px;
+  font-weight: 700;
+  flex-shrink: 0;
 }
 
 .empty-goals {
   text-align: center;
   padding: 60px 20px;
-  color: var(--ink-faint);
 }
-.empty-goals p { font-family: var(--font-display); font-size: 15px; }
+.empty-goals-title {
+  margin: 0 0 4px;
+  font-size: 16px;
+  font-weight: 700;
+}
+.empty-goals-sub {
+  margin: 0;
+  font-size: 13px;
+  color: var(--muted);
+}
 
 /* ============================================
    SETTINGS
@@ -1699,123 +1736,102 @@ input { font-family: inherit; }
 }
 
 /* ============================================
-   DOLLAR SAVINGS SECTION
+   DOLLAR SAVINGS SECTION (REDISEÑO-B3)
    ============================================ */
 
 .dollar-savings-card {
-  background: var(--paper-raised);
-  border: 1px solid var(--paper-line);
-  border-radius: var(--radius-lg);
-  padding: 16px 18px;
-  margin-bottom: 14px;
-  box-shadow: var(--shadow-card);
+  margin-top: 16px;
+  background: var(--surface);
+  border-radius: 28px;
+  padding: 14px 18px 6px;
 }
-
-.dollar-savings-totals {
+.dollar-savings-head {
   display: flex;
-  border-bottom: 1px dashed var(--paper-line);
-  padding-bottom: 14px;
-  margin-bottom: 12px;
-}
-
-.dollar-total-item {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
   align-items: center;
-  gap: 3px;
+  justify-content: space-between;
+  gap: 8px;
 }
-
-.dollar-total-item + .dollar-total-item {
-  border-left: 1px solid var(--paper-line);
+.dollar-savings-title {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 700;
 }
-
-.dollar-total-label {
-  font-size: 10px;
-  text-transform: uppercase;
-  letter-spacing: .05em;
-  color: var(--ink-faint);
+.dollar-deposit-btn {
+  height: 44px;
+  padding: 0 18px;
+  border-radius: 22px;
+  background: var(--primary);
+  color: var(--primary-text);
+  font-size: 14px;
+  font-weight: 700;
+  flex-shrink: 0;
 }
-
 .dollar-total-usd {
-  font-family: var(--font-mono);
-  font-size: 20px;
-  font-weight: 600;
-  color: var(--income);
+  margin-top: 6px;
+  font-size: 30px;
+  font-weight: 800;
+  letter-spacing: -0.02em;
   font-variant-numeric: tabular-nums;
+  overflow-wrap: anywhere;
 }
-
-.dollar-total-ars {
-  font-family: var(--font-mono);
+.dollar-total-ref {
+  margin-top: 2px;
   font-size: 12px;
-  color: var(--ink-soft);
-  font-variant-numeric: tabular-nums;
+  color: var(--muted);
 }
-
 .dollar-deposit-list {
-  display: flex;
-  flex-direction: column;
-  margin-bottom: 10px;
+  margin-top: 10px;
+  border-top: 1px solid var(--divider);
 }
-
 .dollar-deposit-row {
   display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  padding: 10px 0;
-  border-bottom: 1px solid var(--paper-line);
+  align-items: center;
   gap: 12px;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--divider);
 }
-
-.dollar-deposit-row:last-child { border-bottom: none; }
-
+.dollar-deposit-row:last-child { border-bottom: 0; }
+.dollar-deposit-avatar {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  background: var(--income-tint);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  flex-shrink: 0;
+}
 .dollar-deposit-left {
+  flex-grow: 1;
+  min-width: 0;
   display: flex;
   flex-direction: column;
-  gap: 2px;
-  min-width: 0;
 }
-
-.dollar-deposit-date {
-  font-size: 11px;
-  color: var(--ink-faint);
+.dollar-deposit-usd {
+  font-size: 14px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
 }
-
 .dollar-deposit-note {
   font-size: 12px;
-  color: var(--ink-soft);
+  color: var(--muted);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
-
-.dollar-deposit-right {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-end;
-  gap: 2px;
+.dollar-deposit-ars {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--muted);
+  font-variant-numeric: tabular-nums;
   flex-shrink: 0;
 }
-
-.dollar-deposit-usd {
-  font-family: var(--font-mono);
-  font-size: 14px;
-  font-weight: 600;
-  color: var(--income);
-  font-variant-numeric: tabular-nums;
-}
-
-.dollar-deposit-ars {
-  font-family: var(--font-mono);
-  font-size: 11px;
-  color: var(--ink-soft);
-  font-variant-numeric: tabular-nums;
-}
-
 .dollar-savings-empty {
+  margin: 0;
+  padding: 14px 0 16px;
   font-size: 13px;
-  color: var(--ink-faint);
-  padding: 8px 0 12px;
+  color: var(--muted);
 }
 
 /* ARS preview in deposit modal */

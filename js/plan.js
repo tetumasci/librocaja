@@ -7,7 +7,7 @@ let payingAccountId = null; // null = no descontar de ninguna cuenta
 
 /* ---------- Calculations ---------- */
 
-function formatUSD(n) {
+function formatPlanUSD(n) {
   return 'USD ' + Math.round(n).toLocaleString('en-US');
 }
 
@@ -79,18 +79,18 @@ function buildPlanCard(plan) {
     <div class="plan-stats-grid">
       <div class="plan-stat">
         <span class="plan-stat-label">aportado hasta hoy</span>
-        <span class="plan-stat-value">${formatUSD(contributed)}</span>
+        <span class="plan-stat-value">${formatPlanUSD(contributed)}</span>
         <span class="plan-stat-sub">${(plan.contributions || []).length} cuotas</span>
       </div>
       <div class="plan-stat">
         <span class="plan-stat-label">valor acumulado</span>
-        <span class="plan-stat-value">${formatUSD(accumulated)}</span>
+        <span class="plan-stat-value">${formatPlanUSD(accumulated)}</span>
         <span class="plan-stat-sub">${monthsElapsed} meses</span>
       </div>
     </div>
     <div class="plan-projected">
       <span class="plan-projected-label">proyectado a ${plan.termYears} años</span>
-      <span class="plan-projected-value">${formatUSD(projected)}</span>
+      <span class="plan-projected-value">${formatPlanUSD(projected)}</span>
     </div>
     <canvas class="plan-chart" id="plan-chart-${plan.id}" height="70"></canvas>
     <button class="plan-payment-btn" data-id="${plan.id}">registrar pago de este mes</button>
@@ -226,7 +226,7 @@ function openPaymentModal(planId) {
   if (!plan) return;
 
   document.getElementById('payment-plan-name').textContent = plan.name;
-  document.getElementById('payment-usd-amount').textContent = formatUSD(plan.monthlyContributionUSD);
+  document.getElementById('payment-usd-amount').textContent = formatPlanUSD(plan.monthlyContributionUSD);
   document.getElementById('payment-ars-input').value = '';
   document.getElementById('payment-rate-input').value = '';
   document.getElementById('payment-date-input').value = todayISO();
@@ -290,7 +290,7 @@ function savePayment() {
       amount: ars,
       categoryId: 'ahorro-usd',
       accountId,
-      note: `Plan ${plan.name} · ${formatUSD(plan.monthlyContributionUSD)}`,
+      note: `Plan ${plan.name} · ${formatPlanUSD(plan.monthlyContributionUSD)}`,
       date,
       createdAt: Date.now(),
     });
@@ -301,5 +301,5 @@ function savePayment() {
   saveState();
   closePaymentModal();
   renderPlan();
-  showToast(`pago registrado — ${formatUSD(plan.monthlyContributionUSD)}`);
+  showToast(`pago registrado — ${formatPlanUSD(plan.monthlyContributionUSD)}`);
 }
