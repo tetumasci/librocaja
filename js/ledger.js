@@ -352,22 +352,20 @@ function closeActionSheet() {
 
 /* ---------- Add / Edit modal ---------- */
 
-function openAddModal() {
+// type: 'expense' | 'income'. Cualquier otro valor (o ninguno) abre en gasto.
+function openAddModal(type) {
   closeAllOverlaysAndModals();
   editingEntryId = null;
   document.getElementById('btn-save-entry').textContent = 'anotar movimiento';
-  currentEntryType = 'expense';
-  selectedCategoryId = null;
-  selectedSubcategoryId = null;
-  _activeSuggestion = null;
   const hint = document.getElementById('category-suggestion-hint');
   if (hint) hint.hidden = true;
   selectedAccountId = state.accounts.length > 0 ? state.accounts[0].id : null;
   document.getElementById('input-amount').value = '';
   document.getElementById('input-note').value = '';
   document.getElementById('input-date').value = todayISO();
-  setEntryType('expense');
-  renderCategoryGrid();
+  // setEntryType() deja el toggle, limpia categoría/subcategoría/sugerencia
+  // y renderiza las categorías del tipo elegido.
+  setEntryType(type === 'income' ? 'income' : 'expense');
   renderAccountGrid();
   document.getElementById('modal-backdrop').hidden = false;
   history.pushState({ overlay: true }, '');

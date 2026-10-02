@@ -71,6 +71,22 @@
     </div>
   </section>
 
+  <!-- ===== ACCESOS DIRECTOS ===== -->
+  <div class="quick-actions">
+    <button class="quick-action quick-action-expense" id="btn-add-expense">
+      <span class="quick-action-circle"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17L17 7M9 7h8v8"/></svg></span>
+      <span class="quick-action-label">Gasto</span>
+    </button>
+    <button class="quick-action quick-action-income" id="btn-add-income">
+      <span class="quick-action-circle"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 7L7 17M15 17H7V9"/></svg></span>
+      <span class="quick-action-label">Ingreso</span>
+    </button>
+    <button class="quick-action" id="btn-quick-add">
+      <span class="quick-action-circle"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg></span>
+      <span class="quick-action-label">Carga rápida</span>
+    </button>
+  </div>
+
   <!-- ===== SUGGESTION BANNER (dynamic) ===== -->
   <section class="suggestion-banner" id="suggestion-banner" hidden>
     <span class="suggestion-icon">◆</span>
@@ -92,19 +108,11 @@
     </div>
     <div class="empty-state" id="empty-state" hidden>
       <p class="empty-state-title">todavía no anotaste nada este mes</p>
-      <p class="empty-state-sub">tocá el botón + para cargar tu primer movimiento</p>
+      <p class="empty-state-sub">tocá Gasto o Ingreso para cargar tu primer movimiento</p>
     </div>
   </section>
 
 </div>
-
-<!-- ===== FLOATING ADD BUTTON ===== -->
-<button class="fab-quick" id="btn-quick-add" aria-label="Carga rápida">
-  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
-</button>
-<button class="fab" id="btn-add" aria-label="Agregar movimiento">
-  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>
-</button>
 
 <!-- ===== BOTTOM NAV ===== -->
 <nav class="bottom-nav">

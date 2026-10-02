@@ -62,8 +62,9 @@ function attachEventListeners() {
     if (e.target.id === 'action-sheet-backdrop') closeActionSheet();
   });
 
-  // FAB + modal
-  document.getElementById('btn-add').addEventListener('click', openAddModal);
+  // Accesos directos del Inicio + modal (arrow functions: el click no debe pasar el evento como tipo)
+  document.getElementById('btn-add-expense').addEventListener('click', () => openAddModal('expense'));
+  document.getElementById('btn-add-income').addEventListener('click', () => openAddModal('income'));
   document.getElementById('btn-cancel-entry').addEventListener('click', closeAddModal);
   document.getElementById('input-note').addEventListener('input', onNoteInputSuggestion);
 

@@ -165,7 +165,7 @@ vista ya usa.
 
 ---
 ## FEATURE: REDISEÑO-A3 — Accesos directos Gasto / Ingreso / Carga rápida en el Inicio
-**Estado: pendiente**
+**Estado: hecha**
 **Depende de:** REDISEÑO-A2
 
 ### Qué se pide
@@ -182,6 +182,27 @@ En el Inicio, entre la tarjeta del mes y el banner de sugerencias, agregar una f
 - Abrir con Ingreso, cancelar, abrir con Gasto: no quedan el tipo ni la categoría anteriores.
 - Editar un movimiento existente (`openEditModal`) y la carga rápida siguen funcionando.
 - El botón atrás del celu cierra la hoja y nunca quedan dos overlays abiertos.
+
+### Notas de implementación
+- Archivos modificados: `js/ledger.js` (`openAddModal(type)`), `js/main.js` (listeners), `index.html`
+  (fila `.quick-actions`, FAB borrados, texto de `#empty-state`), `styles.css`, `sw.js`
+  (`CACHE_NAME` v25 → v26). `index.html` ya no tiene `#btn-add`; `#btn-quick-add` conserva id y listener
+  (`openQuickAddModal`) y solo cambió de lugar.
+- `openAddModal(type)`: acepta `'expense' | 'income'`; cualquier otro valor, o ninguno, abre en gasto.
+  En vez de duplicar el reseteo, delega en `setEntryType()` (deja el toggle, limpia categoría,
+  subcategoría y sugerencia, y renderiza las categorías del tipo). Se borraron del cuerpo las líneas
+  redundantes que ya hacía `setEntryType`.
+- Los listeners de Gasto e Ingreso son arrow functions (`() => openAddModal('income')`) para que el
+  evento del click no llegue como `type`. `openAddModal` no tiene otros llamadores.
+- CSS: nueva sección "ACCESOS DIRECTOS" con grilla de 3 columnas, círculo de 56 px y etiqueta de 12 px,
+  solo con tokens existentes (flecha ↗ en `--expense`, ↙ en `--income`). Se borraron `.fab` y `.fab-quick`.
+  El estilo final queda para B1.
+- Probado con una simulación de `openAddModal`: Ingreso → tipo y toggle de ingreso con categoría,
+  subcategoría, sugerencia y edición limpias; luego Gasto sin arrastrar la categoría anterior; sin
+  argumento y con un evento como argumento → gasto.
+- El `+` que menciona `js/plan.js` ("usá el botón + para agregar uno") es el botón del encabezado de
+  Plan, no el FAB: no se tocó.
+- Sin probar en navegador real: la fila, el botón atrás y que no queden dos overlays.
 
 ---
 ## FEATURE: REDISEÑO-B0 — Tokens, tipografía y tema claro/oscuro

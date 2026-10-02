@@ -450,26 +450,43 @@ input { font-family: inherit; }
 }
 
 /* ============================================
-   FAB
+   ACCESOS DIRECTOS (Gasto / Ingreso / Carga rápida)
    ============================================ */
 
-.fab {
-  position: fixed;
-  right: 20px;
-  bottom: 88px;
+.quick-actions {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+  margin-bottom: 16px;
+}
+.quick-action {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  min-height: 44px;
+  padding: 4px 0;
+  color: var(--ink);
+}
+.quick-action-circle {
   width: 56px;
   height: 56px;
   border-radius: 50%;
-  background: var(--ink);
-  color: var(--paper);
+  background: var(--paper-raised);
+  border: 1px solid var(--paper-line);
+  box-shadow: var(--shadow-card);
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 4px 14px rgba(31,27,22,0.3);
-  z-index: 40;
 }
-.fab svg { width: 24px; height: 24px; }
-.fab:active { transform: scale(0.94); }
+.quick-action-circle svg { width: 24px; height: 24px; }
+.quick-action:active .quick-action-circle { transform: scale(0.94); }
+.quick-action-expense .quick-action-circle { color: var(--expense); }
+.quick-action-income .quick-action-circle { color: var(--income); }
+.quick-action-label {
+  font-size: 12px;
+  font-weight: 600;
+}
 
 /* ============================================
    BOTTOM NAV
@@ -1765,27 +1782,8 @@ input { font-family: inherit; }
 .transfer-trigger-btn:active { background: rgba(31,27,22,0.03); }
 
 /* ============================================
-   QUICK ADD FAB + MODAL
+   QUICK ADD MODAL
    ============================================ */
-
-.fab-quick {
-  position: fixed;
-  right: 84px;
-  bottom: 88px;
-  width: 44px;
-  height: 44px;
-  border-radius: 50%;
-  background: var(--paper);
-  color: var(--ink);
-  border: 1.5px solid var(--ink);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  box-shadow: 0 2px 8px rgba(31,27,22,0.15);
-  z-index: 40;
-}
-.fab-quick svg { width: 18px; height: 18px; }
-.fab-quick:active { transform: scale(0.94); }
 
 .modal-section-title {
   font-family: var(--font-display);
