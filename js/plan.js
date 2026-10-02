@@ -229,6 +229,10 @@ function openPaymentModal(planId) {
   document.getElementById('payment-ars-input').value = '';
   document.getElementById('payment-rate-input').value = '';
   document.getElementById('payment-date-input').value = todayISO();
+  const accSelect = document.getElementById('payment-account-select');
+  accSelect.innerHTML = '<option value="">no descontar de ninguna</option>' +
+    state.accounts.map(a => `<option value="${a.id}">${a.icon} ${escapeHtml(a.name)}</option>`).join('');
+  accSelect.value = state.accounts.length > 0 ? state.accounts[0].id : '';
   document.getElementById('plan-payment-modal-backdrop').hidden = false;
   history.pushState({ overlay: true }, '');
   setTimeout(() => document.getElementById('payment-ars-input').focus(), 200);
@@ -248,13 +252,32 @@ function savePayment() {
   const rate = parseFloat(document.getElementById('payment-rate-input').value) || null;
   const date = document.getElementById('payment-date-input').value || todayISO();
 
+  const accountId = document.getElementById('payment-account-select').value;
+  if (accountId && !ars) { showToast('Ingresá el monto en pesos para descontarlo'); return; }
+
   if (!plan.contributions) plan.contributions = [];
-  plan.contributions.push({
+  const contribution = {
     date,
     amountUSD: plan.monthlyContributionUSD,
     amountARSPaid: ars,
     exchangeRateUsed: rate,
-  });
+  };
+
+  if (accountId && ars) {
+    const entryId = uid();
+    state.entries.push({
+      id: entryId,
+      type: 'expense',
+      amount: ars,
+      categoryId: 'ahorro-usd',
+      accountId,
+      note: `Plan ${plan.name} · ${formatUSD(plan.monthlyContributionUSD)}`,
+      date,
+      createdAt: Date.now(),
+    });
+    contribution.entryId = entryId;
+  }
+  plan.contributions.push(contribution);
 
   saveState();
   closePaymentModal();
