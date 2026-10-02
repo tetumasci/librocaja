@@ -30,6 +30,12 @@ Reglas que aplican a **todos** los ítems REDISEÑO-*:
   sigue vigente para los ítems del Bloque A.
 - Antes de escribir código, leer `index.html`, `styles.css` y los archivos de `js/` que toque el ítem,
   y decir en una línea a qué archivo de `js/` pertenece cada cambio.
+- **Tokens con sufijo `-new` (desde B0):** en los ítems B1–B6 usar `var(--income-new)`,
+  `var(--expense-new)` y `var(--shadow-card-new)` donde la spec diga `--income`, `--expense` o
+  `--shadow-card`. Los nombres sin sufijo siguen siendo los viejos hasta B7.
+- **`color-scheme` no se toca en B1–B6** (queda en `light`); se cambia recién en B7.
+- Si una pantalla migrada usa una regla con `var(--font-ui)` (token que no existe), reemplazarla por
+  `var(--font-sans)` en esa misma pantalla.
 
 ---
 ## FEATURE: REDISEÑO-A0 — Poner la documentación al día
@@ -447,6 +453,16 @@ Eliminar lo que quedó del diseño viejo y hacer una revisión completa en ambos
   `--expense-soft`, `--radius-sm|md|lg` si ya no se usan, fuentes viejas) y todo estilo huérfano. Buscar
   con `grep` que no quede ningún `var(--…)` apuntando a un token borrado ni colores hardcodeados.
 - Confirmar que no se cargan las fuentes viejas.
+- **Renombrar los tokens `-new`:** una vez borrados los viejos, renombrar `--income-new`,
+  `--expense-new` y `--shadow-card-new` a `--income`, `--expense` y `--shadow-card` en `:root`, en los dos
+  bloques oscuros y en todos los `var(...)` que los usen. Verificar con `grep` que no queda ningún
+  `-new` en `styles.css`, `index.html` ni `js/`.
+- **`color-scheme`:** cambiarlo para que siga al tema (`light` en claro, `dark` en `:root[data-theme="dark"]`
+  y en el bloque `@media (prefers-color-scheme: dark)`), recién ahora que no queda ninguna pantalla vieja.
+  Revisar que inputs, selects, scrollbars y el selector de fecha se vean bien en ambos temas.
+- **`--font-ui`:** verificar con `grep` que no queda ninguna referencia a `var(--font-ui)` (en B0 se
+  encontraron 5: `.dollar-type-chip`, `.dollar-rate-status`, `.subcat-toggle-btn`, `.transfer-trigger-btn`
+  y `.entry-icon.transfer`); corregir las que falten con `var(--font-sans)`.
 - Revisar contraste AA de texto y de los estados (barra al 90 %, pendientes, deshabilitados) en
   claro y oscuro.
 - Revisar iconografía: las acciones y estados importantes no dependen solo del color.
