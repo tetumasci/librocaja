@@ -245,6 +245,12 @@ function attachEventListeners() {
   document.getElementById('btn-import').addEventListener('click', importData);
   document.getElementById('import-file-input').addEventListener('change', handleImportFile);
   document.getElementById('btn-clear-data').addEventListener('click', clearAllData);
+
+  // Curvas del Plan (canvas): se redibujan al rotar / cambiar de tamaño y cuando el sistema cambia de tema (modo automático)
+  window.addEventListener('resize', redrawPlanCharts);
+  const darkQuery = window.matchMedia('(prefers-color-scheme: dark)');
+  if (darkQuery.addEventListener) darkQuery.addEventListener('change', redrawPlanCharts);
+  else if (darkQuery.addListener) darkQuery.addListener(redrawPlanCharts);
   document.querySelectorAll('#theme-selector button').forEach(btn => {
     btn.addEventListener('click', () => setTheme(btn.dataset.themeOption));
   });

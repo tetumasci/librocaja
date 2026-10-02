@@ -8,7 +8,7 @@ let payingAccountId = null; // null = no descontar de ninguna cuenta
 /* ---------- Calculations ---------- */
 
 function formatPlanUSD(n) {
-  return 'USD ' + Math.round(n).toLocaleString('en-US');
+  return 'USD ' + Math.round(n).toLocaleString('es-AR');
 }
 
 function planMonthlyRate(annualRatePct) {
@@ -34,6 +34,9 @@ function planActualContributed(plan) {
 
 /* ---------- Render ---------- */
 
+const TRASH_ICON_SVG = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M8 6V4a2 2 0 012-2h4a2 2 0 012 2v2m3 0v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6h14z"/></svg>';
+const PLAN_CHART_HEIGHT = 120;
+
 function renderPlan() {
   const container = document.getElementById('plan-list');
   container.innerHTML = '';
@@ -41,59 +44,66 @@ function renderPlan() {
   if (!state.investmentPlans || state.investmentPlans.length === 0) {
     container.innerHTML = `
       <div class="plan-empty">
-        <p>todavía no tenés planes de inversión</p>
-        <p style="font-size:12px;color:var(--ink-faint);margin-top:6px">usá el botón + para agregar uno</p>
+        <p class="plan-empty-title">Todavía no tenés planes de inversión</p>
+        <p class="plan-empty-sub">Tocá + arriba para agregar uno</p>
       </div>`;
     return;
   }
 
   state.investmentPlans.forEach(plan => {
-    const card = buildPlanCard(plan);
-    container.appendChild(card);
+    container.appendChild(buildPlanCard(plan));
+  });
+  // Las curvas se dibujan cuando todas las tarjetas ya están en pantalla: el ancho final del canvas
+  // depende de si aparece la barra de scroll.
+  state.investmentPlans.forEach(plan => {
     renderPlanChart(plan, document.getElementById('plan-chart-' + plan.id));
   });
 }
 
 function buildPlanCard(plan) {
   const contributed = planActualContributed(plan);
+  const contributionCount = (plan.contributions || []).length;
   const monthsElapsed = planMonthsElapsed(plan.startDate);
   const accumulated = planFutureValue(plan.monthlyContributionUSD, plan.annualRatePct, monthsElapsed);
   const termMonths = plan.termYears * 12;
   const projected = planFutureValue(plan.monthlyContributionUSD, plan.annualRatePct, termMonths);
 
   const startDate = dateFromISO(plan.startDate);
-  const endYear = startDate.getFullYear() + plan.termYears;
+  const startYear = startDate.getFullYear();
+  const endYear = startYear + plan.termYears;
+  const rateLabel = Number(plan.annualRatePct).toLocaleString('es-AR');
+  const name = escapeHtml(plan.name);
 
-  const card = document.createElement('div');
+  const card = document.createElement('section');
   card.className = 'plan-card';
   card.innerHTML = `
     <div class="plan-card-header">
       <div class="plan-card-title">
-        <span class="plan-card-name">${escapeHtml(plan.name)}</span>
-        <span class="plan-card-meta">${plan.annualRatePct}% anual · ${plan.termYears} años · hasta ${endYear}</span>
+        <h2 class="plan-card-name">${name}</h2>
+        <div class="plan-card-meta">${rateLabel} % anual · ${plan.termYears} años · hasta ${endYear}</div>
       </div>
-      <button class="plan-card-delete" data-id="${plan.id}" aria-label="Eliminar plan">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" width="16" height="16"><path d="M3 6h18M8 6V4a2 2 0 012-2h4a2 2 0 012 2v2m3 0v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6h14z"/></svg>
-      </button>
+      <button class="plan-card-delete" data-id="${plan.id}" aria-label="Eliminar plan ${name}">${TRASH_ICON_SVG}</button>
     </div>
     <div class="plan-stats-grid">
       <div class="plan-stat">
-        <span class="plan-stat-label">aportado hasta hoy</span>
-        <span class="plan-stat-value">${formatPlanUSD(contributed)}</span>
-        <span class="plan-stat-sub">${(plan.contributions || []).length} cuotas</span>
+        <div class="plan-stat-label">Aportado</div>
+        <div class="plan-stat-value">${formatPlanUSD(contributed)}</div>
+        <div class="plan-stat-sub">${contributionCount} ${contributionCount === 1 ? 'cuota' : 'cuotas'}</div>
       </div>
       <div class="plan-stat">
-        <span class="plan-stat-label">valor acumulado</span>
-        <span class="plan-stat-value">${formatPlanUSD(accumulated)}</span>
-        <span class="plan-stat-sub">${monthsElapsed} meses</span>
+        <div class="plan-stat-label">Acumulado hoy</div>
+        <div class="plan-stat-value">${formatPlanUSD(accumulated)}</div>
+        <div class="plan-stat-sub">${monthsElapsed} ${monthsElapsed === 1 ? 'mes' : 'meses'}</div>
+      </div>
+      <div class="plan-stat">
+        <div class="plan-stat-label">Proyectado</div>
+        <div class="plan-stat-value">${formatPlanUSD(projected)}</div>
+        <div class="plan-stat-sub">a ${plan.termYears} años</div>
       </div>
     </div>
-    <div class="plan-projected">
-      <span class="plan-projected-label">proyectado a ${plan.termYears} años</span>
-      <span class="plan-projected-value">${formatPlanUSD(projected)}</span>
-    </div>
-    <canvas class="plan-chart" id="plan-chart-${plan.id}" height="70"></canvas>
-    <button class="plan-payment-btn" data-id="${plan.id}">registrar pago de este mes</button>
+    <canvas class="plan-chart" id="plan-chart-${plan.id}" role="img" aria-label="Curva de crecimiento proyectada de ${name}, de ${startYear} a ${endYear}"></canvas>
+    <div class="plan-chart-years"><span>${startYear}</span><span>${endYear}</span></div>
+    <button class="plan-payment-btn" data-id="${plan.id}">Registrar pago de este mes</button>
   `;
 
   card.querySelector('.plan-card-delete').addEventListener('click', () => {
@@ -111,14 +121,20 @@ function buildPlanCard(plan) {
   return card;
 }
 
+/* Dibuja la curva del plan en un canvas. Los colores se leen de las variables CSS en cada dibujo
+   (no hay colores fijos), así que al cambiar de tema hay que volver a dibujar: ver redrawPlanCharts(). */
 function renderPlanChart(plan, canvas) {
   if (!canvas) return;
 
-  const W = canvas.offsetWidth || canvas.parentElement.offsetWidth || 300;
-  canvas.width = W;
-  const H = canvas.height;
+  const dpr = window.devicePixelRatio || 1;
+  const W = canvas.clientWidth || canvas.parentElement.clientWidth || 300;
+  const H = PLAN_CHART_HEIGHT;
+  canvas.width = Math.round(W * dpr);
+  canvas.height = Math.round(H * dpr);
 
   const ctx = canvas.getContext('2d');
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+
   const termMonths = plan.termYears * 12;
   const steps = Math.min(termMonths, 120);
   const stepSize = termMonths / steps;
@@ -129,31 +145,43 @@ function renderPlanChart(plan, canvas) {
   }
 
   const maxVal = Math.max(...values, 1);
-  const padT = 6, padB = 4, padL = 2, padR = 2;
+  const padT = 8, padB = 6, padL = 6, padR = 6;
   const cH = H - padT - padB;
   const cW = W - padL - padR;
 
   ctx.clearRect(0, 0, W, H);
 
-  const inkColor = getComputedStyle(document.documentElement).getPropertyValue('--income').trim() || '#4A5D3A';
+  const barColor = getComputedStyle(document.documentElement).getPropertyValue('--bar-fill').trim() || 'currentColor';
 
+  const pointAt = (i) => [padL + (i / steps) * cW, padT + cH - (values[i] / maxVal) * cH];
+
+  // Área bajo la curva: el mismo color de la línea con transparencia
   ctx.beginPath();
   values.forEach((v, i) => {
-    const x = padL + (i / steps) * cW;
-    const y = padT + cH - (v / maxVal) * cH;
+    const [x, y] = pointAt(i);
     i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
   });
-  ctx.strokeStyle = inkColor;
-  ctx.lineWidth = 2;
-  ctx.lineJoin = 'round';
-  ctx.stroke();
-
   ctx.lineTo(padL + cW, padT + cH);
   ctx.lineTo(padL, padT + cH);
   ctx.closePath();
-  ctx.fillStyle = 'rgba(74,93,58,0.09)';
+  ctx.globalAlpha = 0.12;
+  ctx.fillStyle = barColor;
   ctx.fill();
+  ctx.globalAlpha = 1;
 
+  // Línea
+  ctx.beginPath();
+  values.forEach((v, i) => {
+    const [x, y] = pointAt(i);
+    i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
+  });
+  ctx.strokeStyle = barColor;
+  ctx.lineWidth = 2.5;
+  ctx.lineJoin = 'round';
+  ctx.lineCap = 'round';
+  ctx.stroke();
+
+  // Punto de "hoy"
   const monthsElapsed = planMonthsElapsed(plan.startDate);
   if (monthsElapsed > 0 && monthsElapsed <= termMonths) {
     const ratio = monthsElapsed / termMonths;
@@ -161,10 +189,20 @@ function renderPlanChart(plan, canvas) {
     const x = padL + ratio * cW;
     const y = padT + cH - (curVal / maxVal) * cH;
     ctx.beginPath();
-    ctx.arc(x, y, 4, 0, Math.PI * 2);
-    ctx.fillStyle = inkColor;
+    ctx.arc(x, y, 5, 0, Math.PI * 2);
+    ctx.fillStyle = barColor;
     ctx.fill();
   }
+}
+
+// Vuelve a dibujar todas las curvas (cambio de tema, rotación o cambio de tamaño). Si Plan no está abierta, no hace nada:
+// renderPlan() las dibuja al abrirla.
+function redrawPlanCharts() {
+  const view = document.getElementById('view-plan');
+  if (!view || view.hidden) return;
+  (state.investmentPlans || []).forEach(plan => {
+    renderPlanChart(plan, document.getElementById('plan-chart-' + plan.id));
+  });
 }
 
 /* ---------- New plan modal ---------- */

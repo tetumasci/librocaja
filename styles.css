@@ -2150,145 +2150,108 @@ input { font-family: inherit; }
 .action-sheet-icon { font-size: 18px; width: 24px; text-align: center; }
 
 /* ============================================
-   PLAN MODULE
+   PLAN MODULE (REDISEÑO-B4)
    ============================================ */
 
 .plan-empty {
   text-align: center;
   padding: 60px 20px;
-  font-family: var(--font-display);
-  font-size: 15px;
-  color: var(--ink-faint);
+}
+.plan-empty-title {
+  margin: 0 0 4px;
+  font-size: 16px;
+  font-weight: 700;
+}
+.plan-empty-sub {
+  margin: 0;
+  font-size: 13px;
+  color: var(--muted);
 }
 
 .plan-card {
-  background: var(--paper-raised);
-  border: 1px solid var(--paper-line);
-  border-radius: var(--radius-lg);
+  margin-top: 14px;
+  background: var(--surface);
+  border-radius: 28px;
   padding: 18px 18px 16px;
-  margin-bottom: 16px;
-  box-shadow: var(--shadow-card);
 }
-
 .plan-card-header {
   display: flex;
-  justify-content: space-between;
   align-items: flex-start;
-  margin-bottom: 14px;
-}
-
-.plan-card-title {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-  min-width: 0;
-  padding-right: 8px;
-}
-
-.plan-card-name {
-  font-family: var(--font-display);
-  font-size: 17px;
-  font-weight: 600;
-  line-height: 1.2;
-}
-
-.plan-card-meta {
-  font-size: 11px;
-  color: var(--ink-faint);
-  font-family: var(--font-mono);
-}
-
-.plan-card-delete {
-  color: var(--ink-faint);
-  padding: 4px;
-  flex-shrink: 0;
-}
-.plan-card-delete:active { color: var(--expense); }
-
-.plan-stats-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 8px;
-  margin-bottom: 12px;
-}
-
-.plan-stat {
-  background: var(--paper);
-  border: 1px solid var(--paper-line);
-  border-radius: var(--radius-md);
-  padding: 10px 12px;
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-}
-
-.plan-stat-label {
-  font-size: 9px;
-  text-transform: uppercase;
-  letter-spacing: .05em;
-  color: var(--ink-faint);
-}
-
-.plan-stat-value {
-  font-family: var(--font-mono);
-  font-size: 15px;
-  font-weight: 600;
-  color: var(--income);
-  font-variant-numeric: tabular-nums;
-}
-
-.plan-stat-sub {
-  font-family: var(--font-mono);
-  font-size: 10px;
-  color: var(--ink-faint);
-}
-
-.plan-projected {
-  display: flex;
   justify-content: space-between;
-  align-items: center;
-  padding: 10px 0;
-  border-top: 1px dashed var(--paper-line);
-  border-bottom: 1px dashed var(--paper-line);
-  margin-bottom: 14px;
+  gap: 8px;
 }
-
-.plan-projected-label {
-  font-size: 10px;
-  text-transform: uppercase;
-  letter-spacing: .04em;
-  color: var(--ink-faint);
-}
-
-.plan-projected-value {
-  font-family: var(--font-mono);
-  font-size: 20px;
+.plan-card-title { min-width: 0; }
+.plan-card-name {
+  margin: 0;
+  font-size: 17px;
   font-weight: 700;
-  color: var(--accent);
-  font-variant-numeric: tabular-nums;
+  overflow-wrap: anywhere;
 }
-
-.plan-chart {
-  width: 100%;
-  display: block;
-  margin-bottom: 14px;
-  border-radius: var(--radius-sm);
+.plan-card-meta {
+  margin-top: 4px;
+  font-size: 12px;
+  color: var(--muted);
 }
-
-.plan-payment-btn {
-  width: 100%;
-  height: 40px;
-  border: 1.5px solid var(--paper-line);
-  border-radius: var(--radius-md);
-  font-size: 13px;
-  font-weight: 600;
-  color: var(--ink-soft);
-  background: transparent;
+.plan-card-delete {
+  width: 44px;
+  height: 44px;
+  margin: -8px -10px 0 0;
+  flex-shrink: 0;
   display: flex;
   align-items: center;
   justify-content: center;
+  color: var(--muted);
 }
-.plan-payment-btn:active { background: var(--paper-line); color: var(--ink); }
+.plan-card-delete svg { width: 18px; height: 18px; }
+
+.plan-stats-grid {
+  margin-top: 14px;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+}
+.plan-stat-label {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--muted);
+}
+.plan-stat-value {
+  margin-top: 2px;
+  font-size: 15px;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+  overflow-wrap: anywhere;
+}
+.plan-stat-sub {
+  margin-top: 1px;
+  font-size: 11px;
+  color: var(--muted);
+}
+
+.plan-chart {
+  display: block;
+  width: 100%;
+  height: 120px;
+  margin-top: 14px;
+}
+.plan-chart-years {
+  margin-top: 10px;
+  display: flex;
+  justify-content: space-between;
+  font-size: 11px;
+  color: var(--muted);
+}
+
+.plan-payment-btn {
+  margin-top: 14px;
+  width: 100%;
+  height: 52px;
+  border-radius: 26px;
+  background: var(--primary);
+  color: var(--primary-text);
+  font-size: 15px;
+  font-weight: 700;
+}
 
 /* plan modal row — two inputs side by side */
 .plan-modal-row {

@@ -257,6 +257,9 @@ function applyTheme() {
       ? (isDarkMeta ? THEME_COLORS.dark : THEME_COLORS.light)
       : THEME_COLORS[theme]);
   });
+
+  // Los gráficos en canvas no heredan el tema: hay que volver a dibujarlos.
+  if (typeof redrawPlanCharts === 'function') redrawPlanCharts();
 }
 
 function renderThemeSelector() {

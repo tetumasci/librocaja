@@ -528,7 +528,7 @@ Aplicar el diseño nuevo a `view-goals`. Referencia: `Real-L-3-metas` / `Real-D-
 
 ---
 ## FEATURE: REDISEÑO-B4 — Plan
-**Estado: pendiente**
+**Estado: hecha**
 **Depende de:** REDISEÑO-B3
 
 ### Qué se pide
@@ -547,6 +547,38 @@ Aplicar el diseño nuevo a `view-plan` y volver el gráfico de canvas sensible a
 - Plan recién creado (sin aportes), plan con varios aportes, varios planes a la vez.
 - Cambiar de tema con la vista de Plan abierta: el gráfico se redibuja con los colores nuevos.
 - Rotación o cambio de tamaño: el canvas mantiene la proporción.
+
+### Notas de implementación
+- Archivos modificados: `index.html` (`view-plan`), `styles.css`, `js/plan.js`, `js/settings.js`
+  (`applyTheme`), `js/main.js`, `sw.js` (`CACHE_NAME` v32 → v33). Ningún id existente se renombró
+  (`#plan-back`, `#btn-add-plan`, `#plan-list`, `#plan-chart-<id>`, `.plan-payment-btn`, etc.).
+- **Verificación contra `Real-L-4-plan` / `Real-D-4-plan`:** corrí la app en un navegador real a 390 px con tres
+  planes de ejemplo y medí con JS: botones volver, + y eliminar de 44 × 44, botón de pago de 299 × 52, tarjeta
+  de radio 28, título 17/700, datos 15/800; capturas en claro y oscuro. Sin colores fijos ni tokens viejos en el
+  CSS nuevo (revisado por script). No probado en un celu real.
+- Encabezado compartido de pantalla (`screen-header`, `screen-back`, `screen-add`, de B3); `view-plan` lleva la
+  clase `themed`. Tarjeta: nombre, "6,5 % anual · 25 años · hasta 2050" (tasa con coma decimal), papelera de
+  44 × 44 con `aria-label="Eliminar plan <nombre>"`, tres datos (Aportado, Acumulado hoy, Proyectado), curva,
+  años de inicio y fin, y botón "Registrar pago de este mes" de 52 px.
+- Decisión propia: el mockup no tiene líneas secundarias en los tres datos, pero se conservaron las que ya
+  existían ("N cuotas", "N meses") y se agregó "a N años" bajo Proyectado, para no perder información.
+- **Gráfico (canvas):** `renderPlanChart()` lee `--bar-fill` con `getComputedStyle` en cada dibujo; se quitó
+  `rgba(74,93,58,0.09)` y el color fijo (el relleno es el mismo color con `globalAlpha` .12, y el respaldo si
+  falta la variable es `currentColor`). Línea de 2,5 px y punto de "hoy" de radio 5, como el mockup. Altura
+  fija de 120 px en CSS; el canvas se dibuja a `devicePixelRatio` (antes se veía borroso en pantallas retina) y
+  al ancho final: las curvas se dibujan después de agregar todas las tarjetas, porque el ancho depende de si
+  aparece la barra de scroll.
+- **Redibujo al cambiar de tema o tamaño:** nueva `redrawPlanCharts()` (no hace nada si Plan no está abierta;
+  `renderPlan()` dibuja al abrirla). Se dispara desde `applyTheme()` (cambio manual en Ajustes), desde
+  `matchMedia('(prefers-color-scheme: dark)')` (modo automático con el sistema) y desde `resize`
+  (rotación). Verificado leyendo el color de un píxel de la línea: `rgb(18,59,51)` en claro y `rgb(143,220,192)`
+  en oscuro tras cambiar el tema con Plan abierta.
+- `formatPlanUSD` (renombrada en B3) ahora usa separador de miles argentino: "USD 72.747" en vez de
+  "USD 72,747", como el mockup y el resto de la app. Afecta también al modal de pago y al aviso de pago registrado.
+- Estado vacío con el estilo nuevo ("Todavía no tenés planes de inversión" / "Tocá + arriba para agregar uno").
+- Casos de borde probados: sin planes, plan recién creado (sin aportes: "USD 0", punto de hoy omitido), varios
+  planes a la vez, nombre muy largo, 320 px de ancho (el canvas se redibuja y no desborda), cambio de tema con
+  Plan abierta, y que el botón de pago y el + abren sus modales. Sin errores de consola.
 
 ---
 ## FEATURE: REDISEÑO-B5 — Ajustes
