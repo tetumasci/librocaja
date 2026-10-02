@@ -11,14 +11,12 @@ function renderAccountManager() {
     const row = document.createElement('div');
     row.className = 'category-manager-row';
     row.innerHTML = `
-      <span>
-        <span>${acc.icon}</span>${escapeHtml(acc.name)}
-        <span class="account-mgr-balance">${formatMoney(balance)}</span>
+      <span class="manager-name"><span class="manager-icon">${acc.icon}</span>${escapeHtml(acc.name)}</span>
+      <span class="manager-actions">
+        <span class="manager-meta">${formatMoney(balance)}</span>
+        <button class="cat-edit" data-acc-id="${acc.id}" aria-label="Editar ${escapeHtml(acc.name)}">editar</button>
+        <button class="cat-remove" data-acc-id="${acc.id}" aria-label="Quitar ${escapeHtml(acc.name)}">quitar</button>
       </span>
-      <div style="display:flex;gap:10px;align-items:center">
-        <button class="cat-edit" data-acc-id="${acc.id}">editar</button>
-        <button class="cat-remove" data-acc-id="${acc.id}">quitar</button>
-      </div>
     `;
     container.appendChild(row);
   });

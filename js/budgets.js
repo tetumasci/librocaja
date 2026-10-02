@@ -17,10 +17,26 @@ function renderBudgetManager() {
     const row = document.createElement('div');
     row.className = 'category-manager-row';
     row.innerHTML = `
-      <span><span>${cat.icon}</span>${escapeHtml(cat.name)}<span class="budget-limit-tag">${formatMoney(budget.monthlyLimit)}/mes</span></span>
-      <button class="cat-remove" data-budget-cat="${budget.categoryId}">quitar</button>
+      <span class="manager-name"><span class="manager-icon">${cat.icon}</span>${escapeHtml(cat.name)}</span>
+      <span class="manager-actions">
+        <span class="manager-meta">${formatMoney(budget.monthlyLimit)}/mes</span>
+        <button class="cat-edit budget-edit" data-budget-cat="${budget.categoryId}" aria-label="Editar presupuesto de ${escapeHtml(cat.name)}">editar</button>
+        <button class="cat-remove" data-budget-cat="${budget.categoryId}" aria-label="Quitar presupuesto de ${escapeHtml(cat.name)}">quitar</button>
+      </span>
     `;
     container.appendChild(row);
+  });
+
+  // "editar" abre el mismo modal de presupuesto con la categoría y el límite ya cargados
+  container.querySelectorAll('.budget-edit').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const budget = state.budgets.find(b => b.categoryId === btn.dataset.budgetCat);
+      if (!budget) return;
+      openBudgetModal();
+      selectedCategoryIdForBudget = budget.categoryId;
+      renderBudgetCategorySelector();
+      document.getElementById('budget-limit').value = budget.monthlyLimit;
+    });
   });
 
   container.querySelectorAll('.cat-remove[data-budget-cat]').forEach(btn => {

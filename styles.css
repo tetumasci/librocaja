@@ -689,22 +689,6 @@ input { font-family: inherit; }
   padding: 0 16px;
 }
 
-.section-label {
-  font-family: var(--font-display);
-  font-size: 14px;
-  font-weight: 600;
-  color: var(--ink-soft);
-  text-transform: lowercase;
-  margin: 28px 0 12px;
-}
-
-.budget-limit-tag {
-  font-family: var(--font-mono);
-  font-size: 11px;
-  color: var(--ink-faint);
-  margin-left: 8px;
-}
-
 /* ============================================
    REPORTES (REDISEÑO-B2)
    ============================================ */
@@ -1104,28 +1088,7 @@ input { font-family: inherit; }
   color: var(--muted);
 }
 
-/* ============================================
-   SETTINGS
-   ============================================ */
-
-.category-manager {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-}
-.category-manager-row {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 10px 2px;
-  border-bottom: 1px solid var(--paper-line);
-  font-size: 14px;
-}
-.category-manager-row span {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
+/* clases compartidas con el modal de categorías (se migra en B6): se conservan tal cual */
 .cat-remove {
   color: var(--expense);
   font-size: 12px;
@@ -1139,26 +1102,263 @@ input { font-family: inherit; }
   padding: 12px 2px;
 }
 
+/* ============================================
+   SETTINGS (REDISEÑO-B5)
+   ============================================ */
+
+.settings-card {
+  margin-top: 12px;
+  background: var(--surface);
+  border-radius: 24px;
+  padding: 14px 18px 4px;
+}
+.settings-card-title {
+  margin: 0 0 2px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* filas de listas (categorías, presupuestos, cuentas) */
+.category-manager { display: flex; flex-direction: column; }
+.category-manager-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  min-height: 48px;
+  border-bottom: 1px solid var(--divider);
+}
+.category-manager-row:last-child { border-bottom: 0; }
+.manager-name {
+  min-width: 0;
+  font-size: 14px;
+  font-weight: 600;
+  overflow-wrap: anywhere;
+}
+.manager-icon { margin-right: 6px; }
+.manager-actions {
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+}
+.manager-meta {
+  margin-right: 4px;
+  font-size: 12px;
+  color: var(--muted);
+  font-variant-numeric: tabular-nums;
+}
+.settings-card .cat-edit,
+.settings-card .cat-remove,
+.settings-card .recurring-toggle {
+  height: 44px;
+  padding: 0 8px;
+  font-size: 12px;
+  font-weight: 700;
+  background: none;
+  border: 0;
+  border-radius: 0;
+}
+.settings-card .cat-edit { color: var(--link); }
+.settings-card .cat-remove,
+.settings-card .recurring-toggle { color: var(--muted); }
+
+.settings-card .text-btn {
+  height: 44px;
+  padding: 0;
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--link);
+}
+.recurring-empty {
+  margin: 0;
+  padding: 12px 0;
+  font-size: 13px;
+  color: var(--muted);
+}
+
+/* gastos fijos, ingresos fijos y cuotas: nombre y detalle arriba, acciones abajo a la derecha */
+.recurring-manager { display: flex; flex-direction: column; }
+.recurring-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 0 0;
+  border-bottom: 1px solid var(--divider);
+}
+.recurring-manager > .recurring-row:last-child { border-bottom: 0; }
+.recurring-row-info {
+  flex: 1 1 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+.recurring-row-name {
+  font-size: 14px;
+  font-weight: 600;
+}
+.recurring-row-detail {
+  font-size: 12px;
+  color: var(--muted);
+  font-variant-numeric: tabular-nums;
+}
+.recurring-row-actions {
+  flex: 1 1 100%;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  align-items: center;
+}
+.row-tag {
+  margin-left: 6px;
+  font-size: 10px;
+  font-weight: 700;
+  padding: 2px 7px;
+  border-radius: 8px;
+  background: var(--neutral-tint);
+  color: var(--muted);
+}
+
+.installment-summary { padding: 4px 0 6px; }
+.installment-summary-line {
+  margin: 0;
+  font-size: 12px;
+  color: var(--muted);
+}
+.installment-summary-line strong {
+  color: var(--text);
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+.installment-progress-track {
+  margin: 4px 0;
+  height: 10px;
+  border-radius: 5px;
+  background: var(--track);
+  overflow: hidden;
+}
+.installment-progress-fill {
+  height: 10px;
+  border-radius: 5px;
+  background: var(--bar-fill);
+  transition: width 0.3s ease;
+}
+
+/* inflación y gastos hormiga */
+.settings-input-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 56px;
+}
+.settings-input-label {
+  flex: 1;
+  min-width: 0;
+  font-size: 14px;
+  font-weight: 600;
+}
+#inflation-month-label { text-transform: capitalize; }
+.settings-input-wrap {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  flex-shrink: 0;
+}
+.settings-input-unit {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--muted);
+}
+.settings-input {
+  width: 92px;
+  height: 44px;
+  padding: 0 12px;
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  background: var(--input-bg);
+  color: var(--text);
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 600;
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+.settings-input:focus-visible {
+  outline: 2px solid var(--link);
+  outline-offset: 1px;
+}
+.settings-input-row .text-btn { flex-shrink: 0; }
+/* etiqueta larga: ocupa la fila de arriba y el campo con su botón van abajo, a la derecha */
+.settings-input-row.stacked {
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  padding-top: 10px;
+}
+.settings-input-row.stacked .settings-input-label { flex: 1 1 100%; }
+.inflation-history {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  padding-bottom: 12px;
+}
+.inflation-hist-item {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--muted);
+  background: var(--neutral-tint);
+  border-radius: 10px;
+  padding: 4px 8px;
+  font-variant-numeric: tabular-nums;
+}
+.settings-hint {
+  margin: 0;
+  padding: 0 0 12px;
+  font-size: 12px;
+  color: var(--muted);
+}
+
+/* datos */
 .settings-row {
   display: flex;
   align-items: center;
   justify-content: space-between;
   width: 100%;
-  padding: 14px 16px;
-  background: var(--paper-raised);
-  border: 1px solid var(--paper-line);
-  border-radius: var(--radius-md);
+  min-height: 48px;
+  border-bottom: 1px solid var(--divider);
   font-size: 14px;
-  margin-bottom: 8px;
+  font-weight: 600;
+  text-align: left;
 }
-.settings-row.danger { color: var(--expense); }
+.settings-row:last-of-type { border-bottom: 0; }
+.settings-row.danger {
+  font-weight: 700;
+  color: var(--expense-new);
+}
+.settings-row svg { flex-shrink: 0; }
 
 .app-version {
+  margin: 14px 0 0;
   text-align: center;
-  font-size: 11px;
-  color: var(--ink-faint);
-  margin-top: 30px;
+  font-size: 12px;
+  color: var(--muted);
 }
+
 
 /* ============================================
    MODAL / BOTTOM SHEET
@@ -1349,89 +1549,6 @@ input { font-family: inherit; }
   gap: 8px;
 }
 
-/* recurring expenses manager */
-.recurring-manager {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-}
-.recurring-empty {
-  font-size: 13px;
-  color: var(--ink-faint);
-  padding: 10px 2px;
-}
-.recurring-row {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 12px 2px;
-  border-bottom: 1px solid var(--paper-line);
-}
-.recurring-row-info {
-  display: flex;
-  flex-direction: column;
-  gap: 3px;
-  min-width: 0;
-}
-.recurring-row-name {
-  font-size: 14px;
-  font-weight: 500;
-}
-.recurring-row-detail {
-  font-size: 12px;
-  color: var(--ink-soft);
-  font-family: var(--font-mono);
-}
-.recurring-row-actions {
-  display: flex;
-  gap: 10px;
-  align-items: center;
-  flex-shrink: 0;
-  margin-left: 8px;
-}
-.recurring-toggle {
-  font-size: 11px;
-  font-weight: 600;
-  color: var(--ink-faint);
-  padding: 4px 8px;
-  border: 1px solid var(--paper-line);
-  border-radius: 12px;
-}
-.recurring-toggle.active {
-  color: var(--income);
-  border-color: var(--income-soft);
-  background: var(--income-soft);
-}
-
-/* installment purchases */
-.installment-summary {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-  margin-bottom: 6px;
-}
-.installment-summary-line {
-  font-size: 12.5px;
-  color: var(--ink-soft);
-}
-.installment-summary-line strong {
-  color: var(--ink);
-  font-family: var(--font-mono);
-}
-.installment-progress-track {
-  height: 5px;
-  background: var(--paper-line);
-  border-radius: 3px;
-  overflow: hidden;
-  margin: 2px 0;
-}
-.installment-progress-fill {
-  height: 100%;
-  background: var(--accent);
-  border-radius: 3px;
-  transition: width 0.3s ease;
-}
-
 /* recurring modal — amount + day side by side */
 .recurring-amount-day {
   display: flex;
@@ -1602,53 +1719,6 @@ input { font-family: inherit; }
   color: var(--ink-faint);
   text-align: center;
   line-height: 1.35;
-}
-
-/* ============================================
-   INFLATION SECTION
-   ============================================ */
-.inflation-row {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  margin-bottom: 10px;
-}
-.inflation-month-label {
-  font-size: 13px;
-  font-weight: 600;
-  color: var(--ink);
-  min-width: 80px;
-  flex-shrink: 0;
-}
-.inflation-input-wrap {
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  flex: 1;
-}
-.inflation-input {
-  width: 80px;
-  text-align: right;
-  font-family: var(--font-mono);
-}
-.inflation-pct {
-  font-size: 14px;
-  font-weight: 600;
-  color: var(--ink-mid);
-}
-.inflation-history {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 6px;
-  margin-bottom: 4px;
-}
-.inflation-hist-item {
-  font-size: 11px;
-  font-family: var(--font-mono);
-  color: var(--ink-mid);
-  background: var(--paper-line);
-  border-radius: var(--radius-sm);
-  padding: 3px 7px;
 }
 
 /* ============================================
@@ -1926,23 +1996,6 @@ input { font-family: inherit; }
 }
 .history-status.paid { background: var(--income-soft); color: var(--income); }
 .history-status.pending { background: var(--paper-line); color: var(--ink-faint); }
-
-/* ============================================
-   ACCOUNT MANAGER — edit button + balance
-   ============================================ */
-
-.cat-edit {
-  color: var(--accent);
-  font-size: 12px;
-  font-weight: 600;
-}
-
-.account-mgr-balance {
-  font-family: var(--font-mono);
-  font-size: 11px;
-  color: var(--ink-faint);
-  margin-left: 8px;
-}
 
 /* adjustment section inside account modal */
 .account-balance-info {

@@ -582,7 +582,7 @@ Aplicar el diseño nuevo a `view-plan` y volver el gráfico de canvas sensible a
 
 ---
 ## FEATURE: REDISEÑO-B5 — Ajustes
-**Estado: pendiente**
+**Estado: hecha**
 **Depende de:** REDISEÑO-B4
 
 ### Qué se pide
@@ -599,6 +599,40 @@ Aplicar el diseño nuevo a `view-settings`. Referencia: `Real-L-5-ajustes` / `Re
 - Listas largas (muchas categorías o cuentas) y listas vacías.
 - Que "editar" y "quitar" no se toquen por error (separación suficiente).
 - Importar / exportar datos siguen funcionando.
+
+### Notas de implementación
+- Archivos modificados: `index.html` (`view-settings`), `styles.css`, `js/settings.js`, `js/accounts.js`,
+  `js/budgets.js`, `js/recurring.js`, `sw.js` (`CACHE_NAME` v33 → v34). Ningún id existente se renombró (verificado
+  por script). Cada sección pasó a una tarjeta (`.settings-card`) con título en mayúsculas chicas
+  (`.settings-card-title`); encabezado compartido `screen-header`; `view-settings` lleva la clase `themed`.
+- **Verificación contra `Real-L-5-ajustes` / `Real-D-5-ajustes`:** corrí la app en un navegador real a 390 y 320 px con
+  datos de ejemplo (categorías, presupuestos, cuentas, fijos activos y pausados, una compra en cuotas, inflación) y
+  medí con JS: filas de 48 px, botones "editar" / "quitar" / "Agregar" / "Guardar" de 44 px de alto, campos de 44 px,
+  selector de tema de 44 px; capturas en claro y oscuro. Sin colores fijos ni tokens viejos en el CSS nuevo
+  (revisado por script). No probado en un celu real.
+- Filas de categorías, presupuestos y cuentas: nombre a la izquierda; a la derecha el monto o saldo (si hay) y los
+  botones "editar" (`--link`) y "quitar" (`--muted`, ya no rojo). `aria-label` con el nombre en cada botón.
+- **Funcionalidad que el mockup no dibuja y se conservó:** la sección "Compras en cuotas" (resumen, lista con barra de
+  avance, "historial", "editar", "quitar" y "+ Nueva compra en cuotas"); el historial de montos de gastos / ingresos fijos
+  ("historial"), "pausar / activar" y "quitar"; los campos de inflación (mes actual + % + "Guardar") y del umbral de gastos
+  hormiga (monto + "Guardar") en vez de los botones "Actualizar" / "Cambiar"; y el historial de inflación de los últimos
+  meses. Los gastos hormiga muestran el texto aclaratorio de Reportes.
+- Decisiones propias: (1) los presupuestos no tenían "editar" y el mockup lo muestra, así que se agregó: abre el
+  mismo modal de presupuesto con la categoría y el límite ya cargados; (2) en gastos fijos, ingresos fijos y cuotas las
+  acciones van en una segunda línea alineada a la derecha, porque con 3 o 4 acciones de 44 px no entran al lado del
+  nombre; (3) los fijos pausados muestran la etiqueta "pausado" junto al nombre (antes solo cambiaba el texto del
+  botón y un tinte verde, que ya no existe); (4) "Exportar" e "Importar" quedan sin ícono, como el mockup; "Borrar todos los
+  datos" conserva su ícono de papelera, en `--expense-new` y siempre con sus dos `confirm()`; (5) el historial de inflación
+  ahora usa coma decimal y espacio ("2,1 %", antes "2.1%").
+- Accesibilidad: los campos de inflación y de umbral tienen un `<label>` con texto oculto (`.visually-hidden`).
+- `.cat-remove` y `.text-btn` también las usa el modal de categorías (se migra en B6): se conservaron sus reglas
+  viejas y el estilo nuevo se aplica solo dentro de `.settings-card`. `.section-label`, `.budget-limit-tag`,
+  `.account-mgr-balance` y las clases `.inflation-*` viejas ya no se usan y se borraron.
+- Casos de borde probados: listas vacías de fijos (mensaje), listas con nombres muy largos (no rompen la fila),
+  320 px de ancho sin desbordes, "editar" y "quitar" separados por 44 px de área táctil, el modal de presupuesto abre con los
+  datos, "editar" de categoría / cuenta / fijo abre su modal, pausar / activar, guardar inflación y umbral, y cambio de tema.
+  Sin errores de consola. Exportar, importar y borrar no se ejercitaron en el navegador de pruebas (abren descarga o
+  confirmaciones del navegador); su código no se tocó, solo el marcado de los botones.
 
 ---
 ## FEATURE: REDISEÑO-B6 — Hojas (modales) y diálogos

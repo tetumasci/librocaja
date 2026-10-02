@@ -116,7 +116,7 @@ function renderRecurringRows(container, list, entryType) {
     row.className = 'recurring-row';
     row.innerHTML = `
       <div class="recurring-row-info">
-        <span class="recurring-row-name">${cat.icon} ${escapeHtml(rec.name)}</span>
+        <span class="recurring-row-name">${cat.icon} ${escapeHtml(rec.name)}${rec.active ? '' : '<span class="row-tag">pausado</span>'}</span>
         <span class="recurring-row-detail">${formatMoney(rec.amount)} · ${entryType === 'expense' ? 'referencia día' : 'día'} ${rec.dayOfMonth}</span>
       </div>
       <div class="recurring-row-actions">

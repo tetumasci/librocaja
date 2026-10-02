@@ -11,10 +11,10 @@ function renderCategoryRows(container, list, listKey) {
     const row = document.createElement('div');
     row.className = 'category-manager-row';
     row.innerHTML = `
-      <span><span>${cat.icon}</span>${escapeHtml(cat.name)}</span>
-      <span style="display:flex;gap:10px">
-        <button class="cat-edit" data-cat-id="${cat.id}" data-list="${listKey}">editar</button>
-        <button class="cat-remove" data-cat-id="${cat.id}" data-list="${listKey}">quitar</button>
+      <span class="manager-name"><span class="manager-icon">${cat.icon}</span>${escapeHtml(cat.name)}</span>
+      <span class="manager-actions">
+        <button class="cat-edit" data-cat-id="${cat.id}" data-list="${listKey}" aria-label="Editar ${escapeHtml(cat.name)}">editar</button>
+        <button class="cat-remove" data-cat-id="${cat.id}" data-list="${listKey}" aria-label="Quitar ${escapeHtml(cat.name)}">quitar</button>
       </span>
     `;
     container.appendChild(row);
@@ -208,7 +208,7 @@ function renderInflationHistory() {
   const keys = Object.keys(state.inflationRates).sort().reverse().slice(0, 8);
   histEl.innerHTML = keys.map(k => {
     const [y, m] = k.split('-').map(Number);
-    return `<span class="inflation-hist-item">${MONTH_NAMES[m - 1].slice(0, 3)} ${y}: ${state.inflationRates[k]}%</span>`;
+    return `<span class="inflation-hist-item">${MONTH_NAMES[m - 1].slice(0, 3)} ${y}: ${Number(state.inflationRates[k]).toLocaleString('es-AR')} %</span>`;
   }).join('');
 }
 
