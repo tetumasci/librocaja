@@ -317,6 +317,7 @@ Aplicar el diseño nuevo al Inicio, en claro y en oscuro. Referencia: `Real-L-1-
 - Fila de accesos directos (Gasto, Ingreso, Carga rápida) entre la tarjeta del mes y el banner, según el mockup; barra inferior flotante con 5 pestañas.
 - `padding-bottom` del contenido ≥ 110 px para que nada quede tapado.
 - Sin colores ni medidas hardcodeadas: solo tokens.
+- Usar `--income-new`, `--expense-new` y `--shadow-card-new`. NO cambiar `color-scheme` en este ítem (queda en `light` hasta B7). Si una regla migrada usa `var(--font-ui)`, reemplazala por el token de fuente nuevo.
 
 ### Casos de borde a probar
 - Sin movimientos en el mes (`#empty-state`), con 1 sola cuenta, con 5 o más cuentas con saldo.

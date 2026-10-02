@@ -43,17 +43,6 @@ El `:root` actual usa `--paper`, `--paper-raised`, `--paper-line`, `--ink`, `--i
 
 ### 2.2 Tokens nuevos
 
-> **Nombres con sufijo `-new` (vigente desde REDISEÑO-B0).** Tres tokens de la tabla chocan con
-> nombres que ya existen en `:root` con otro valor y que usan las pantallas viejas. Hasta REDISEÑO-B7
-> se llaman así: `--income` → **`--income-new`**, `--expense` → **`--expense-new`** y
-> `--shadow-card` → **`--shadow-card-new`**. En cualquier ítem B1–B6, **donde esta spec diga
-> `--income`, `--expense` o `--shadow-card` hay que usar la versión `-new`**; usar el nombre sin sufijo
-> daría el color viejo (oliva / terracota) y en oscuro no cambiaría. En B7 se borran los viejos y se
-> renombran estos tres (ver el ítem B7). El resto de los tokens se usa con el nombre exacto de la tabla.
->
-> `color-scheme` se queda en `light` hasta REDISEÑO-B7: entre B1 y B6 hay pantallas migradas y
-> pantallas viejas en crema, y un `color-scheme: dark` oscurecería los controles nativos de las viejas.
-
 | Token | Claro | Oscuro | Uso |
 |---|---|---|---|
 | `--bg` | `#EEF2EC` | `#0A0A0A` | fondo de la app |
@@ -91,6 +80,10 @@ El `:root` actual usa `--paper`, `--paper-raised`, `--paper-line`, `--ink`, `--i
 | `--income-solid` | `#14532D` | `#2E7D4A` | botón "Ingreso" activo (texto blanco). *Derivado: no está dibujado.* |
 | `--overlay` | `rgba(18,35,31,.55)` | `rgba(0,0,0,.65)` | fondo oscurecido detrás de hojas |
 | `--shadow-card` | `0 8px 24px rgba(18,59,51,.14)` | `0 8px 24px rgba(0,0,0,.55)` | barra inferior, FABs |
+
+**Nombres provisorios:** mientras B7 esté pendiente, los tokens `--income`, `--expense` y `--shadow-card` de esta tabla se usan con sufijo `-new` (`--income-new`, `--expense-new`, `--shadow-card-new`), porque los nombres sin sufijo los siguen usando las pantallas viejas con otros valores. Todo estilo nuevo (B1 a B6) usa los nombres con `-new`. En B7 se borran los viejos y se renombran los `-new` a los nombres finales.
+
+`color-scheme` se queda en `light` hasta REDISEÑO-B7: entre B1 y B6 hay pantallas migradas y pantallas viejas en crema, y un `color-scheme: dark` oscurecería los controles nativos de las viejas.
 
 Al implementar, verificar contraste WCAG AA (4,5:1 texto normal) en ambos temas.
 Ingresos y gastos **nunca se distinguen solo por color**: siempre signo (+/−) o flecha.
