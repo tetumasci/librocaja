@@ -6,6 +6,13 @@ function renderStats() {
   const now = new Date();
   document.getElementById('stats-month-label').textContent = monthLabel(now);
 
+  const monthSummary = getMonthSummary(now);
+  const statsBalanceEl = document.getElementById('stats-month-balance');
+  statsBalanceEl.textContent = formatMoney(monthSummary.balance);
+  statsBalanceEl.classList.toggle('negative', monthSummary.balance < 0);
+  document.getElementById('stats-month-income').textContent = formatMoney(monthSummary.income);
+  document.getElementById('stats-month-expense').textContent = formatMoney(monthSummary.expense);
+
   // Excluye entries pending:true (gastos fijos / cuotas sin confirmar,
   // ingresos fijos que todavía no llegaron a su día) — mismo criterio ya
   // aplicado al balance del mes en renderSummary().

@@ -9,17 +9,22 @@ function getEntriesForMonth(date) {
   return state.entries.filter(e => isSameMonth(e.date, date));
 }
 
-function renderSummary() {
-  document.getElementById('current-month-label').textContent = monthLabel(viewDate);
-  // Entries autogenerados con pending:true (ingresos fijos que todavía no
-  // llegaron a su día, o gastos fijos/cuotas sin confirmar con "pagar")
-  // se listan pero no pesan en el balance del mes.
-  const monthEntries = getEntriesForMonth(viewDate).filter(e => !e.pending);
-
+/* Resumen de un mes: ingresos, gastos, ajustes de saldo y balance.
+   Entries autogenerados con pending:true (ingresos fijos que todavía no
+   llegaron a su día, o gastos fijos/cuotas sin confirmar con "pagar")
+   se listan pero no pesan en el balance del mes. Lo usan el Inicio
+   (renderSummary) y Reportes (renderStats). */
+function getMonthSummary(date) {
+  const monthEntries = getEntriesForMonth(date).filter(e => !e.pending);
   const income = monthEntries.filter(e => e.type === 'income').reduce((s, e) => s + e.amount, 0);
   const expense = monthEntries.filter(e => e.type === 'expense').reduce((s, e) => s + e.amount, 0);
   const adjNet = monthEntries.filter(e => e.type === 'adjustment').reduce((s, e) => s + e.amount, 0);
-  const balance = income - expense + adjNet;
+  return { income, expense, adjNet, balance: income - expense + adjNet };
+}
+
+function renderSummary() {
+  document.getElementById('current-month-label').textContent = monthLabel(viewDate);
+  const { income, expense, balance } = getMonthSummary(viewDate);
 
   const balanceEl = document.getElementById('month-balance');
   balanceEl.textContent = formatMoney(balance);

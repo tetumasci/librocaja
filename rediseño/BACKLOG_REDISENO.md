@@ -127,7 +127,7 @@ las cuentas que tienen dinero.
 
 ---
 ## FEATURE: REDISEÑO-A2 — Saldo del mes en Reportes
-**Estado: pendiente**
+**Estado: hecha**
 **Depende de:** REDISEÑO-A1
 
 ### Qué se pide
@@ -149,6 +149,19 @@ vista ya usa.
 - Mes con ajustes de saldo (`adjustment`): incluidos igual que en el Inicio.
 - Entries `pending` excluidos igual que en el Inicio.
 - El valor de Reportes coincide con el del Inicio para el mismo mes.
+
+### Notas de implementación
+- Archivos modificados: `js/ledger.js` (nueva `getMonthSummary(date)` → `{ income, expense, adjNet,
+  balance }`; `renderSummary()` pasa a usarla, misma fórmula y mismo filtro de `pending`),
+  `js/stats.js` (`renderStats()` llena el bloque nuevo), `index.html`, `sw.js` (`CACHE_NAME` v24 → v25).
+- Bloque nuevo en `view-stats`, antes de `.metric-grid`: `#stats-month-balance`, `#stats-month-income`,
+  `#stats-month-expense`. Estilo provisorio reusando `.summary-card`, `.summary-balance-*` y
+  `.summary-split` (sin CSS nuevo); el estilo final va en B2. El saldo negativo usa la clase `negative`.
+- Decisión propia: Reportes sigue usando el mes actual (`new Date()`), igual que el resto de
+  `renderStats()`; el Inicio usa `viewDate`. Coinciden solo mientras el Inicio esté en el mes actual.
+- Probada `getMonthSummary()` con datos simulados: ingreso, gasto, ajuste negativo, un gasto
+  `pending` (excluido) y un movimiento de otro mes (excluido) → `{1000, 300, -50, 650}`; mes sin
+  movimientos → todo en 0.
 
 ---
 ## FEATURE: REDISEÑO-A3 — Accesos directos Gasto / Ingreso / Carga rápida en el Inicio
