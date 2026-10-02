@@ -2,8 +2,11 @@
 
 ## Contexto del proyecto
 PWA de finanzas personales (HTML/CSS/JS vanilla, sin frameworks, sin build
-step). Archivos: `index.html`, `styles.css`, `app.js`, `manifest.json`,
-`sw.js`. Persistencia 100% local con `localStorage`, clave
+step). Archivos: `index.html`, `styles.css`, `manifest.json`, `sw.js` y el
+código JS modularizado en `js/` (`state.js`, `ui.js`, `ledger.js`,
+`recurring.js`, `installments.js`, `accounts.js`, `budgets.js`, `goals.js`,
+`stats.js`, `settings.js`, `plan.js`, `suggestions.js`, `quickadd.js`,
+`transfers.js`, `main.js`). Persistencia 100% local con `localStorage`, clave
 `libro-caja-data-v1`. Identidad visual "libro de caja": papel crema
 (`--paper: #FAF6EF`), tinta (`--ink: #1F1B16`), terracota para gastos
 (`--expense: #B8512F`), oliva para ingresos (`--income: #4A5D3A`), dorado
@@ -11,8 +14,8 @@ de acento (`--accent: #C99A3D`). Tipografía: Source Serif 4 para display,
 Inter para UI, JetBrains Mono para números. Mantené esta identidad en todo
 lo nuevo — no introduzcas paletas o tipografías distintas.
 
-Antes de tocar código, leé `index.html`, `styles.css` y `app.js` completos
-para entender la estructura actual (vistas tipo overlay full-screen,
+Antes de tocar código, leé `index.html`, `styles.css` y los archivos de `js/`
+que toque la feature para entender la estructura actual (vistas tipo overlay full-screen,
 modales tipo bottom-sheet, patrón de `state` global + `saveState()` /
 `loadState()` + funciones `renderX()` por sección).
 

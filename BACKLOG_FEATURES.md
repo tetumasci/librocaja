@@ -39,8 +39,9 @@ al usuario en vez de implementarla fuera de orden.
   servido como archivos estáticos, salvo que una feature puntual diga lo
   contrario explícitamente.
 - **Modularización ya aplicada**: el código vive organizado en `js/`
-  (`state.js`, `ui.js`, `ledger.js`, `accounts.js`, `recurring.js`,
-  `budgets.js`, `goals.js`, `stats.js`, `settings.js`, `main.js`), cargados
+  (`state.js`, `ui.js`, `ledger.js`, `recurring.js`, `installments.js`,
+  `accounts.js`, `budgets.js`, `goals.js`, `stats.js`, `settings.js`,
+  `plan.js`, `suggestions.js`, `quickadd.js`, `transfers.js`, `main.js`), cargados
   como `<script>` tags en orden de dependencia desde `index.html`. El
   archivo `app.js` monolítico ya no existe. **Antes de escribir código
   para cualquier feature nueva, decidí a qué archivo de `js/` pertenece
