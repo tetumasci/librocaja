@@ -636,7 +636,7 @@ Aplicar el diseño nuevo a `view-settings`. Referencia: `Real-L-5-ajustes` / `Re
 
 ---
 ## FEATURE: REDISEÑO-B6 — Hojas (modales) y diálogos
-**Estado: pendiente**
+**Estado: hecha**
 **Depende de:** REDISEÑO-B5
 
 ### Qué se pide
@@ -659,6 +659,51 @@ carga de movimiento, carga rápida, transferir, depositar USD, acciones del movi
 - Abrir un modal desde otro (por ejemplo "nueva cuenta" desde gasto fijo): un solo overlay visible.
 - Botón "atrás" del celu cierra la hoja.
 - Todos los modales se ven bien en oscuro, incluido el fondo `--overlay`.
+
+### Notas de implementación
+- Archivos modificados: `styles.css`, `index.html`, `js/ledger.js`, `js/quickadd.js`, `js/installments.js`, `sw.js`
+  (`CACHE_NAME` v34 → v35). Ningún id existente se renombró y el mecanismo centralizado de apertura / cierre de
+  hojas (`closeAllModals`, `closeAllOverlaysAndModals`, `closeTopmostOverlay`, `history.pushState`) no se tocó.
+  Ids nuevos: `#entry-modal-title`, `#action-sheet-title`, `#quick-examples`, `#quick-suggestion-hint`.
+- **Cómo se migraron las 15 hojas:** todas comparten las clases `.modal-backdrop` / `.modal-sheet` / `.modal-handle` /
+  `.modal-title` / `.field-*` / `.category-chip` / `.btn-save` ..., así que el CSS nuevo (sección "HOJAS Y DIÁLOGOS
+  (REDISEÑO-B6)" al final de `styles.css`) las cubre juntas. Se borraron 126 reglas viejas; quedan solo
+  `.recurring-amount-day`, `.plan-modal-row` y `.modal-sheet-compact` (de layout).
+- **Hoja y componentes (spec sección 5 y mockups 6 a 11):** fondo `--surface`, radio 28 px arriba, handle 40 × 5
+  `--line`, velo `--overlay`, título 18/700 alineado a la izquierda; control segmentado Gasto / Ingreso con
+  `--expense-solid` / `--income-solid` y texto `--hero-text` (casi blanco en los dos temas); monto de 48/800;
+  chips de pastilla de 44 px con emoji (categoría, cuenta, tipo, moneda, meta, tipo de cambio) con
+  `--chip-selected-*` y borde punteado `--link` para "sugerido"; selector de íconos de 44 × 44; inputs de 48 px
+  con `--input-bg` y `--line`; botón principal de 56 px, "Cancelar" como botón de texto de 44 px y "eliminar" como
+  botón con borde `--expense-new`. La hoja scrollea (`max-height: 90dvh`, `overflow-y: auto`), así que con el
+  teclado abierto el botón de guardar sigue alcanzable.
+- **Modal de movimiento:** ahora tiene título ("Nuevo movimiento" / "Editar movimiento") y el orden del mockup
+  (monto, nota, categoría, cuenta, fecha). El botón dice "Guardar gasto", "Guardar ingreso" o "Guardar cambios"
+  (`updateEntrySaveLabel()` en `ledger.js`). La nota quedó antes de la categoría para que la sugerencia por nota se vea
+  arriba.
+- **Carga rápida:** las opciones de categoría, subcategoría y cuenta quedan siempre a la vista, como en el mockup
+  (los botones desplegables siguen en el DOM pero ocultos, y `_closeQuickPickers()` quedó vacía para no tocar a los
+  llamadores). Se agregó "Ejemplos: 500 nafta · cobré 50000 sueldo" y la pista "Sugerida por tus movimientos anteriores"
+  mientras la categoría marcada sea la que se sugirió. El monto detectado, el tipo y la nota siguen siendo editables
+  (el mockup muestra el monto como texto fijo; se conservó la edición).
+- **Menú de acciones del movimiento:** título con la nota o la categoría del movimiento, y filas de 56 px.
+- **Calendario de racha (`view-streak`):** encabezado compartido `screen-header`; las celdas usan `--track` y
+  `--bar-fill` con tres niveles de opacidad (se quitaron `#C8DDB8` y `#7FA868`); las estadísticas pasan a tarjetas.
+  La barra inferior queda visible encima y marca "Libro".
+- **Toast y aviso de actualización:** se migraron con `--hero` / `--hero-text` (el aviso es una píldora flotante con
+  botones de 44 px). Quedaron fuera de lo que pedía el ítem, pero eran lo último con colores viejos en pantalla.
+- **Accesibilidad:** todo input de las hojas tiene `<label for>` o `aria-label` (revisado por script en las 15 hojas; se
+  agregaron etiquetas a la carga rápida y al nombre de subcategoría) y no hay botones de menos de 44 px de alto.
+- `.view-overlay` pasa a usar los tokens nuevos como base (todas las pantallas ya migraron), se borró la clase auxiliar
+  `themed` y los estilos de `.icon-btn` / `.view-header`. No queda ninguna referencia a `var(--font-ui)`.
+- Textos: los títulos y botones que arman otros archivos en minúscula ("nueva meta de ahorro", "crear meta") se
+  muestran con la primera letra en mayúscula por CSS (`::first-letter`), sin tocar los textos de cada archivo.
+- **Verificación:** corrí la app en un navegador real a 390 px y abrí las 15 hojas: en todas hay una sola abierta a la
+  vez, radio 28, fondo y velo con tokens y botones de al menos 44 px; encadenar hojas ("nueva cuenta" desde gasto fijo)
+  deja una sola visible y el botón atrás cierra la hoja. Capturas del modal de movimiento (claro) y de la carga rápida,
+  el menú de acciones y el calendario de racha (oscuro). No probado en un celu real; el `confirm()` nativo no cambia.
+- Pendiente de confirmar: el mockup de carga rápida muestra "Monto detectado" como texto y un distintivo "Gasto"; se
+  mantuvo el campo editable y el selector Gasto / Ingreso para no perder esa función.
 
 ---
 ## FEATURE: REDISEÑO-B7 — Cierre: limpiar tokens viejos y revisión final

@@ -13,6 +13,7 @@ let _quickSelectedCategoryId = null;
 let _quickSelectedSubcategoryId = null;
 let _quickSelectedAccountId = null;
 let _quickOpenPicker = null; // 'category' | 'subcategory' | 'account' | null
+let _quickSuggestedCategoryId = null; // categoría que propuso la sugerencia automática, si hubo
 
 const _INCOME_KEYWORDS = new Set([
   'cobre','cobré','cobro','cobrar',
@@ -77,6 +78,7 @@ function openQuickAddModal() {
   _quickEntryType = 'expense';
   _quickSelectedCategoryId = null;
   _quickSelectedSubcategoryId = null;
+  _quickSuggestedCategoryId = null;
   _quickSelectedAccountId = _defaultQuickAccountId();
   _closeQuickPickers();
   document.getElementById('quick-input-text').value = '';
@@ -109,6 +111,7 @@ function _setQuickType(type) {
   const suggestion = getSuggestionForNote(note || text, _quickEntryType);
   _quickSelectedCategoryId = suggestion ? suggestion.categoryId : null;
   _quickSelectedSubcategoryId = suggestion ? suggestion.subcategoryId : null;
+  _quickSuggestedCategoryId = _quickSelectedCategoryId;
   _closeQuickPickers();
   _renderQuickCard();
 }
@@ -147,6 +150,7 @@ function onQuickTextInput() {
   const suggestion = getSuggestionForNote(parsed.note || text, _quickEntryType);
   _quickSelectedCategoryId = suggestion ? suggestion.categoryId : null;
   _quickSelectedSubcategoryId = suggestion ? suggestion.subcategoryId : null;
+  _quickSuggestedCategoryId = _quickSelectedCategoryId;
 
   _closeQuickPickers();
   _renderQuickCard();
@@ -160,14 +164,22 @@ function _renderQuickCard() {
   _renderQuickCategoryChip();
   _renderQuickSubcategoryField();
   _renderQuickAccountChip();
-}
-
-function _closeQuickPickers() {
-  _quickOpenPicker = null;
+  _renderQuickCategoryOptions();
+  _renderQuickSubcategoryOptions();
+  _renderQuickAccountOptions();
   ['category', 'subcategory', 'account'].forEach(which => {
     const el = document.getElementById(`quick-${which}-picker`);
-    if (el) el.hidden = true;
+    if (el) el.hidden = false;
   });
+  // La pista aparece mientras la categoría marcada sea la que se sugirió automáticamente.
+  const hint = document.getElementById('quick-suggestion-hint');
+  if (hint) hint.hidden = !(_quickSuggestedCategoryId && _quickSuggestedCategoryId === _quickSelectedCategoryId);
+}
+
+// Las opciones de categoría, subcategoría y cuenta están siempre a la vista (menos toques, como en el mockup);
+// esta función queda para que los llamadores existentes no cambien.
+function _closeQuickPickers() {
+  _quickOpenPicker = null;
 }
 
 function _toggleQuickPicker(which) {

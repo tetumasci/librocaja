@@ -336,7 +336,7 @@ function renderInstallmentCategoryGrid() {
   const noneChip = document.createElement('button');
   noneChip.type = 'button';
   noneChip.className = 'category-chip' + (!selectedCategoryIdForInstallment ? ' selected' : '');
-  noneChip.innerHTML = `<span style="color:var(--ink-faint);padding:0 4px">sin categoría</span>`;
+  noneChip.innerHTML = `<span style="color:var(--muted);padding:0 4px">sin categoría</span>`;
   noneChip.addEventListener('click', () => {
     selectedCategoryIdForInstallment = null;
     renderInstallmentCategoryGrid();

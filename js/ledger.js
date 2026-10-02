@@ -386,6 +386,8 @@ function renderAll() {
 function openActionSheet(entry) {
   actionSheetEntry = entry;
   closeAllModals();
+  const actionCat = entry.type === 'adjustment' ? { name: 'Ajuste de saldo' } : getCategoryById(entry.categoryId, entry.type);
+  document.getElementById('action-sheet-title').textContent = (entry.type !== 'adjustment' && (entry.note || '').trim()) || actionCat.name;
   document.getElementById('action-edit').hidden = entry.type === 'adjustment';
   document.getElementById('action-pay').hidden = !entry.pending;
   document.getElementById('action-sheet-backdrop').hidden = false;
@@ -403,7 +405,7 @@ function closeActionSheet() {
 function openAddModal(type) {
   closeAllOverlaysAndModals();
   editingEntryId = null;
-  document.getElementById('btn-save-entry').textContent = 'anotar movimiento';
+  document.getElementById('entry-modal-title').textContent = 'Nuevo movimiento';
   const hint = document.getElementById('category-suggestion-hint');
   if (hint) hint.hidden = true;
   selectedAccountId = state.accounts.length > 0 ? state.accounts[0].id : null;
@@ -421,8 +423,14 @@ function openAddModal(type) {
 
 function closeAddModal() {
   editingEntryId = null;
-  document.getElementById('btn-save-entry').textContent = 'anotar movimiento';
   document.getElementById('modal-backdrop').hidden = true;
+}
+
+// El botón principal dice qué se va a guardar: "Guardar gasto", "Guardar ingreso" o "Guardar cambios" al editar.
+function updateEntrySaveLabel() {
+  document.getElementById('btn-save-entry').textContent = editingEntryId
+    ? 'Guardar cambios'
+    : (currentEntryType === 'income' ? 'Guardar ingreso' : 'Guardar gasto');
 }
 
 function openEditModal(entry) {
@@ -439,7 +447,8 @@ function openEditModal(entry) {
   document.getElementById('type-income').classList.toggle('active', entry.type === 'income');
   renderCategoryGrid();
   renderAccountGrid();
-  document.getElementById('btn-save-entry').textContent = 'guardar cambios';
+  document.getElementById('entry-modal-title').textContent = 'Editar movimiento';
+  updateEntrySaveLabel();
   document.getElementById('modal-backdrop').hidden = false;
   history.pushState({ overlay: true }, '');
 }
@@ -451,6 +460,7 @@ function setEntryType(type) {
   _activeSuggestion = null;
   document.getElementById('type-expense').classList.toggle('active', type === 'expense');
   document.getElementById('type-income').classList.toggle('active', type === 'income');
+  updateEntrySaveLabel();
   renderCategoryGrid();
 }
 
@@ -497,7 +507,7 @@ function renderSubcategoryGrid() {
   const noneChip = document.createElement('button');
   noneChip.type = 'button';
   noneChip.className = 'category-chip' + (!selectedSubcategoryId ? ' selected' : '');
-  noneChip.innerHTML = `<span style="color:var(--ink-faint);padding:0 4px">—</span>`;
+  noneChip.innerHTML = `<span style="color:var(--muted);padding:0 4px">—</span>`;
   noneChip.addEventListener('click', () => {
     selectedSubcategoryId = null;
     renderSubcategoryGrid();

@@ -144,7 +144,7 @@
 </nav>
 
 <!-- ===== VIEW: STATS (full screen overlay) ===== -->
-<div class="view-overlay themed" id="view-stats" hidden>
+<div class="view-overlay" id="view-stats" hidden>
   <header class="screen-header">
     <button class="screen-back" id="stats-back" aria-label="Volver">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
@@ -240,7 +240,7 @@
 </div>
 
 <!-- ===== VIEW: GOALS ===== -->
-<div class="view-overlay themed" id="view-goals" hidden>
+<div class="view-overlay" id="view-goals" hidden>
   <header class="screen-header">
     <button class="screen-back" id="goals-back" aria-label="Volver">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
@@ -256,7 +256,7 @@
 </div>
 
 <!-- ===== VIEW: SETTINGS ===== -->
-<div class="view-overlay themed" id="view-settings" hidden>
+<div class="view-overlay" id="view-settings" hidden>
   <header class="screen-header">
     <button class="screen-back" id="settings-back" aria-label="Volver">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
@@ -365,7 +365,7 @@
 </div>
 
 <!-- ===== VIEW: PLAN ===== -->
-<div class="view-overlay themed" id="view-plan" hidden>
+<div class="view-overlay" id="view-plan" hidden>
   <header class="screen-header">
     <button class="screen-back" id="plan-back" aria-label="Volver">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
@@ -387,9 +387,10 @@
     <p class="modal-section-title">carga rápida</p>
 
     <div class="field-group">
-      <label class="field-label">escribí el movimiento</label>
+      <label class="field-label" for="quick-input-text">Escribí el movimiento</label>
       <input type="text" id="quick-input-text" class="text-input"
-             placeholder="ej: 500 nafta, cobré 50000 sueldo...">
+             placeholder="ej: 500 nafta, cobré 50000 sueldo..." autocomplete="off">
+      <p class="field-hint" id="quick-examples">Ejemplos: 500 nafta · cobré 50000 sueldo</p>
       <p id="quick-parse-error" class="quick-parse-error" hidden>
         No encontré un monto. Intentá "500 nafta" o usá el formulario completo.
       </p>
@@ -399,40 +400,41 @@
     <div id="quick-preview" class="quick-card" hidden>
       <div class="quick-card-amount-row">
         <span class="quick-card-currency">$</span>
-        <input type="number" inputmode="decimal" id="quick-input-amount" class="quick-card-amount" placeholder="0" autocomplete="off">
+        <input type="number" inputmode="decimal" id="quick-input-amount" class="quick-card-amount" placeholder="0" autocomplete="off" aria-label="Monto detectado">
       </div>
 
       <div class="modal-type-toggle quick-card-type-toggle">
-        <button class="type-btn expense active" id="quick-type-expense">gasto</button>
-        <button class="type-btn income" id="quick-type-income">ingreso</button>
+        <button class="type-btn expense active" id="quick-type-expense">Gasto</button>
+        <button class="type-btn income" id="quick-type-income">Ingreso</button>
       </div>
 
       <div class="quick-chip-field">
-        <label class="field-label">categoría</label>
-        <button type="button" class="quick-chip quick-chip-empty" id="quick-category-chip"></button>
+        <label class="field-label">Categoría</label>
+        <button type="button" class="quick-chip quick-chip-empty" id="quick-category-chip" hidden></button>
         <div class="quick-chip-options" id="quick-category-picker" hidden></div>
+        <p class="suggestion-hint" id="quick-suggestion-hint" hidden>Sugerida por tus movimientos anteriores</p>
       </div>
 
       <div class="quick-chip-field" id="quick-subcategory-field" hidden>
-        <label class="field-label">subcategoría</label>
-        <button type="button" class="quick-chip quick-chip-empty" id="quick-subcategory-chip"></button>
+        <label class="field-label">Subcategoría</label>
+        <button type="button" class="quick-chip quick-chip-empty" id="quick-subcategory-chip" hidden></button>
         <div class="quick-chip-options" id="quick-subcategory-picker" hidden></div>
       </div>
 
       <div class="quick-chip-field">
-        <label class="field-label">cuenta</label>
-        <button type="button" class="quick-chip" id="quick-account-chip"></button>
+        <label class="field-label">Cuenta</label>
+        <button type="button" class="quick-chip" id="quick-account-chip" hidden></button>
         <div class="quick-chip-options" id="quick-account-picker" hidden></div>
       </div>
 
       <div class="field-group">
-        <label class="field-label">nota</label>
+        <label class="field-label" for="quick-input-note">Nota</label>
         <input type="text" id="quick-input-note" class="text-input" placeholder="(opcional)">
       </div>
     </div>
 
-    <button class="btn-save" id="btn-save-quick" hidden>confirmar</button>
-    <button class="btn-cancel" id="btn-cancel-quick">cancelar</button>
+    <button class="btn-save" id="btn-save-quick" hidden>Guardar</button>
+    <button class="btn-cancel" id="btn-cancel-quick">Cancelar</button>
   </div>
 </div>
 
@@ -440,44 +442,45 @@
 <div class="modal-backdrop" id="modal-backdrop" hidden>
   <div class="modal-sheet" id="modal-sheet">
     <div class="modal-handle"></div>
+    <h2 class="modal-title" id="entry-modal-title">Nuevo movimiento</h2>
     <div class="modal-type-toggle">
-      <button class="type-btn expense active" id="type-expense" data-type="expense">gasto</button>
-      <button class="type-btn income" id="type-income" data-type="income">ingreso</button>
+      <button class="type-btn expense active" id="type-expense" data-type="expense">Gasto</button>
+      <button class="type-btn income" id="type-income" data-type="income">Ingreso</button>
     </div>
 
     <div class="amount-input-wrap">
       <span class="amount-currency">$</span>
-      <input type="number" inputmode="decimal" id="input-amount" class="amount-input" placeholder="0" autocomplete="off">
+      <input type="number" inputmode="decimal" id="input-amount" class="amount-input" placeholder="0" autocomplete="off" aria-label="Monto">
     </div>
 
     <div class="field-group">
-      <label class="field-label">categoría</label>
-      <div class="category-grid" id="category-grid"></div>
-    </div>
-
-    <div class="field-group" id="subcategory-field" hidden>
-      <label class="field-label">subcategoría <span class="field-label-optional">(opcional)</span></label>
-      <div class="category-grid" id="subcategory-grid"></div>
-    </div>
-
-    <div class="field-group">
-      <label class="field-label">cuenta</label>
-      <div class="account-grid" id="account-grid"></div>
-    </div>
-
-    <div class="field-group">
-      <label class="field-label" for="input-note">nota (opcional)</label>
+      <label class="field-label" for="input-note">Nota (opcional)</label>
       <input type="text" id="input-note" class="text-input" placeholder="ej: nafta, supermercado, sueldo...">
       <p id="category-suggestion-hint" class="suggestion-hint" hidden></p>
     </div>
 
     <div class="field-group">
-      <label class="field-label" for="input-date">fecha</label>
+      <label class="field-label">Categoría</label>
+      <div class="category-grid" id="category-grid"></div>
+    </div>
+
+    <div class="field-group" id="subcategory-field" hidden>
+      <label class="field-label">Subcategoría <span class="field-label-optional">(opcional)</span></label>
+      <div class="category-grid" id="subcategory-grid"></div>
+    </div>
+
+    <div class="field-group">
+      <label class="field-label">Cuenta</label>
+      <div class="account-grid" id="account-grid"></div>
+    </div>
+
+    <div class="field-group">
+      <label class="field-label" for="input-date">Fecha</label>
       <input type="date" id="input-date" class="text-input">
     </div>
 
-    <button class="btn-save" id="btn-save-entry">anotar movimiento</button>
-    <button class="btn-cancel" id="btn-cancel-entry">cancelar</button>
+    <button class="btn-save" id="btn-save-entry">Guardar gasto</button>
+    <button class="btn-cancel" id="btn-cancel-entry">Cancelar</button>
   </div>
 </div>
 
@@ -556,7 +559,7 @@
         <label class="field-label">subcategorías</label>
         <div id="subcategory-list" class="subcategory-list"></div>
         <div class="subcategory-add-row">
-          <input type="text" id="new-subcategory-name" class="text-input" placeholder="ej: Supermercado, Delivery...">
+          <input type="text" id="new-subcategory-name" class="text-input" placeholder="ej: Supermercado, Delivery..." aria-label="Nombre de la subcategoría">
           <button type="button" class="text-btn" id="btn-add-subcategory">+ agregar</button>
         </div>
       </div>
@@ -568,14 +571,14 @@
 
 <!-- ===== VIEW: STREAK CALENDAR ===== -->
 <div class="view-overlay" id="view-streak" hidden>
-  <header class="view-header">
-    <button class="icon-btn" id="streak-cal-back" aria-label="Volver">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M15 18l-6-6 6-6"/></svg>
+  <header class="screen-header">
+    <button class="screen-back" id="streak-cal-back" aria-label="Volver">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
     </button>
-    <h2>registro de días</h2>
-    <div style="width:36px"></div>
+    <h1>Registro de días</h1>
+    <div class="screen-header-spacer"></div>
   </header>
-  <div class="view-body">
+  <div class="view-body screen-body">
 
     <div class="streak-hero">
       <span class="streak-hero-count" id="streak-hero-count">0</span>
@@ -771,8 +774,8 @@
     <div class="modal-handle"></div>
     <h3 class="modal-title">depositar ahorro en USD</h3>
     <div class="amount-input-wrap">
-      <span class="amount-currency" style="font-size:20px;letter-spacing:-.02em">USD</span>
-      <input type="number" inputmode="decimal" id="dollar-amount-usd" class="amount-input" placeholder="0" autocomplete="off" style="width:160px">
+      <span class="amount-currency">USD</span>
+      <input type="number" inputmode="decimal" id="dollar-amount-usd" class="amount-input" placeholder="0" autocomplete="off" aria-label="Monto en dólares">
     </div>
     <div class="field-group">
       <label class="field-label" for="dollar-exchange-rate">tipo de cambio · 1 USD = $</label>
@@ -805,7 +808,7 @@
     <h3 class="modal-title">transferir entre cuentas</h3>
     <div class="amount-input-wrap">
       <span class="amount-currency">$</span>
-      <input type="number" inputmode="decimal" id="transfer-amount" class="amount-input" placeholder="0" autocomplete="off">
+      <input type="number" inputmode="decimal" id="transfer-amount" class="amount-input" placeholder="0" autocomplete="off" aria-label="Monto a transferir">
     </div>
     <div class="field-group">
       <label class="field-label">desde</label>
@@ -832,14 +835,15 @@
 <div class="modal-backdrop" id="action-sheet-backdrop" hidden>
   <div class="modal-sheet">
     <div class="modal-handle"></div>
+    <h2 class="modal-title" id="action-sheet-title"></h2>
     <button class="action-sheet-btn action-sheet-primary" id="action-pay" hidden>
-      <span class="action-sheet-icon">✅</span> pagar
+      <span class="action-sheet-icon">✅</span> Pagar
     </button>
     <button class="action-sheet-btn" id="action-edit">
-      <span class="action-sheet-icon">✏️</span> editar movimiento
+      <span class="action-sheet-icon">✏️</span> Editar movimiento
     </button>
     <button class="action-sheet-btn action-sheet-danger" id="action-delete">
-      <span class="action-sheet-icon">🗑️</span> eliminar
+      <span class="action-sheet-icon">🗑️</span> Eliminar
     </button>
     <button class="btn-cancel" id="action-cancel">cancelar</button>
   </div>
