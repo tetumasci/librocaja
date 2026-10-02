@@ -104,7 +104,10 @@ function attachEventListeners() {
     const pill = e.target.closest('.pill');
     if (!pill) return;
     currentFilter = pill.dataset.filter;
-    document.querySelectorAll('.pill').forEach(p => p.classList.toggle('active', p === pill));
+    document.querySelectorAll('.pill').forEach(p => {
+      p.classList.toggle('active', p === pill);
+      p.setAttribute('aria-pressed', String(p === pill));
+    });
     renderLedger();
   });
 
@@ -116,7 +119,6 @@ function attachEventListeners() {
       showView(view);
     });
   });
-  document.getElementById('btn-open-stats').addEventListener('click', () => showView('stats'));
 
   // Back buttons
   document.getElementById('stats-back').addEventListener('click', hideAllOverlays);

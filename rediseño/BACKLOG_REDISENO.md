@@ -294,7 +294,7 @@ nueva, mecanismo de tema claro/oscuro y la opción en Ajustes. Seguir `REDISENO_
 
 ---
 ## FEATURE: REDISEÑO-B1 — Inicio (libro)
-**Estado: pendiente**
+**Estado: hecha**
 **Depende de:** REDISEÑO-B0
 
 ### Qué se pide
@@ -326,6 +326,58 @@ Aplicar el diseño nuevo al Inicio, en claro y en oscuro. Referencia: `Real-L-1-
 - Cambiar de claro a oscuro con la pantalla abierta.
 - Pantalla angosta (320 px) y celu con barra de gestos.
 - Que la barra inferior no tape el último movimiento (se puede scrollear por debajo).
+
+### Notas de implementación
+- Archivos modificados: `index.html`, `styles.css`, `js/ledger.js`, `js/main.js`, `sw.js` (`CACHE_NAME`
+  v27 → v28). Ningún id existente se renombró (verificado por script: todo `getElementById` del JS
+  existe en `index.html`). Agregué un id nuevo: `#streak-unit` ("día"/"días").
+- **Verificación contra los mockups** (`Real-L-1-inicio` y `Real-D-1-inicio`): corrí la app en un
+  navegador real a 390 px con datos de ejemplo y medí con JS: barra de mes y chip de racha 44 px,
+  hero radio 28 con monto 42/800, filas de cuenta 40 px, botón de transferir 48 px, tarjeta del mes
+  radio 22, círculos 56 px con ícono 22, avatares 38 px, barra inferior 68 px (radio 34, ítems 64×54);
+  capturas en claro y oscuro. Sin colores ni medidas de color hardcodeadas en el CSS nuevo (revisado por
+  script) y sin tokens viejos en las secciones reescritas. No probado en un celu real.
+- **Encabezado eliminado:** el mockup no tiene el título "Libro de caja" ni el botón de Reportes de la
+  barra superior, así que se sacó ese `<header>` (con `#btn-open-stats`) y su listener en `main.js`.
+  Reportes sigue accesible desde la barra inferior.
+- Barra superior: mes en píldora (`#prev-month`, `#current-month-label`, `#next-month`; el texto se
+  capitaliza por CSS) y racha como chip (`#streak-bar` ahora es un `<button>`; `#streak-count`,
+  `#streak-flame`, `#streak-today-badge` conservados). Hoy pendiente/anotado: aro vacío / tilde en el
+  chip, y texto completo en el `aria-label` (no depende del color).
+- Hero: "Tenés ahora" + `#total-balance`, cuentas con emoji, y `#btn-open-transfer` dentro de la
+  tarjeta. Con una sola cuenta con saldo el desglose se oculta y el padding inferior del hero pasa de 4 a
+  20 px (clase `has-extras`, la pone `renderAccountBreakdown`). Tarjeta chica: ingresos / gastos / saldo
+  del mes; el saldo lleva signo (`+$ …` / `−$ …`, función `formatSignedMoney` en `ledger.js`).
+- Movimientos: título del renglón = la nota si hay (si no, la categoría); el subtítulo suma la categoría
+  (cuando no es el título), subcategoría, cuenta (solo con 2+ cuentas) y "gasto fijo" / "ingreso fijo" /
+  "cuota" (reemplaza al ↻). Pendientes: opacidad .6 + tag "pendiente". Ajustes y transferencias: avatar y
+  monto neutros; el ajuste muestra "Cuenta X" y conserva el signo. El filtro (`.pill`) ahora actualiza
+  también `aria-pressed`.
+- Etiquetas de día: función nueva `formatLedgerDayLabel` ("Hoy · vie 2", "Ayer · jue 1", "Mié 30"; el
+  mayúsculas es CSS) y sufijo " · pendiente" si todos los renglones del grupo son pendientes. `formatDayLabel`
+  no se tocó porque la usa `goals.js`.
+- Barra inferior flotante (68 px, radio 34, `left/right` 20 px, máximo 440 px de ancho) con el ícono de
+  Ajustes del mockup (sliders) y etiquetas con mayúscula. Decisión propia: `bottom: max(16px,
+  env(safe-area-inset-bottom))` para no chocar con la barra de gestos de iOS. `body` tiene
+  `padding-bottom: 110px` + safe-area; el toast subió para quedar sobre la barra.
+- Accesos directos: iconos y tamaños del mockup; en oscuro el círculo lleva borde `--line` (regla
+  duplicada para `[data-theme="dark"]` y para el `@media`, igual que los tokens).
+- Convivencia con pantallas viejas: `html/body` usan `--bg` pero conservan el color de texto viejo (las
+  pantallas viejas lo heredan); `#app` y `.bottom-nav` usan `--text` y `--font-sans`. Se conservaron las
+  reglas `.summary-card`, `.summary-balance*`, `.summary-split` y `.split-*` porque el bloque de Reportes
+  (A2) las usa; se borran en B2. Borrado como huérfano: `.top-bar*`, `.ledger-mark`, `.streak-bar*`,
+  `.summary-row`, `.summary-month*`, `.nav-arrow`, y las reglas viejas de `.fab`/`.transfer-trigger-btn`.
+- `var(--font-ui)`: se eliminó con las reglas de `.entry-icon.transfer` y `.transfer-trigger-btn`
+  (migradas). Quedan 3 referencias en pantallas no migradas (`.dollar-type-chip`, `.dollar-rate-status`,
+  `.subcat-toggle-btn`).
+- Probado en navegador a 390 y 320 px: monto de $ 13.387.678 (el monto del hero baja a 34,5 px a 320 px y
+  no desborda), nota larga (se trunca con "…"), estado vacío, una cuenta, saldo negativo, filtro, mes
+  anterior/siguiente, racha, Gasto/Ingreso/Carga rápida, y que no queden overlays abiertos.
+- Limitación conocida: un saldo negativo dentro del hero (fondo verde oscuro) no se pinta de rojo, porque
+  ningún token de color de gasto se lee bien sobre `--hero` en los dos temas; se distingue por el signo
+  "-". A confirmar.
+- Limitación conocida: con las pantallas viejas todavía sin migrar, los modales (hojas crema) se ven
+  claros incluso con el Inicio en oscuro, hasta B6.
 
 ---
 ## FEATURE: REDISEÑO-B2 — Reportes

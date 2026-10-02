@@ -28,70 +28,64 @@
 
 <div id="app">
 
-  <!-- ===== HEADER ===== -->
-  <header class="top-bar">
-    <div class="top-bar-title">
-      <span class="ledger-mark">§</span>
-      <h1>Libro de caja</h1>
+  <!-- ===== BARRA SUPERIOR: mes + racha ===== -->
+  <div class="home-top">
+    <div class="month-pill">
+      <button class="month-pill-btn" id="prev-month" aria-label="Mes anterior">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
+      </button>
+      <span class="month-pill-label" id="current-month-label">junio 2026</span>
+      <button class="month-pill-btn" id="next-month" aria-label="Mes siguiente">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg>
+      </button>
     </div>
-    <button class="icon-btn" id="btn-open-stats" aria-label="Ver reportes">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M4 19V10M12 19V5M20 19v-7"/></svg>
+    <button class="streak-chip" id="streak-bar" aria-label="Ver calendario de racha">
+      <svg id="streak-flame" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3c1 3 5 5 5 10a5 5 0 01-10 0c0-2 1-3 2-4 0 2 1 3 2 3 0-3-1-6 1-9z"/></svg>
+      <span><span id="streak-count">0</span> <span id="streak-unit">días</span></span>
+      <span class="streak-today" id="streak-today-badge" aria-hidden="true"></span>
     </button>
-  </header>
+  </div>
 
-  <!-- ===== STREAK / HABIT BAR ===== -->
-  <section class="streak-bar" id="streak-bar" role="button" aria-label="Ver calendario de racha">
-    <div class="streak-info">
-      <span class="streak-flame" id="streak-flame">🔥</span>
-      <span class="streak-text"><strong id="streak-count">0</strong> días seguidos anotando</span>
-    </div>
-    <div class="streak-today" id="streak-today-badge">hoy: pendiente</div>
+  <!-- ===== TARJETA PRINCIPAL: tenés ahora ===== -->
+  <section class="home-hero">
+    <div class="home-hero-label">Tenés ahora (todas las cuentas)</div>
+    <div class="home-hero-amount" id="total-balance">$ 0</div>
+    <div class="account-breakdown" id="account-breakdown" hidden></div>
+    <button class="transfer-trigger-btn" id="btn-open-transfer" hidden>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 7h12M16 3l4 4-4 4M17 17H5M8 13l-4 4 4 4"/></svg>
+      Transferir entre cuentas
+    </button>
   </section>
 
-  <!-- ===== MONTH SUMMARY ===== -->
-  <section class="summary-card">
-    <div class="summary-row">
-      <div class="summary-month-nav">
-        <button class="nav-arrow" id="prev-month" aria-label="Mes anterior">‹</button>
-        <span class="summary-month" id="current-month-label">junio 2026</span>
-        <button class="nav-arrow" id="next-month" aria-label="Mes siguiente">›</button>
+  <!-- ===== RESULTADO DEL MES ===== -->
+  <section class="home-month-card">
+    <div class="home-month-grid">
+      <div>
+        <div class="home-month-label">Ingresos del mes</div>
+        <div class="home-month-value income" id="month-income">$ 0</div>
       </div>
-    </div>
-    <div class="summary-balance">
-      <span class="summary-balance-label">tenés ahora (todas las cuentas)</span>
-      <span class="summary-balance-amount" id="total-balance">$ 0</span>
-    </div>
-    <div class="account-breakdown" id="account-breakdown" hidden></div>
-    <button class="transfer-trigger-btn" id="btn-open-transfer" hidden>↔ transferir</button>
-    <div class="summary-split">
-      <div class="split-item split-income">
-        <span class="split-label">ingresos</span>
-        <span class="split-amount" id="month-income">$ 0</span>
+      <div>
+        <div class="home-month-label">Gastos del mes</div>
+        <div class="home-month-value expense" id="month-expense">$ 0</div>
       </div>
-      <div class="split-divider"></div>
-      <div class="split-item split-expense">
-        <span class="split-label">gastos</span>
-        <span class="split-amount" id="month-expense">$ 0</span>
-      </div>
-      <div class="split-divider"></div>
-      <div class="split-item split-balance">
-        <span class="split-label">saldo del mes</span>
-        <span class="split-amount" id="month-balance">$ 0</span>
+      <div>
+        <div class="home-month-label">Saldo del mes</div>
+        <div class="home-month-value" id="month-balance">$ 0</div>
       </div>
     </div>
   </section>
 
   <!-- ===== ACCESOS DIRECTOS ===== -->
   <div class="quick-actions">
-    <button class="quick-action quick-action-expense" id="btn-add-expense">
-      <span class="quick-action-circle"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17L17 7M9 7h8v8"/></svg></span>
+    <button class="quick-action quick-action-expense" id="btn-add-expense" aria-label="Agregar gasto">
+      <span class="quick-action-circle"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17L17 7M8 7h9v9"/></svg></span>
       <span class="quick-action-label">Gasto</span>
     </button>
-    <button class="quick-action quick-action-income" id="btn-add-income">
-      <span class="quick-action-circle"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 7L7 17M15 17H7V9"/></svg></span>
+    <button class="quick-action quick-action-income" id="btn-add-income" aria-label="Agregar ingreso">
+      <span class="quick-action-circle"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 7L7 17M16 17H7V8"/></svg></span>
       <span class="quick-action-label">Ingreso</span>
     </button>
-    <button class="quick-action" id="btn-quick-add">
+    <button class="quick-action" id="btn-quick-add" aria-label="Carga rápida">
       <span class="quick-action-circle"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg></span>
       <span class="quick-action-label">Carga rápida</span>
     </button>
@@ -106,19 +100,19 @@
   <!-- ===== MOVEMENTS LIST ===== -->
   <section class="ledger-section">
     <div class="ledger-section-head">
-      <h2>movimientos</h2>
+      <h2>Movimientos</h2>
       <div class="filter-pills" id="filter-pills">
-        <button class="pill active" data-filter="all">todos</button>
-        <button class="pill" data-filter="income">ingresos</button>
-        <button class="pill" data-filter="expense">gastos</button>
+        <button class="pill active" data-filter="all" aria-pressed="true">Todos</button>
+        <button class="pill" data-filter="income" aria-pressed="false">Ingresos</button>
+        <button class="pill" data-filter="expense" aria-pressed="false">Gastos</button>
       </div>
     </div>
     <div id="ledger-list" class="ledger-list">
       <!-- entries injected here -->
     </div>
     <div class="empty-state" id="empty-state" hidden>
-      <p class="empty-state-title">todavía no anotaste nada este mes</p>
-      <p class="empty-state-sub">tocá Gasto o Ingreso para cargar tu primer movimiento</p>
+      <p class="empty-state-title">Todavía no anotaste nada este mes</p>
+      <p class="empty-state-sub">Tocá Gasto o Ingreso para cargar tu primer movimiento</p>
     </div>
   </section>
 
@@ -127,24 +121,24 @@
 <!-- ===== BOTTOM NAV ===== -->
 <nav class="bottom-nav">
   <button class="nav-item active" data-view="ledger">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M4 6h16M4 12h16M4 18h10"/></svg>
-    <span>libro</span>
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6h16M4 12h16M4 18h10"/></svg>
+    <span>Libro</span>
   </button>
   <button class="nav-item" data-view="stats">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M4 19V10M12 19V5M20 19v-7"/></svg>
-    <span>reportes</span>
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19V10M12 19V5M20 19v-7"/></svg>
+    <span>Reportes</span>
   </button>
   <button class="nav-item" data-view="goals">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="3"/></svg>
-    <span>metas</span>
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="3"/></svg>
+    <span>Metas</span>
   </button>
   <button class="nav-item" data-view="settings">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 11-2.83 2.83l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 11-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 11-2.83-2.83l.06-.06a1.65 1.65 0 00.33-1.82 1.65 1.65 0 00-1.51-1H3a2 2 0 110-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 112.83-2.83l.06.06a1.65 1.65 0 001.82.33H9a1.65 1.65 0 001-1.51V3a2 2 0 114 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 112.83 2.83l-.06.06a1.65 1.65 0 00-.33 1.82V9a1.65 1.65 0 001.51 1H21a2 2 0 110 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg>
-    <span>ajustes</span>
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h9M17 7h3M4 17h3M11 17h9"/><circle cx="15" cy="7" r="2"/><circle cx="9" cy="17" r="2"/></svg>
+    <span>Ajustes</span>
   </button>
   <button class="nav-item" data-view="plan">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/></svg>
-    <span>plan</span>
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/></svg>
+    <span>Plan</span>
   </button>
 </nav>
 

@@ -178,7 +178,7 @@
 html, body {
   margin: 0;
   padding: 0;
-  background: var(--paper);
+  background: var(--bg);
   color: var(--ink);
   font-family: var(--font-body);
   -webkit-tap-highlight-color: transparent;
@@ -186,7 +186,7 @@ html, body {
 }
 
 body {
-  padding-bottom: 84px;
+  padding-bottom: calc(110px + env(safe-area-inset-bottom));
   min-height: 100vh;
 }
 
@@ -203,39 +203,9 @@ input { font-family: inherit; }
 #app {
   max-width: 480px;
   margin: 0 auto;
-  padding: 0 16px;
-}
-
-/* ============================================
-   TOP BAR
-   ============================================ */
-
-.top-bar {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 20px 0 12px;
-}
-
-.top-bar-title {
-  display: flex;
-  align-items: baseline;
-  gap: 8px;
-}
-
-.ledger-mark {
-  font-family: var(--font-display);
-  font-size: 22px;
-  color: var(--accent);
-  font-weight: 600;
-}
-
-.top-bar h1 {
-  font-family: var(--font-display);
-  font-size: 22px;
-  font-weight: 600;
-  margin: 0;
-  letter-spacing: -0.01em;
+  padding: max(20px, env(safe-area-inset-top)) 20px 0;
+  font-family: var(--font-sans);
+  color: var(--text);
 }
 
 .icon-btn {
@@ -251,49 +221,171 @@ input { font-family: inherit; }
 .icon-btn:active { background: var(--paper-line); }
 
 /* ============================================
-   STREAK BAR
+   INICIO (REDISEÑO-B1): barra superior, hero, tarjeta del mes
+   Tokens nuevos; las tres variantes -new evitan chocar con los viejos.
    ============================================ */
 
-.streak-bar {
+.home-top {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  background: var(--accent-soft);
-  border: 0.5px solid var(--accent);
-  border-radius: var(--radius-md);
-  padding: 10px 14px;
-  margin-bottom: 14px;
+  height: 44px;
 }
 
-.streak-info {
+.month-pill {
   display: flex;
   align-items: center;
-  gap: 8px;
-  font-size: 13px;
-  color: #6B4F1A;
+  height: 44px;
+  border-radius: 22px;
+  background: var(--surface);
+  padding: 0 4px;
+}
+.month-pill-btn {
+  width: 36px;
+  height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text);
+}
+.month-pill-btn svg { width: 18px; height: 18px; }
+.month-pill-label {
+  font-size: 15px;
+  font-weight: 700;
+  padding: 0 6px;
+  text-transform: capitalize;
 }
 
-.streak-flame { font-size: 15px; filter: grayscale(0.3); }
-
-.streak-text strong {
-  font-family: var(--font-mono);
-  font-weight: 600;
+.streak-chip {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  height: 44px;
+  border-radius: 22px;
+  background: var(--highlight);
+  color: var(--highlight-text);
+  padding: 0 14px;
+  font-size: 14px;
+  font-weight: 700;
 }
-
+.streak-chip svg { width: 16px; height: 16px; }
+.streak-chip:active { opacity: 0.85; }
+/* indicador de "hoy": aro vacío = pendiente, tilde sobre fondo lleno = anotado */
 .streak-today {
-  font-size: 11px;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
-  padding: 4px 8px;
-  border-radius: 20px;
-  background: rgba(255,255,255,0.6);
-  color: #8A6A24;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  border: 1.5px solid currentColor;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 10px;
+  line-height: 1;
 }
 .streak-today.done {
-  background: var(--income);
-  color: #fff;
+  background: var(--highlight-text);
+  color: var(--highlight);
+  border-color: var(--highlight-text);
 }
+
+.home-hero {
+  margin-top: 14px;
+  background: var(--hero);
+  color: var(--hero-text);
+  border: 1px solid var(--hero-border);
+  border-radius: 28px;
+  padding: 20px;
+}
+.home-hero.has-extras { padding-bottom: 4px; }
+.home-hero-label {
+  font-size: 13px;
+  font-weight: 500;
+  opacity: 0.8;
+}
+.home-hero-amount {
+  margin-top: 2px;
+  font-size: min(42px, 10.8vw);
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  font-variant-numeric: tabular-nums;
+  overflow-wrap: anywhere;
+}
+
+/* desglose de cuentas dentro del hero */
+.account-breakdown {
+  margin-top: 14px;
+  border-top: 1px solid var(--hero-divider);
+}
+.account-balance-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  height: 40px;
+  border-bottom: 1px solid var(--hero-divider);
+}
+.account-balance-icon {
+  font-size: 18px;
+  width: 22px;
+  text-align: center;
+}
+.account-balance-name {
+  flex-grow: 1;
+  min-width: 0;
+  font-size: 14px;
+  font-weight: 500;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.account-balance-amount {
+  font-size: 14px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+.transfer-trigger-btn {
+  width: 100%;
+  height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--hero-icon);
+}
+.transfer-trigger-btn svg { width: 18px; height: 18px; }
+.account-breakdown[hidden] + .transfer-trigger-btn {
+  margin-top: 14px;
+  border-top: 1px solid var(--hero-divider);
+}
+
+.home-month-card {
+  margin-top: 10px;
+  background: var(--surface);
+  border-radius: 22px;
+  padding: 12px 16px;
+}
+.home-month-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+}
+.home-month-label {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--muted);
+}
+.home-month-value {
+  margin-top: 2px;
+  font-size: 13px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  overflow-wrap: anywhere;
+}
+.home-month-value.income { color: var(--income-new); }
+.home-month-value.expense { color: var(--expense-new); }
+.home-month-value.negative { color: var(--expense-new); }
 
 /* ============================================
    SUMMARY CARD
@@ -308,34 +400,6 @@ input { font-family: inherit; }
   margin-bottom: 16px;
   position: relative;
 }
-
-.summary-row { margin-bottom: 4px; }
-
-.summary-month-nav {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 14px;
-}
-
-.summary-month {
-  font-size: 12px;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.07em;
-  color: var(--ink-soft);
-}
-
-.nav-arrow {
-  font-size: 18px;
-  color: var(--ink-faint);
-  width: 24px;
-  height: 24px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-.nav-arrow:active { color: var(--ink); }
 
 .summary-balance {
   display: flex;
@@ -401,94 +465,68 @@ input { font-family: inherit; }
   background: var(--paper-line);
 }
 
-/* account breakdown in summary card */
-.account-breakdown {
-  border-top: 1px dashed var(--paper-line);
-  padding-top: 10px;
-  margin-top: 12px;
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-}
-.account-balance-row {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-.account-balance-name {
-  font-size: 12px;
-  color: var(--ink-soft);
-}
-.account-balance-amount {
-  font-family: var(--font-mono);
-  font-size: 12px;
-  font-weight: 600;
-  font-variant-numeric: tabular-nums;
-  color: var(--ink);
-}
-.account-balance-amount.negative { color: var(--expense); }
-
 /* ============================================
    SUGGESTION BANNER
    ============================================ */
 
 .suggestion-banner {
+  margin-top: 12px;
   display: flex;
   align-items: flex-start;
   gap: 10px;
-  background: var(--income-soft);
-  border-radius: var(--radius-md);
+  background: var(--banner-bg);
+  color: var(--banner-fg);
+  border-radius: 20px;
   padding: 12px 14px;
-  margin-bottom: 16px;
 }
 .suggestion-icon {
-  color: var(--income);
   font-size: 12px;
-  margin-top: 3px;
+  margin-top: 2px;
 }
 .suggestion-banner p {
   margin: 0;
   font-size: 13px;
   line-height: 1.5;
-  color: #2E3B23;
 }
 
 /* ============================================
    LEDGER LIST
    ============================================ */
 
-.ledger-section-head {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: 10px;
+.ledger-section {
+  margin-top: 12px;
+  background: var(--surface);
+  border-radius: 28px;
+  padding: 16px 18px 6px;
 }
 
 .ledger-section-head h2 {
-  font-family: var(--font-display);
-  font-size: 15px;
-  font-weight: 600;
-  text-transform: lowercase;
   margin: 0;
-  color: var(--ink-soft);
+  font-size: 16px;
+  font-weight: 700;
 }
 
+/* control segmentado del filtro (Todos / Ingresos / Gastos) */
 .filter-pills {
-  display: flex;
-  gap: 6px;
+  margin-top: 12px;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 4px;
+  padding: 4px;
+  border-radius: 26px;
+  background: var(--bg);
 }
-
 .pill {
-  font-size: 11px;
-  padding: 5px 11px;
-  border-radius: 20px;
-  border: 1px solid var(--paper-line);
-  color: var(--ink-soft);
+  height: 44px;
+  border-radius: 22px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--muted);
 }
 .pill.active {
-  background: var(--ink);
-  color: var(--paper);
-  border-color: var(--ink);
+  background: var(--seg-selected-bg);
+  color: var(--seg-selected-fg);
+  font-weight: 700;
 }
 
 .ledger-list {
@@ -496,90 +534,94 @@ input { font-family: inherit; }
   flex-direction: column;
 }
 
-.ledger-day-group {
-  margin-bottom: 4px;
-}
-
 .ledger-day-label {
+  padding: 12px 0 2px;
   font-size: 11px;
-  font-weight: 600;
+  font-weight: 700;
+  letter-spacing: 0.06em;
   text-transform: uppercase;
-  letter-spacing: 0.05em;
-  color: var(--ink-faint);
-  padding: 14px 2px 6px;
+  color: var(--muted);
 }
 
 .ledger-entry {
   display: flex;
   align-items: center;
   gap: 12px;
-  padding: 11px 2px;
-  border-bottom: 1px solid var(--paper-line);
-  position: relative;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--divider);
 }
-.ledger-entry:active { background: rgba(31,27,22,0.02); }
-.ledger-entry.pending { opacity: 0.55; }
-.ledger-entry.pending .entry-amount { color: var(--ink-faint) !important; }
+.ledger-list > .ledger-day-group:last-child > .ledger-entry:last-child { border-bottom: 0; }
+.ledger-entry:active { background: var(--bg); }
+.ledger-entry.pending { opacity: 0.6; }
 
 .entry-icon {
-  width: 34px;
-  height: 34px;
+  width: 38px;
+  height: 38px;
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 15px;
+  font-size: 18px;
   flex-shrink: 0;
 }
-.entry-icon.expense { background: var(--expense-soft); color: var(--expense); }
-.entry-icon.income { background: var(--income-soft); color: var(--income); }
+.entry-icon.expense { background: var(--expense-tint); }
+.entry-icon.income { background: var(--income-tint); }
+.entry-icon.adjustment,
+.entry-icon.transfer { background: var(--neutral-tint); }
 
 .entry-detail {
-  flex: 1;
+  flex-grow: 1;
   min-width: 0;
 }
-
 .entry-category {
   font-size: 14px;
-  font-weight: 500;
+  font-weight: 600;
   margin: 0;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
-
 .entry-note {
   font-size: 12px;
-  color: var(--ink-faint);
-  margin: 1px 0 0;
+  color: var(--muted);
+  margin: 0;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
+.entry-tag {
+  margin-left: 6px;
+  font-size: 10px;
+  font-weight: 700;
+  padding: 2px 7px;
+  border-radius: 8px;
+  background: var(--neutral-tint);
+  color: var(--muted);
+}
 
 .entry-amount {
-  font-family: var(--font-mono);
   font-size: 14px;
-  font-weight: 600;
+  font-weight: 700;
   font-variant-numeric: tabular-nums;
   flex-shrink: 0;
 }
-.entry-amount.expense { color: var(--expense); }
-.entry-amount.income { color: var(--income); }
+.entry-amount.expense { color: var(--expense-new); }
+.entry-amount.income { color: var(--income-new); }
+.entry-amount.adjustment,
+.entry-amount.transfer { color: var(--muted); }
 
 .empty-state {
   text-align: center;
-  padding: 60px 20px;
+  padding: 40px 20px 34px;
 }
 .empty-state-title {
-  font-family: var(--font-display);
   font-size: 16px;
-  color: var(--ink-soft);
+  font-weight: 700;
   margin: 0 0 4px;
 }
 .empty-state-sub {
   font-size: 13px;
-  color: var(--ink-faint);
+  color: var(--muted);
   margin: 0;
 }
 
@@ -588,10 +630,10 @@ input { font-family: inherit; }
    ============================================ */
 
 .quick-actions {
+  margin-top: 14px;
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 8px;
-  margin-bottom: 16px;
 }
 .quick-action {
   display: flex;
@@ -599,61 +641,75 @@ input { font-family: inherit; }
   align-items: center;
   gap: 6px;
   min-height: 44px;
-  padding: 4px 0;
-  color: var(--ink);
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text);
 }
 .quick-action-circle {
   width: 56px;
   height: 56px;
   border-radius: 50%;
-  background: var(--paper-raised);
-  border: 1px solid var(--paper-line);
-  box-shadow: var(--shadow-card);
+  background: var(--surface);
+  border: 1px solid transparent;
   display: flex;
   align-items: center;
   justify-content: center;
 }
-.quick-action-circle svg { width: 24px; height: 24px; }
+.quick-action-circle svg { width: 22px; height: 22px; }
 .quick-action:active .quick-action-circle { transform: scale(0.94); }
-.quick-action-expense .quick-action-circle { color: var(--expense); }
-.quick-action-income .quick-action-circle { color: var(--income); }
-.quick-action-label {
-  font-size: 12px;
-  font-weight: 600;
+.quick-action-expense .quick-action-circle { color: var(--expense-new); }
+.quick-action-income .quick-action-circle { color: var(--income-new); }
+/* en oscuro el círculo lleva borde para despegarse del fondo */
+:root[data-theme="dark"] .quick-action-circle { border-color: var(--line); }
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .quick-action-circle { border-color: var(--line); }
 }
 
 /* ============================================
-   BOTTOM NAV
+   BOTTOM NAV (flotante)
    ============================================ */
 
 .bottom-nav {
   position: fixed;
-  bottom: 0;
   left: 0;
   right: 0;
-  background: var(--paper-raised);
-  border-top: 1px solid var(--paper-line);
+  bottom: max(16px, env(safe-area-inset-bottom));
+  width: calc(100% - 40px);
+  max-width: 440px;
+  height: 68px;
+  margin: 0 auto;
+  border-radius: 34px;
+  background: var(--surface);
+  box-shadow: var(--shadow-card-new);
   display: flex;
-  padding: 6px 0 max(6px, env(safe-area-inset-bottom));
+  align-items: center;
+  justify-content: space-around;
+  padding: 0 6px;
+  font-family: var(--font-sans);
   z-index: 30;
 }
 
 .nav-item {
-  flex: 1;
+  width: 64px;
+  height: 54px;
+  border-radius: 27px;
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 3px;
-  padding: 6px 0;
-  color: var(--ink-faint);
+  justify-content: center;
+  gap: 2px;
+  color: var(--muted);
 }
-.nav-item svg { width: 21px; height: 21px; }
+.nav-item svg { width: 20px; height: 20px; }
 .nav-item span {
-  font-size: 10px;
+  font-size: 11px;
   font-weight: 500;
-  text-transform: lowercase;
 }
-.nav-item.active { color: var(--ink); }
+.nav-item.active {
+  background: var(--nav-active-bg);
+  color: var(--nav-active-fg);
+}
+.nav-item.active span { font-weight: 600; }
 
 /* ============================================
    VIEW OVERLAYS (stats/goals/settings)
@@ -1315,9 +1371,6 @@ input { font-family: inherit; }
    STREAK CALENDAR VIEW
    ============================================ */
 
-.streak-bar { cursor: pointer; }
-.streak-bar:active { opacity: 0.85; }
-
 .streak-hero {
   display: flex;
   flex-direction: column;
@@ -1546,7 +1599,7 @@ input { font-family: inherit; }
 
 .toast {
   position: fixed;
-  bottom: 90px;
+  bottom: calc(100px + env(safe-area-inset-bottom));
   left: 50%;
   transform: translateX(-50%) translateY(20px);
   background: var(--ink);
@@ -1569,14 +1622,8 @@ input { font-family: inherit; }
    RESPONSIVE / SAFE AREAS
    ============================================ */
 
-@supports (padding: max(0px)) {
-  .top-bar { padding-top: max(20px, env(safe-area-inset-top)); }
-}
-
 @media (min-width: 480px) {
-  body { display: flex; justify-content: center; background: var(--paper-line); }
-  #app, .bottom-nav, .view-overlay { background: var(--paper); }
-  .bottom-nav { box-shadow: 0 0 0 1px var(--paper-line); }
+  body { display: flex; justify-content: center; }
 }
 
 /* ============================================
@@ -1837,9 +1884,6 @@ input { font-family: inherit; }
   color: var(--ink);
 }
 
-/* adjustment entry in ledger */
-.entry-icon.adjustment { background: var(--accent-soft); color: var(--accent); }
-
 /* subcategory management in category edit modal */
 .subcategory-list { margin-bottom: 8px; }
 .subcategory-row {
@@ -1892,28 +1936,6 @@ input { font-family: inherit; }
   color: var(--accent);
   font-style: italic;
 }
-
-/* transfer entry in ledger */
-.entry-icon.transfer { background: var(--paper-line); color: var(--ink-faint); font-size: 16px; font-family: var(--font-ui); }
-.entry-amount.transfer { color: var(--ink-faint); }
-
-/* transfer trigger button in summary card */
-.transfer-trigger-btn {
-  display: block;
-  width: 100%;
-  margin-top: 10px;
-  padding: 8px 0;
-  background: none;
-  border: 1px dashed var(--paper-line);
-  border-radius: 8px;
-  font-size: 13px;
-  font-weight: 600;
-  font-family: var(--font-ui);
-  color: var(--ink-faint);
-  cursor: pointer;
-  letter-spacing: 0.01em;
-}
-.transfer-trigger-btn:active { background: rgba(31,27,22,0.03); }
 
 /* ============================================
    QUICK ADD MODAL
