@@ -231,43 +231,30 @@ function openPaymentModal(planId) {
   document.getElementById('payment-rate-input').value = '';
   document.getElementById('payment-date-input').value = todayISO();
   payingAccountId = state.accounts.length > 0 ? state.accounts[0].id : null;
-  document.getElementById('payment-account-picker').hidden = true;
-  renderPaymentAccountChip();
+  renderPaymentAccountGrid();
   document.getElementById('plan-payment-modal-backdrop').hidden = false;
   history.pushState({ overlay: true }, '');
   setTimeout(() => document.getElementById('payment-ars-input').focus(), 200);
 }
 
-function renderPaymentAccountChip() {
-  const chip = document.getElementById('payment-account-chip');
-  if (!chip) return;
-  const acc = state.accounts.find(a => a.id === payingAccountId);
-  chip.classList.toggle('quick-chip-empty', !acc);
-  chip.innerHTML = acc
-    ? `<span class="chip-icon">${acc.icon}</span><span>${escapeHtml(acc.name)}</span>`
-    : `<span>no descontar de ninguna</span>`;
-}
-
-function togglePaymentAccountPicker() {
-  const wrap = document.getElementById('payment-account-picker');
-  if (!wrap.hidden) { wrap.hidden = true; return; }
-  wrap.innerHTML = '';
-  const options = [{ id: null, html: '<span>ninguna</span>' }].concat(
-    state.accounts.map(a => ({ id: a.id, html: `<span class="chip-icon">${a.icon}</span><span>${escapeHtml(a.name)}</span>` }))
-  );
+function renderPaymentAccountGrid() {
+  const grid = document.getElementById('payment-account-grid');
+  if (!grid) return;
+  grid.innerHTML = '';
+  const options = state.accounts
+    .map(a => ({ id: a.id, html: `<span class="chip-icon">${a.icon}</span><span>${escapeHtml(a.name)}</span>` }))
+    .concat([{ id: null, html: '<span>ninguna</span>' }]);
   options.forEach(opt => {
     const chip = document.createElement('button');
     chip.type = 'button';
-    chip.className = 'quick-option-chip' + (payingAccountId === opt.id ? ' selected' : '');
+    chip.className = 'category-chip' + (payingAccountId === opt.id ? ' selected' : '');
     chip.innerHTML = opt.html;
     chip.addEventListener('click', () => {
       payingAccountId = opt.id;
-      wrap.hidden = true;
-      renderPaymentAccountChip();
+      renderPaymentAccountGrid();
     });
-    wrap.appendChild(chip);
+    grid.appendChild(chip);
   });
-  wrap.hidden = false;
 }
 
 function closePaymentModal() {

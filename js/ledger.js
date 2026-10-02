@@ -355,7 +355,6 @@ function openAddModal() {
   document.getElementById('input-amount').value = '';
   document.getElementById('input-note').value = '';
   document.getElementById('input-date').value = todayISO();
-  _closeEntryPickers();
   setEntryType('expense');
   renderCategoryGrid();
   renderAccountGrid();
@@ -382,7 +381,6 @@ function openEditModal(entry) {
   document.getElementById('input-date').value = entry.date;
   document.getElementById('type-expense').classList.toggle('active', entry.type === 'expense');
   document.getElementById('type-income').classList.toggle('active', entry.type === 'income');
-  _closeEntryPickers();
   renderCategoryGrid();
   renderAccountGrid();
   document.getElementById('btn-save-entry').textContent = 'guardar cambios';
@@ -400,119 +398,72 @@ function setEntryType(type) {
   renderCategoryGrid();
 }
 
-/* Selectores compactos del modal manual: cada campo es un chip tocable
-   que despliega una fila de opciones (mismo patrón que la tarjeta de
-   carga rápida, reusa sus clases .quick-chip-*). Un solo picker abierto
-   a la vez. */
-let _entryOpenPicker = null; // 'category' | 'subcategory' | 'account' | null
-
-function _entryCategoryList() {
-  return currentEntryType === 'income' ? state.incomeCategories : state.categories;
-}
-
-function _closeEntryPickers() {
-  _entryOpenPicker = null;
-  ['category', 'subcategory', 'account'].forEach(w => {
-    const el = document.getElementById(`entry-${w}-picker`);
-    if (el) el.hidden = true;
-  });
-}
-
-function toggleEntryPicker(which) {
-  if (_entryOpenPicker === which) { _closeEntryPickers(); return; }
-  _entryOpenPicker = which;
-  ['category', 'subcategory', 'account'].forEach(w => {
-    const el = document.getElementById(`entry-${w}-picker`);
-    if (el) el.hidden = (w !== which);
-  });
-  if (which === 'category') _renderEntryCategoryOptions();
-  else if (which === 'subcategory') _renderEntrySubcategoryOptions();
-  else _renderEntryAccountOptions();
-}
-
-function _optionChip(selected, html, onClick) {
-  const chip = document.createElement('button');
-  chip.type = 'button';
-  chip.className = 'quick-option-chip' + (selected ? ' selected' : '');
-  chip.innerHTML = html;
-  chip.addEventListener('click', onClick);
-  return chip;
-}
-
 function renderCategoryGrid() {
-  const chip = document.getElementById('entry-category-chip');
-  if (!chip) return;
-  const cat = _entryCategoryList().find(c => c.id === selectedCategoryId);
-  chip.classList.toggle('quick-chip-empty', !cat);
-  chip.innerHTML = cat
-    ? `<span class="chip-icon">${cat.icon}</span><span>${escapeHtml(cat.name)}</span>`
-    : `<span>elegir categoría</span>`;
-  if (_entryOpenPicker === 'category') _renderEntryCategoryOptions();
-  renderSubcategoryGrid();
-  _applyActiveSuggestion();
-}
-
-function _renderEntryCategoryOptions() {
-  const wrap = document.getElementById('entry-category-picker');
-  if (!wrap) return;
-  wrap.innerHTML = '';
-  _entryCategoryList().forEach(cat => {
-    const chip = _optionChip(selectedCategoryId === cat.id,
-      `<span class="chip-icon">${cat.icon}</span><span>${escapeHtml(cat.name)}</span>`,
-      () => {
-        selectedCategoryId = cat.id;
-        selectedSubcategoryId = null;
-        _activeSuggestion = null;
-        _closeEntryPickers();
-        renderCategoryGrid();
-      });
+  const grid = document.getElementById('category-grid');
+  const list = currentEntryType === 'income' ? state.incomeCategories : state.categories;
+  grid.innerHTML = '';
+  list.forEach(cat => {
+    const chip = document.createElement('button');
+    chip.type = 'button';
+    chip.className = 'category-chip' + (selectedCategoryId === cat.id ? ' selected' : '');
     chip.dataset.catId = cat.id;
-    wrap.appendChild(chip);
+    chip.innerHTML = `<span class="chip-icon">${cat.icon}</span><span>${escapeHtml(cat.name)}</span>`;
+    chip.addEventListener('click', () => {
+      selectedCategoryId = cat.id;
+      selectedSubcategoryId = null;
+      _activeSuggestion = null;
+      const hint = document.getElementById('category-suggestion-hint');
+      if (hint) hint.hidden = true;
+      renderCategoryGrid();
+    });
+    grid.appendChild(chip);
   });
+  renderSubcategoryGrid();
   _applyActiveSuggestion();
 }
 
 function renderSubcategoryGrid() {
   const field = document.getElementById('subcategory-field');
-  const chip = document.getElementById('entry-subcategory-chip');
-  if (!field || !chip) return;
+  const grid = document.getElementById('subcategory-grid');
+  if (!field || !grid) return;
 
-  const cat = _entryCategoryList().find(c => c.id === selectedCategoryId);
-  const subcats = cat && cat.subcategories ? cat.subcategories : [];
-  if (subcats.length === 0) {
-    field.hidden = true;
-    if (_entryOpenPicker === 'subcategory') _closeEntryPickers();
-    return;
-  }
+  if (!selectedCategoryId) { field.hidden = true; return; }
+
+  const list = currentEntryType === 'income' ? state.incomeCategories : state.categories;
+  const cat = list.find(c => c.id === selectedCategoryId);
+  const subcats = cat && cat.subcategories && cat.subcategories.length > 0 ? cat.subcategories : [];
+
+  if (subcats.length === 0) { field.hidden = true; return; }
 
   field.hidden = false;
-  const sub = subcats.find(s => s.id === selectedSubcategoryId);
-  chip.classList.toggle('quick-chip-empty', !sub);
-  chip.innerHTML = sub ? `<span>${escapeHtml(sub.name)}</span>` : `<span>elegir subcategoría</span>`;
-  if (_entryOpenPicker === 'subcategory') _renderEntrySubcategoryOptions();
-}
+  grid.innerHTML = '';
 
-function _renderEntrySubcategoryOptions() {
-  const wrap = document.getElementById('entry-subcategory-picker');
-  if (!wrap) return;
-  const cat = _entryCategoryList().find(c => c.id === selectedCategoryId);
-  const subcats = cat && cat.subcategories ? cat.subcategories : [];
-  wrap.innerHTML = '';
-  const pick = id => () => {
-    selectedSubcategoryId = id;
-    _closeEntryPickers();
+  const noneChip = document.createElement('button');
+  noneChip.type = 'button';
+  noneChip.className = 'category-chip' + (!selectedSubcategoryId ? ' selected' : '');
+  noneChip.innerHTML = `<span style="color:var(--ink-faint);padding:0 4px">—</span>`;
+  noneChip.addEventListener('click', () => {
+    selectedSubcategoryId = null;
     renderSubcategoryGrid();
-  };
-  wrap.appendChild(_optionChip(!selectedSubcategoryId, '<span>—</span>', pick(null)));
+  });
+  grid.appendChild(noneChip);
+
   subcats.forEach(sc => {
-    wrap.appendChild(_optionChip(selectedSubcategoryId === sc.id,
-      `<span>${escapeHtml(sc.name)}</span>`, pick(sc.id)));
+    const chip = document.createElement('button');
+    chip.type = 'button';
+    chip.className = 'category-chip' + (selectedSubcategoryId === sc.id ? ' selected' : '');
+    chip.innerHTML = `<span>${escapeHtml(sc.name)}</span>`;
+    chip.addEventListener('click', () => {
+      selectedSubcategoryId = sc.id;
+      renderSubcategoryGrid();
+    });
+    grid.appendChild(chip);
   });
 }
 
 function _applyActiveSuggestion() {
   const hint = document.getElementById('category-suggestion-hint');
-  document.querySelectorAll('#entry-category-picker .quick-option-chip').forEach(c => c.classList.remove('suggested'));
+  document.querySelectorAll('#category-grid .category-chip').forEach(c => c.classList.remove('suggested'));
 
   if (!_activeSuggestion || selectedCategoryId) {
     if (hint) hint.hidden = true;
@@ -520,10 +471,11 @@ function _applyActiveSuggestion() {
   }
 
   const { categoryId, subcategoryId } = _activeSuggestion;
-  const cat = _entryCategoryList().find(c => c.id === categoryId);
+  const list = currentEntryType === 'income' ? state.incomeCategories : state.categories;
+  const cat = list.find(c => c.id === categoryId);
   if (!cat) { if (hint) hint.hidden = true; return; }
 
-  const chip = document.querySelector(`#entry-category-picker [data-cat-id="${categoryId}"]`);
+  const chip = document.querySelector(`#category-grid [data-cat-id="${categoryId}"]`);
   if (chip) chip.classList.add('suggested');
 
   let hintText = `sugerido: ${cat.icon} ${cat.name}`;
@@ -544,28 +496,19 @@ function onNoteInputSuggestion() {
 }
 
 function renderAccountGrid() {
-  const chip = document.getElementById('entry-account-chip');
-  if (!chip) return;
-  const acc = state.accounts.find(a => a.id === selectedAccountId);
-  chip.classList.toggle('quick-chip-empty', !acc);
-  chip.innerHTML = acc
-    ? `<span class="chip-icon">${acc.icon}</span><span>${escapeHtml(acc.name)}</span>`
-    : `<span>elegir cuenta</span>`;
-  if (_entryOpenPicker === 'account') _renderEntryAccountOptions();
-}
-
-function _renderEntryAccountOptions() {
-  const wrap = document.getElementById('entry-account-picker');
-  if (!wrap) return;
-  wrap.innerHTML = '';
+  const grid = document.getElementById('account-grid');
+  if (!grid) return;
+  grid.innerHTML = '';
   state.accounts.forEach(acc => {
-    wrap.appendChild(_optionChip(selectedAccountId === acc.id,
-      `<span class="chip-icon">${acc.icon}</span><span>${escapeHtml(acc.name)}</span>`,
-      () => {
-        selectedAccountId = acc.id;
-        _closeEntryPickers();
-        renderAccountGrid();
-      }));
+    const chip = document.createElement('button');
+    chip.type = 'button';
+    chip.className = 'category-chip' + (selectedAccountId === acc.id ? ' selected' : '');
+    chip.innerHTML = `<span class="chip-icon">${acc.icon}</span><span>${escapeHtml(acc.name)}</span>`;
+    chip.addEventListener('click', () => {
+      selectedAccountId = acc.id;
+      renderAccountGrid();
+    });
+    grid.appendChild(chip);
   });
 }
 

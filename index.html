@@ -368,22 +368,19 @@
       <input type="number" inputmode="decimal" id="input-amount" class="amount-input" placeholder="0" autocomplete="off">
     </div>
 
-    <div class="quick-chip-field">
+    <div class="field-group">
       <label class="field-label">categoría</label>
-      <button type="button" class="quick-chip quick-chip-empty" id="entry-category-chip" onclick="toggleEntryPicker('category')"></button>
-      <div class="quick-chip-options" id="entry-category-picker" hidden></div>
+      <div class="category-grid" id="category-grid"></div>
     </div>
 
-    <div class="quick-chip-field" id="subcategory-field" hidden>
+    <div class="field-group" id="subcategory-field" hidden>
       <label class="field-label">subcategoría <span class="field-label-optional">(opcional)</span></label>
-      <button type="button" class="quick-chip quick-chip-empty" id="entry-subcategory-chip" onclick="toggleEntryPicker('subcategory')"></button>
-      <div class="quick-chip-options" id="entry-subcategory-picker" hidden></div>
+      <div class="category-grid" id="subcategory-grid"></div>
     </div>
 
-    <div class="quick-chip-field">
+    <div class="field-group">
       <label class="field-label">cuenta</label>
-      <button type="button" class="quick-chip" id="entry-account-chip" onclick="toggleEntryPicker('account')"></button>
-      <div class="quick-chip-options" id="entry-account-picker" hidden></div>
+      <div class="account-grid" id="account-grid"></div>
     </div>
 
     <div class="field-group">
@@ -814,10 +811,9 @@
       <label class="field-label" for="payment-ars-input">monto en pesos pagado</label>
       <input type="number" inputmode="decimal" id="payment-ars-input" class="text-input" placeholder="0">
     </div>
-    <div class="quick-chip-field">
+    <div class="field-group">
       <label class="field-label">descontar de la cuenta</label>
-      <button type="button" class="quick-chip" id="payment-account-chip" onclick="togglePaymentAccountPicker()"></button>
-      <div class="quick-chip-options" id="payment-account-picker" hidden></div>
+      <div class="account-grid" id="payment-account-grid"></div>
     </div>
     <div class="field-group">
       <label class="field-label" for="payment-rate-input">tipo de cambio usado (opcional · 1 USD = $)</label>
