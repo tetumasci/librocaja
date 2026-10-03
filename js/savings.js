@@ -68,10 +68,12 @@ function computeSavingsOverview(now) {
     .reduce((s, e) => s + e.amount, 0);
   const incomeSoFar = thisMonth.filter(e => e.type === 'income').reduce((s, e) => s + e.amount, 0);
 
-  // Fijos y cuotas que todavía no pagaste (también los que arrastrás de meses anteriores).
-  const pendingTotal = state.entries
-    .filter(e => e.pending && e.type === 'expense' && e.date <= monthEndISO)
-    .reduce((s, e) => s + e.amount, 0);
+  // Fijos y cuotas de ESTE mes que todavía no pagaste. Los pendientes de meses anteriores no se
+  // suman: casi siempre son pagos que se hicieron y quedaron sin confirmar, y inflaban el cálculo.
+  const monthStartISO = isoFromDate(new Date(now.getFullYear(), now.getMonth(), 1));
+  const pendingNow = state.entries.filter(e => e.pending && e.type === 'expense' && e.date >= monthStartISO && e.date <= monthEndISO);
+  const pendingTotal = pendingNow.reduce((s, e) => s + e.amount, 0);
+  const staleOld = state.entries.filter(e => e.pending && e.type === 'expense' && e.date < monthStartISO);
 
   // Gasto variable del mes: lo más alto entre tu promedio y tu ritmo actual (a propósito conservador).
   const paceProjection = daysElapsed >= 5 ? (variableSoFar / daysElapsed) * dim : null;
@@ -96,7 +98,8 @@ function computeSavingsOverview(now) {
     now, settings, rate, daysElapsed, daysInMonth: dim, enoughData,
     savedUSD: sumAmountUSDInMonth(state.dollarSavings, now),
     planUSD: planContributedUSDInMonth(now),
-    cash, pendingTotal, projectedVariable, remainingVariable, cushion, marginARS,
+    cash, pendingTotal, pendingCount: pendingNow.length, staleCount: staleOld.length,
+    staleTotal: staleOld.reduce((s, e) => s + e.amount, 0), projectedVariable, remainingVariable, cushion, marginARS,
     capacityARS, capacityUSD: toUSD(capacityARS),
     idealARS, idealUSD: idealARS == null ? null : toUSD(idealARS),
     monthlySpendRef,
@@ -188,7 +191,8 @@ function openSavingsModal() {
       </div>
       <p class="report-subtitle">Cómo se calcula</p>
       ${row('Tenés ahora', ov.cash, 'saldo de todas tus cuentas', '+')}
-      ${row('Fijos y cuotas por pagar', ov.pendingTotal, 'lo que figura como pendiente', '-')}
+      ${row('Fijos y cuotas por pagar', ov.pendingTotal,
+        ov.pendingCount ? `${ov.pendingCount} ${ov.pendingCount === 1 ? 'pendiente' : 'pendientes'} de este mes` : 'nada pendiente este mes', '-')}
       ${row('Gasto variable que falta', ov.remainingVariable, 'según tu ritmo y tus últimos meses', '-')}
       ${row(`Colchón de seguridad (${cushionPct} %)`, ov.cushion, 'de un mes de gastos, para imprevistos', '-')}
       <div class="savings-row savings-row-total">
@@ -204,6 +208,9 @@ function openSavingsModal() {
     ? `<div class="savings-progress" role="img" aria-label="Ahorrado ${Math.round(Math.min(100, (ov.savedUSD / floorUSD) * 100))} por ciento del piso"><div class="savings-progress-fill" style="width:${Math.min(100, (ov.savedUSD / floorUSD) * 100)}%"></div></div>
        <p class="savings-note">Tu piso es ${formatUSD(floorUSD)} por mes${ov.savedUSD >= floorUSD ? ' · ¡cumplido!' : ''}.</p>`
     : '';
+  const staleLine = ov.staleCount > 0
+    ? `<p class="savings-note">Tenés ${ov.staleCount} ${ov.staleCount === 1 ? 'pendiente' : 'pendientes'} de meses anteriores (${formatMoney(ov.staleTotal)}) sin confirmar. No se cuentan acá; si ya los pagaste, confirmalos en Pendientes, mirando el mes anterior.</p>`
+    : '';
   const idealLine = ov.idealARS != null
     ? `<p class="savings-note">Ideal: ${idealPct} % de tus ingresos = ${ov.idealUSD != null ? formatUSD(Math.round(ov.idealUSD)) : formatMoney(ov.idealARS)}. Lo cambiás en Ajustes.</p>`
     : '';
@@ -216,6 +223,7 @@ function openSavingsModal() {
     ${floorLine}
     ${planLine}
     ${capacityBlock}
+    ${staleLine}
     ${idealLine}
     <p class="savings-note savings-disclaimer">Es una estimación con tus propios datos, no una recomendación financiera. Vos decidís cuánto ahorrar.</p>
   `;
