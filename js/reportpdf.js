@@ -350,9 +350,15 @@ function buildReportPdf(data) {
 
   /* ----- ahorro, metas, pendientes de cobro, hábito ----- */
 
-  const hasSavings = data.usd.totalAccumulated > 0 || data.saved.usd > 0 || data.goals.length > 0;
+  const hasSavings = data.usd.totalAccumulated > 0 || data.eur.totalAccumulated > 0 || data.saved.usd > 0 || data.goals.length > 0;
   if (hasSavings) {
     sectionTitle('Ahorro y metas');
+    if (data.eur.totalAccumulated > 0) {
+      font(9); color(PDF_COLORS.text);
+      ensure(8);
+      doc.text(pdfText(`Ahorro en euros: ${data.eur.depositCount} ${data.eur.depositCount === 1 ? 'depósito' : 'depósitos'} en el período por EUR ${data.eur.depositedInRange.toLocaleString('es-AR', { maximumFractionDigits: 2 })}. Acumulado total: EUR ${data.eur.totalAccumulated.toLocaleString('es-AR', { maximumFractionDigits: 2 })}.`), M, y + 2, { maxWidth: CW });
+      y += 8;
+    }
     if (data.usd.totalAccumulated > 0 || data.saved.usd > 0) {
       font(9); color(PDF_COLORS.text);
       const inRange = data.usd.depositCount
@@ -364,8 +370,8 @@ function buildReportPdf(data) {
     }
     barRows(data.goals.map(g => {
       const pct = g.target > 0 ? Math.min(100, (g.current / g.target) * 100) : 0;
-      const fmt = v => (g.currency === 'USD'
-        ? `USD ${v.toLocaleString('es-AR', { maximumFractionDigits: 2 })}`
+      const fmt = v => (g.currency === 'USD' || g.currency === 'EUR'
+        ? `${g.currency} ${v.toLocaleString('es-AR', { maximumFractionDigits: 2 })}`
         : pdfMoney(v));
       return { label: g.name, value: pct || 0.0001, text: `${Math.round(pct)} %`, sub: `${fmt(g.current)} de ${fmt(g.target)}` };
     }), PDF_COLORS.income, '');

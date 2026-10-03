@@ -2438,3 +2438,10 @@ input { font-family: inherit; }
 .savings-row-total .savings-row-label,
 .savings-row-total .savings-row-amount { font-weight: 800; }
 #savings-chips-label { margin-top: 16px; }
+
+/* ---- cotizaciones y euros ---- */
+.rate-type-selector { grid-template-columns: repeat(4, minmax(0, 1fr)); margin-top: 10px; }
+@media (max-width: 359px) {
+  .rate-type-selector { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+.dollar-total-usd.secondary { margin-top: 10px; font-size: 22px; }

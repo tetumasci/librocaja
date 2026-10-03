@@ -32,6 +32,7 @@ function showView(viewName) {
     renderInflationSection();
     renderSmallExpenseThreshold();
     renderSavingsSettings();
+    renderRatesSettings();
     renderThemeSelector();
   }
   if (viewName === 'plan') renderPlan();
@@ -113,6 +114,16 @@ function attachEventListeners() {
   });
   document.querySelectorAll('#tag-range button').forEach(btn => {
     btn.addEventListener('click', () => setTagReportRange(btn.dataset.range));
+  });
+
+  // Cotizaciones automáticas
+  document.querySelectorAll('#dollar-type-selector button').forEach(btn => {
+    btn.addEventListener('click', () => setDollarType(btn.dataset.dollarType));
+  });
+  document.getElementById('btn-refresh-rates').addEventListener('click', refreshRatesFromSettings);
+  // Si la app queda abierta mucho tiempo, al volver a ella se refresca (solo si pasaron más de 30 min).
+  document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'visible') autoRefreshRates(false);
   });
 
   // Ahorro: aviso del Inicio, cálculo y ajustes
@@ -197,6 +208,8 @@ function attachEventListeners() {
   document.getElementById('dollar-modal-backdrop').addEventListener('click', (e) => {
     if (e.target.id === 'dollar-modal-backdrop') closeDollarModal();
   });
+  document.getElementById('dollar-currency-usd').addEventListener('click', () => setDollarModalCurrency('USD'));
+  document.getElementById('dollar-currency-eur').addEventListener('click', () => setDollarModalCurrency('EUR'));
   document.getElementById('dollar-amount-usd').addEventListener('input', updateDollarArsPreview);
   document.getElementById('dollar-exchange-rate').addEventListener('input', updateDollarArsPreview);
 
@@ -210,6 +223,7 @@ function attachEventListeners() {
   document.getElementById('btn-delete-goal').addEventListener('click', deleteGoal);
   document.getElementById('goal-currency-ars').addEventListener('click', () => setGoalCurrency('ARS'));
   document.getElementById('goal-currency-usd').addEventListener('click', () => setGoalCurrency('USD'));
+  document.getElementById('goal-currency-eur').addEventListener('click', () => setGoalCurrency('EUR'));
 
   // Add funds to goal
   document.getElementById('btn-cancel-fund').addEventListener('click', closeAddFundModal);
@@ -219,6 +233,7 @@ function attachEventListeners() {
   document.getElementById('btn-save-fund').addEventListener('click', saveAddFund);
   document.getElementById('fund-currency-ars').addEventListener('click', () => setFundCurrency('ARS'));
   document.getElementById('fund-currency-usd').addEventListener('click', () => setFundCurrency('USD'));
+  document.getElementById('fund-currency-eur').addEventListener('click', () => setFundCurrency('EUR'));
   document.getElementById('fund-amount').addEventListener('input', updateFundRatePreview);
   document.getElementById('fund-exchange-rate').addEventListener('input', updateFundRatePreview);
 
@@ -346,6 +361,7 @@ function init() {
   processRecurringExpenses();
   processInstallmentPurchasesWithToast();
   closeAllOverlaysAndModals();
+  autoRefreshRates(false);
 }
 
 document.addEventListener('DOMContentLoaded', init);

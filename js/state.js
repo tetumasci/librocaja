@@ -59,7 +59,8 @@ let state = {
   lastWeeklySummaryShown: null, // domingo (ISO) de cierre de la última semana ya vista
   savingsSettings: { floorUSD: 0, idealPct: 20, cushionPct: 15 }, // piso mensual (USD, 0 = sin piso), % ideal de ingresos, % de colchón
   savingsNudgeDismissed: null,  // 'YYYY-MM' del mes en que se descartó el aviso de ahorro
-  settings: { theme: 'auto' }, // theme: 'auto' | 'light' | 'dark'
+  liveRates: null,              // última cotización traída sola: { ts, usd: { blue, oficial, bolsa, tarjeta }, eur }
+  settings: { theme: 'auto', dollarType: 'blue' }, // theme: 'auto' | 'light' | 'dark'; dollarType: 'blue' | 'oficial' | 'bolsa' | 'tarjeta'
 };
 
 let viewDate = new Date();
@@ -114,7 +115,9 @@ function loadState() {
     if (!state.lastWeeklySummaryShown) state.lastWeeklySummaryShown = null;
     state.savingsSettings = Object.assign({ floorUSD: 0, idealPct: 20, cushionPct: 15 }, state.savingsSettings);
     if (!state.savingsNudgeDismissed) state.savingsNudgeDismissed = null;
-    state.settings = Object.assign({ theme: 'auto' }, state.settings);
+    if (!state.liveRates) state.liveRates = null;
+    state.settings = Object.assign({ theme: 'auto', dollarType: 'blue' }, state.settings);
+    if (!['blue', 'oficial', 'bolsa', 'tarjeta'].includes(state.settings.dollarType)) state.settings.dollarType = 'blue';
     if (!['auto', 'light', 'dark'].includes(state.settings.theme)) state.settings.theme = 'auto';
     state.goals = state.goals.map(g => g.currency ? g : { ...g, currency: 'ARS' });
     state.categories = state.categories.map(c => c.subcategories ? c : { ...c, subcategories: [] });
@@ -185,7 +188,7 @@ function monthLabel(date) {
 }
 
 function getCategoryById(id, type) {
-  if (id === 'ahorro-usd') return { id: 'ahorro-usd', name: 'Ahorro USD', icon: '💵' };
+  if (id === 'ahorro-usd') return { id: 'ahorro-usd', name: 'Ahorro', icon: '💵' };
   if (id === 'cuotas') return { id: 'cuotas', name: 'Compra en cuotas', icon: '🧾' };
   const list = type === 'income' ? state.incomeCategories : state.categories;
   return list.find(c => c.id === id) || { id, name: id, icon: '◆' };

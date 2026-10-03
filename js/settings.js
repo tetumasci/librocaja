@@ -406,7 +406,11 @@ function handleImportFile(e) {
       lastWeeklySummaryShown: parsed.lastWeeklySummaryShown || null,
       savingsSettings:        Object.assign({ floorUSD: 0, idealPct: 20, cushionPct: 15 }, parsed.savingsSettings),
       savingsNudgeDismissed:  parsed.savingsNudgeDismissed || null,
-      settings:               { theme: ['light', 'dark'].includes(parsed.settings?.theme) ? parsed.settings.theme : 'auto' },
+      liveRates:              parsed.liveRates || null,
+      settings:               {
+        theme: ['light', 'dark'].includes(parsed.settings?.theme) ? parsed.settings.theme : 'auto',
+        dollarType: ['blue', 'oficial', 'bolsa', 'tarjeta'].includes(parsed.settings?.dollarType) ? parsed.settings.dollarType : 'blue',
+      },
     };
 
     state.accounts = state.accounts.map(acc =>
@@ -474,7 +478,8 @@ function clearAllData() {
     lastWeeklySummaryShown: null,
     savingsSettings: { floorUSD: 0, idealPct: 20, cushionPct: 15 },
     savingsNudgeDismissed: null,
-    settings: { theme: 'auto' },
+    liveRates: null,
+    settings: { theme: 'auto', dollarType: 'blue' },
   };
   saveState();
   applyTheme();

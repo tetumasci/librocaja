@@ -376,6 +376,19 @@
     </section>
 
     <section class="settings-card">
+      <h2 class="settings-card-title">Cotización</h2>
+      <p class="settings-hint">La app trae sola el valor del dólar y del euro al abrirla. Elegí qué dólar usar para tus cálculos y para sugerirte el tipo de cambio.</p>
+      <div class="theme-selector rate-type-selector" id="dollar-type-selector" role="group" aria-label="Tipo de dólar">
+        <button type="button" data-dollar-type="blue" aria-pressed="true">Blue</button>
+        <button type="button" data-dollar-type="oficial" aria-pressed="false">Oficial</button>
+        <button type="button" data-dollar-type="bolsa" aria-pressed="false">MEP</button>
+        <button type="button" data-dollar-type="tarjeta" aria-pressed="false">Tarjeta</button>
+      </div>
+      <p class="settings-hint" id="rates-status" aria-live="polite"></p>
+      <button class="text-btn" id="btn-refresh-rates">Actualizar ahora</button>
+    </section>
+
+    <section class="settings-card">
       <h2 class="settings-card-title">Ahorro</h2>
       <div class="settings-input-row stacked">
         <span class="settings-input-label">Piso mensual, aparte del plan (opcional)</span>
@@ -607,6 +620,7 @@
       <div class="account-type-selector">
         <button type="button" id="goal-currency-ars" class="account-type-btn selected">$ ARS</button>
         <button type="button" id="goal-currency-usd" class="account-type-btn">USD $</button>
+        <button type="button" id="goal-currency-eur" class="account-type-btn">EUR €</button>
       </div>
       <p class="field-hint" id="goal-currency-hint" hidden>no se puede cambiar después de crear la meta</p>
     </div>
@@ -634,6 +648,7 @@
       <div class="account-type-selector">
         <button type="button" id="fund-currency-ars" class="account-type-btn selected">$ ARS</button>
         <button type="button" id="fund-currency-usd" class="account-type-btn">USD $</button>
+        <button type="button" id="fund-currency-eur" class="account-type-btn">EUR €</button>
       </div>
     </div>
     <div class="field-group">
@@ -641,7 +656,7 @@
       <input type="number" inputmode="decimal" id="fund-amount" class="text-input" placeholder="0">
     </div>
     <div class="field-group" id="fund-rate-group" hidden>
-      <label class="field-label" for="fund-exchange-rate">tipo de cambio</label>
+      <label class="field-label" for="fund-exchange-rate" id="fund-rate-label">tipo de cambio</label>
       <input type="number" inputmode="decimal" id="fund-exchange-rate" class="text-input" placeholder="ej: 1200">
       <p id="fund-rate-preview" class="dollar-ars-preview" hidden></p>
     </div>
@@ -937,13 +952,20 @@
 <div class="modal-backdrop" id="dollar-modal-backdrop" hidden>
   <div class="modal-sheet">
     <div class="modal-handle"></div>
-    <h3 class="modal-title">depositar ahorro en USD</h3>
+    <h3 class="modal-title" id="dollar-modal-title">depositar ahorro en USD</h3>
+    <div class="field-group">
+      <label class="field-label">moneda</label>
+      <div class="account-type-selector">
+        <button type="button" id="dollar-currency-usd" class="account-type-btn selected">USD $</button>
+        <button type="button" id="dollar-currency-eur" class="account-type-btn">EUR €</button>
+      </div>
+    </div>
     <div class="amount-input-wrap">
-      <span class="amount-currency">USD</span>
-      <input type="number" inputmode="decimal" id="dollar-amount-usd" class="amount-input" placeholder="0" autocomplete="off" aria-label="Monto en dólares">
+      <span class="amount-currency" id="dollar-amount-prefix">USD</span>
+      <input type="number" inputmode="decimal" id="dollar-amount-usd" class="amount-input" placeholder="0" autocomplete="off" aria-label="Monto en USD">
     </div>
     <div class="field-group">
-      <label class="field-label" for="dollar-exchange-rate">tipo de cambio · 1 USD = $</label>
+      <label class="field-label" for="dollar-exchange-rate" id="dollar-rate-label">tipo de cambio · 1 USD = $</label>
       <input type="number" inputmode="decimal" id="dollar-exchange-rate" class="text-input" placeholder="ej: 1250">
       <div class="dollar-type-chips" id="dollar-rate-chips" hidden></div>
       <p class="dollar-rate-status" id="dollar-rate-status"></p>
@@ -1092,6 +1114,7 @@
 
 <script src="js/state.js"></script>
 <script src="js/ui.js"></script>
+<script src="js/currency.js"></script>
 <script src="js/ledger.js"></script>
 <script src="js/recurring.js"></script>
 <script src="js/installments.js"></script>

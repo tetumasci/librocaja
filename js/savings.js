@@ -96,7 +96,10 @@ function computeSavingsOverview(now) {
 
   return {
     now, settings, rate, daysElapsed, daysInMonth: dim, enoughData,
-    savedUSD: sumAmountUSDInMonth(state.dollarSavings, now),
+    // Los euros se pasan a dólares (vía pesos) para compararlos con el piso, que está en USD.
+    savedUSD: (state.dollarSavings || [])
+      .filter(d => d.date && isSameMonth(d.date, now))
+      .reduce((s, d) => s + depositUSDEquivalent(d, rate), 0),
     planUSD: planContributedUSDInMonth(now),
     cash, pendingTotal, pendingCount: pendingNow.length, staleCount: staleOld.length,
     staleTotal: staleOld.reduce((s, e) => s + e.amount, 0), projectedVariable, remainingVariable, cushion, marginARS,

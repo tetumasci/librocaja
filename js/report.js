@@ -228,8 +228,10 @@ function buildReportData(range) {
     name: g.name, currency: g.currency || 'ARS', current: g.current || 0, target: g.target || 0,
   }));
 
-  const usdDeposits = (state.dollarSavings || []);
-  const usdInRange = usdDeposits.filter(d => d.date >= range.startISO && d.date <= range.endISO);
+  const inRangeDep = d => d.date >= range.startISO && d.date <= range.endISO;
+  const usdDeposits = (state.dollarSavings || []).filter(d => depositCurrency(d) === 'USD');
+  const usdInRange = usdDeposits.filter(inRangeDep);
+  const eurDeposits = (state.dollarSavings || []).filter(d => depositCurrency(d) === 'EUR');
 
   const shared = groupSplitsByPerson(getUnsettledSplits()).map(g => ({ name: g.label, total: g.total }));
 
@@ -246,9 +248,14 @@ function buildReportData(range) {
     categories, incomeCategories, series, seriesKind, weekdays, accounts, topExpenses, tags, budgets,
     goals, shared,
     usd: {
-      depositedInRange: usdInRange.reduce((s, d) => s + (d.amountUSD || 0), 0),
+      depositedInRange: usdInRange.reduce((s, d) => s + depositAmount(d), 0),
       depositCount: usdInRange.length,
-      totalAccumulated: usdDeposits.reduce((s, d) => s + (d.amountUSD || 0), 0),
+      totalAccumulated: usdDeposits.reduce((s, d) => s + depositAmount(d), 0),
+    },
+    eur: {
+      depositedInRange: eurDeposits.filter(inRangeDep).reduce((s, d) => s + depositAmount(d), 0),
+      depositCount: eurDeposits.filter(inRangeDep).length,
+      totalAccumulated: eurDeposits.reduce((s, d) => s + depositAmount(d), 0),
     },
     streak: { current: computeStreak(), best: computeBestStreak() },
     prev: prev && { ...prev, label: range.prev.label },
