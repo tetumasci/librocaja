@@ -1,7 +1,7 @@
 # Rediseño de Libro de caja — Especificación visual ("estilo E")
 
 Documento de referencia para Claude Code. Describe **qué se ve** (tokens, componentes, pantallas).
-El **orden de trabajo** está en `BACKLOG_REDISENO.md` (ítems REDISEÑO-A0 … B7).
+El **orden de trabajo** está en historial de git (commits "rediseño A1 … B7", ver `CHANGELOG.md`).
 
 Referencia visual exacta: carpeta `mockups/` (HTML estáticos, abrir en el navegador). Cada archivo
 es una pantalla a 390 px de ancho, en claro (`Real-L-*`) y en oscuro (`Real-D-*`). Los valores de

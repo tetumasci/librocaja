@@ -56,6 +56,9 @@ let state = {
   smallExpenseThreshold: 5000,
   transfers: [],
   installmentPurchases: [],
+  lastWeeklySummaryShown: null, // domingo (ISO) de cierre de la última semana ya vista
+  savingsSettings: { floorUSD: 0, idealPct: 20, cushionPct: 15 }, // piso mensual (USD, 0 = sin piso), % ideal de ingresos, % de colchón
+  savingsNudgeDismissed: null,  // 'YYYY-MM' del mes en que se descartó el aviso de ahorro
   settings: { theme: 'auto' }, // theme: 'auto' | 'light' | 'dark'
 };
 
@@ -108,6 +111,9 @@ function loadState() {
     if (!state.investmentPlans) state.investmentPlans = [];
     if (!state.transfers) state.transfers = [];
     if (!state.installmentPurchases) state.installmentPurchases = [];
+    if (!state.lastWeeklySummaryShown) state.lastWeeklySummaryShown = null;
+    state.savingsSettings = Object.assign({ floorUSD: 0, idealPct: 20, cushionPct: 15 }, state.savingsSettings);
+    if (!state.savingsNudgeDismissed) state.savingsNudgeDismissed = null;
     state.settings = Object.assign({ theme: 'auto' }, state.settings);
     if (!['auto', 'light', 'dark'].includes(state.settings.theme)) state.settings.theme = 'auto';
     state.goals = state.goals.map(g => g.currency ? g : { ...g, currency: 'ARS' });

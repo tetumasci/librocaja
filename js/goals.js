@@ -315,6 +315,7 @@ function renderDollarSavings(container) {
     </div>
     <div class="dollar-total-usd">${formatUSD(totalUSD)}</div>
     ${refLine}
+    <button type="button" class="savings-link-btn" id="btn-open-savings">${savingsLinkText()}</button>
   `;
 
   const list = document.createElement('div');
@@ -340,7 +341,8 @@ function renderDollarSavings(container) {
     });
   }
   card.appendChild(list);
-  card.querySelector('#btn-open-dollar').addEventListener('click', openDollarModal);
+  card.querySelector('#btn-open-dollar').addEventListener('click', () => openDollarModal());
+  card.querySelector('#btn-open-savings').addEventListener('click', openSavingsModal);
   container.appendChild(card);
 }
 
@@ -432,10 +434,12 @@ async function prefillExchangeRate() {
   }
 }
 
-function openDollarModal() {
+// prefillUSD (opcional): monto sugerido desde el cálculo de ahorro; siempre editable.
+// Cuando se usa como handler de click llega un evento, que se ignora.
+function openDollarModal(prefillUSD) {
   closeAllModals();
   selectedDolarType = 'blue';
-  document.getElementById('dollar-amount-usd').value = '';
+  document.getElementById('dollar-amount-usd').value = typeof prefillUSD === 'number' ? prefillUSD : '';
   document.getElementById('dollar-exchange-rate').value = '';
   document.getElementById('dollar-note').value = '';
   document.getElementById('dollar-ars-preview').hidden = true;

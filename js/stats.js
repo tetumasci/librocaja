@@ -150,6 +150,8 @@ function renderStats() {
   }
 
   renderCategoryBars(thisMonthEntries, expense);
+  renderTagReport(now);
+  renderSharedExpenses();
   renderTrendChart(now);
 }
 

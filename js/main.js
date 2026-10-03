@@ -31,6 +31,7 @@ function showView(viewName) {
     renderInstallmentManager();
     renderInflationSection();
     renderSmallExpenseThreshold();
+    renderSavingsSettings();
     renderThemeSelector();
   }
   if (viewName === 'plan') renderPlan();
@@ -93,6 +94,58 @@ function attachEventListeners() {
     if (e.target.id === 'modal-backdrop') closeAddModal();
   });
   document.getElementById('btn-save-entry').addEventListener('click', saveEntry);
+
+  // Gasto compartido
+  document.getElementById('split-toggle').addEventListener('click', () => setSplitEnabled(!splitEnabled));
+  document.getElementById('split-type-equal').addEventListener('click', () => setSplitType('equal'));
+  document.getElementById('split-type-custom').addEventListener('click', () => setSplitType('custom'));
+  document.getElementById('split-name').addEventListener('input', updateSplitPreview);
+  document.getElementById('split-my-share').addEventListener('input', () => onSplitShareInput('mine'));
+  document.getElementById('split-other-share').addEventListener('input', () => onSplitShareInput('other'));
+  document.getElementById('input-amount').addEventListener('input', updateSplitPreview);
+
+  // Etiquetas
+  document.getElementById('input-tag').addEventListener('keydown', onTagInputKeydown);
+  document.getElementById('input-tag').addEventListener('input', renderTagSuggestions);
+  document.getElementById('btn-add-tag').addEventListener('click', () => {
+    addTag(document.getElementById('input-tag').value);
+    document.getElementById('input-tag').focus();
+  });
+  document.querySelectorAll('#tag-range button').forEach(btn => {
+    btn.addEventListener('click', () => setTagReportRange(btn.dataset.range));
+  });
+
+  // Ahorro: aviso del Inicio, cálculo y ajustes
+  document.getElementById('btn-open-savings-nudge').addEventListener('click', openSavingsModal);
+  document.getElementById('btn-dismiss-savings-nudge').addEventListener('click', dismissSavingsNudge);
+  document.getElementById('btn-close-savings').addEventListener('click', closeSavingsModal);
+  document.getElementById('savings-modal-backdrop').addEventListener('click', (e) => {
+    if (e.target.id === 'savings-modal-backdrop') closeSavingsModal();
+  });
+  document.getElementById('btn-save-savings').addEventListener('click', saveSavingsSettings);
+
+  // Reporte descargable (PDF / Excel)
+  document.getElementById('btn-open-export').addEventListener('click', openExportModal);
+  document.getElementById('btn-open-export-settings').addEventListener('click', openExportModal);
+  document.getElementById('btn-cancel-export').addEventListener('click', closeExportModal);
+  document.getElementById('export-modal-backdrop').addEventListener('click', (e) => {
+    if (e.target.id === 'export-modal-backdrop') closeExportModal();
+  });
+  document.querySelectorAll('#export-period-type button').forEach(btn => {
+    btn.addEventListener('click', () => setExportPeriodType(btn.dataset.period));
+  });
+  document.getElementById('export-month').addEventListener('change', renderExportModal);
+  document.getElementById('export-year').addEventListener('change', renderExportModal);
+  document.getElementById('btn-export-pdf').addEventListener('click', () => runReportExport('pdf'));
+  document.getElementById('btn-export-xlsx').addEventListener('click', () => runReportExport('xlsx'));
+
+  // Resumen semanal (la tarjeta del Inicio lo abre; nunca se abre solo)
+  document.getElementById('btn-open-weekly').addEventListener('click', openWeeklySummary);
+  document.getElementById('btn-dismiss-weekly').addEventListener('click', markWeeklySummarySeen);
+  document.getElementById('btn-close-weekly').addEventListener('click', closeWeeklySummary);
+  document.getElementById('weekly-modal-backdrop').addEventListener('click', (e) => {
+    if (e.target.id === 'weekly-modal-backdrop') closeWeeklySummary();
+  });
   document.getElementById('type-expense').addEventListener('click', () => setEntryType('expense'));
   document.getElementById('type-income').addEventListener('click', () => setEntryType('income'));
 

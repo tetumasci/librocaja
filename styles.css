@@ -1,7 +1,7 @@
 /* ============================================
    LIBRO DE CAJA — design tokens
    Estilo "E": verde, Plus Jakarta Sans, tema claro y oscuro.
-   Especificación: rediseño/REDISENO_SPEC.md
+   Especificación: docs/rediseno/REDISENO_SPEC.md
    ============================================ */
 
 /* Needed: author CSS (e.g. display:flex on .modal-backdrop) has same specificity
@@ -2169,3 +2169,272 @@ input { font-family: inherit; }
   z-index: 200;
 }
 .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+/* ============================================
+   GASTOS COMPARTIDOS, ETIQUETAS, RESUMEN SEMANAL
+   ============================================ */
+
+/* ---- gasto compartido (modal de movimiento) ---- */
+.split-toggle[aria-pressed="true"] {
+  background: var(--chip-selected-bg);
+  color: var(--chip-selected-fg);
+  border-color: var(--chip-selected-border);
+}
+.split-details { margin-top: 12px; }
+.split-label-gap { margin-top: 12px; }
+.split-custom-fields {
+  margin-top: 12px;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+.split-preview { color: var(--link); font-weight: 600; }
+.split-preview.warn { color: var(--warn); }
+.entry-tag-shared { background: var(--income-tint); color: var(--income); }
+
+/* ---- gastos compartidos (Reportes) ---- */
+.shared-person { padding: 12px 0; border-bottom: 1px solid var(--divider); }
+#shared-list > .shared-person:last-child { border-bottom: 0; }
+.shared-person-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+.shared-person-name { font-size: 15px; font-weight: 700; }
+.shared-person-total { font-size: 13px; font-weight: 700; color: var(--income); font-variant-numeric: tabular-nums; }
+.shared-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 6px 0 0;
+}
+.shared-row-detail { flex: 1; min-width: 0; }
+.shared-row-title {
+  font-size: 13px;
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.shared-row-sub { font-size: 12px; color: var(--muted); }
+.shared-row-amount { font-size: 13px; font-weight: 700; font-variant-numeric: tabular-nums; }
+
+/* ---- etiquetas ---- */
+.tag-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+.tag-suggestions { margin: 8px 0 0; }
+.tag-chip {
+  min-height: 44px;
+  padding: 0 14px;
+  border-radius: 22px;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  max-width: 100%;
+  background: var(--chip-selected-bg);
+  color: var(--chip-selected-fg);
+  border: 1px solid var(--chip-selected-border);
+}
+.tag-chip-x { font-size: 18px; line-height: 1; opacity: 0.8; }
+.tag-chip-suggest {
+  background: var(--input-bg);
+  color: var(--link);
+  border: 1.5px dashed var(--link);
+}
+.tag-input-row { display: flex; align-items: center; gap: 8px; }
+.tag-input-row .text-input { flex: 1; min-width: 0; }
+.tag-add-btn { flex-shrink: 0; padding: 0 4px; }
+
+.tag-report-chips,
+#tag-report-chips {
+  margin-top: 12px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.tag-report-amount { font-variant-numeric: tabular-nums; opacity: 0.85; font-weight: 500; }
+.tag-report-hint { margin: 10px 0 12px; }
+.tag-report-total {
+  margin-top: 14px;
+  padding: 12px 14px;
+  border-radius: 20px;
+  background: var(--neutral-tint);
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.tag-report-total-label { font-size: 12px; font-weight: 700; color: var(--muted); }
+.tag-report-total-value { font-size: 22px; font-weight: 800; font-variant-numeric: tabular-nums; }
+.tag-report-total-sub { font-size: 12px; color: var(--muted); }
+
+/* ---- resumen semanal: aviso en el Inicio ---- */
+.weekly-card {
+  margin-top: 12px;
+  display: flex;
+  align-items: stretch;
+  background: var(--surface);
+  border: 1.5px solid var(--link);
+  border-radius: 20px;
+}
+.weekly-card-main {
+  flex: 1;
+  min-width: 0;
+  min-height: 56px;
+  padding: 10px 6px 10px 16px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: flex-start;
+  gap: 2px;
+  text-align: left;
+}
+.weekly-card-title { font-size: 14px; font-weight: 700; color: var(--text); }
+.weekly-card-sub { font-size: 12px; color: var(--muted); }
+.weekly-card-close {
+  width: 48px;
+  min-height: 44px;
+  font-size: 24px;
+  line-height: 1;
+  color: var(--muted);
+}
+
+/* ---- resumen semanal: modal ---- */
+.weekly-total {
+  margin-top: 14px;
+  padding: 14px 16px;
+  border-radius: 20px;
+  background: var(--neutral-tint);
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.weekly-total-label { font-size: 12px; font-weight: 700; color: var(--muted); }
+.weekly-total-value { font-size: 28px; font-weight: 800; font-variant-numeric: tabular-nums; }
+.weekly-compare { font-size: 13px; font-weight: 600; color: var(--muted); }
+.weekly-compare.up { color: var(--expense); }
+.weekly-compare.down { color: var(--income); }
+.weekly-top-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--divider);
+}
+.weekly-top > .weekly-top-row:last-child { border-bottom: 0; }
+.weekly-top-rank {
+  width: 24px;
+  height: 24px;
+  border-radius: 12px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  font-size: 12px;
+  font-weight: 700;
+  background: var(--neutral-tint);
+  color: var(--muted);
+}
+.weekly-top-name { flex: 1; min-width: 0; font-size: 14px; font-weight: 600; }
+.weekly-top-amount { font-size: 14px; font-weight: 700; font-variant-numeric: tabular-nums; }
+#weekly-body .report-subtitle { margin-top: 16px; }
+.weekly-days { margin-top: 8px; display: flex; gap: 6px; }
+.weekly-day {
+  flex: 1;
+  height: 36px;
+  border-radius: 12px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  font-weight: 700;
+  background: var(--neutral-tint);
+  color: var(--muted);
+}
+.weekly-day.logged { background: var(--chip-selected-bg); color: var(--chip-selected-fg); }
+.weekly-days-text { margin: 8px 0 0; font-size: 13px; color: var(--muted); }
+
+/* ---- descargar reporte ---- */
+.btn-save-secondary {
+  background: transparent;
+  color: var(--link);
+  border: 1.5px solid var(--link);
+}
+.btn-save-secondary:disabled,
+.btn-save:disabled { opacity: 0.55; }
+.export-gap { margin-top: 14px; }
+.export-selects {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+.export-selects > .field-group[hidden] { display: none; }
+
+/* ---- ahorro del mes ---- */
+.savings-link-btn {
+  display: block;
+  margin-top: 10px;
+  min-height: 44px;
+  padding: 0;
+  text-align: left;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--link);
+}
+.savings-saved {
+  margin-top: 14px;
+  padding: 14px 16px;
+  border-radius: 20px;
+  background: var(--neutral-tint);
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.savings-saved-label { font-size: 12px; font-weight: 700; color: var(--muted); }
+.savings-saved-value { font-size: 26px; font-weight: 800; font-variant-numeric: tabular-nums; }
+.savings-progress {
+  margin-top: 10px;
+  height: 8px;
+  border-radius: 4px;
+  background: var(--track);
+  overflow: hidden;
+}
+.savings-progress-fill { height: 100%; border-radius: 4px; background: var(--bar-fill); }
+.savings-note { margin: 8px 0 0; font-size: 12px; line-height: 1.5; color: var(--muted); }
+.savings-disclaimer { margin-bottom: 4px; }
+.savings-capacity {
+  margin-top: 14px;
+  padding: 14px 16px;
+  border-radius: 20px;
+  background: var(--banner-bg);
+  color: var(--banner-fg);
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.savings-capacity-label { font-size: 12px; font-weight: 700; }
+.savings-capacity-value { font-size: 28px; font-weight: 800; font-variant-numeric: tabular-nums; }
+.savings-capacity-sub { font-size: 12px; }
+#savings-body .report-subtitle { margin-top: 16px; }
+.savings-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 9px 0;
+  border-bottom: 1px solid var(--divider);
+}
+.savings-row-detail { flex: 1; min-width: 0; }
+.savings-row-label { font-size: 14px; font-weight: 600; }
+.savings-row-sub { font-size: 12px; color: var(--muted); }
+.savings-row-amount { font-size: 14px; font-weight: 700; font-variant-numeric: tabular-nums; }
+.savings-row-amount.minus { color: var(--expense); }
+.savings-row-total { border-bottom: 0; }
+.savings-row-total .savings-row-label,
+.savings-row-total .savings-row-amount { font-weight: 800; }
+#savings-chips-label { margin-top: 16px; }

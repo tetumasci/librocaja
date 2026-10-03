@@ -93,6 +93,24 @@
     </button>
   </div>
 
+  <!-- ===== RESUMEN SEMANAL (aviso; el modal se abre solo con un toque) ===== -->
+  <section class="weekly-card" id="weekly-card" hidden>
+    <button type="button" class="weekly-card-main" id="btn-open-weekly">
+      <span class="weekly-card-title">Tu resumen de la semana está listo</span>
+      <span class="weekly-card-sub" id="weekly-card-sub"></span>
+    </button>
+    <button type="button" class="weekly-card-close" id="btn-dismiss-weekly" aria-label="Descartar resumen semanal">×</button>
+  </section>
+
+  <!-- ===== AVISO DE AHORRO (el cálculo se abre con un toque) ===== -->
+  <section class="weekly-card" id="savings-nudge" hidden>
+    <button type="button" class="weekly-card-main" id="btn-open-savings-nudge">
+      <span class="weekly-card-title" id="savings-nudge-title"></span>
+      <span class="weekly-card-sub" id="savings-nudge-sub"></span>
+    </button>
+    <button type="button" class="weekly-card-close" id="btn-dismiss-savings-nudge" aria-label="Descartar aviso de ahorro">×</button>
+  </section>
+
   <!-- ===== SUGGESTION BANNER (dynamic) ===== -->
   <section class="suggestion-banner" id="suggestion-banner" hidden>
     <span class="suggestion-icon">◆</span>
@@ -152,7 +170,9 @@
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
     </button>
     <h1>Reportes</h1>
-    <div class="screen-header-spacer"></div>
+    <button class="screen-add" id="btn-open-export" aria-label="Descargar reporte en PDF o Excel">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4v11M7 11l5 5 5-5M5 20h14"/></svg>
+    </button>
   </header>
   <div class="view-body screen-body">
     <div class="report-month">
@@ -218,6 +238,23 @@
     <section class="report-card">
       <h2 class="report-card-title">Gastos por categoría</h2>
       <div id="category-bars" class="category-bars"></div>
+    </section>
+
+    <section class="report-card" id="tags-card" hidden>
+      <h2 class="report-card-title">Gastos por etiqueta</h2>
+      <p class="report-card-sub">Total gastado bajo cada etiqueta, sin importar la categoría</p>
+      <div class="seg-control seg-cols-2" id="tag-range" role="group" aria-label="Período de las etiquetas">
+        <button type="button" class="seg-btn" data-range="month" aria-pressed="true">Este mes</button>
+        <button type="button" class="seg-btn" data-range="all" aria-pressed="false">Todo</button>
+      </div>
+      <div class="tag-report-chips" id="tag-report-chips"></div>
+      <div id="tag-report-detail"></div>
+    </section>
+
+    <section class="report-card" id="shared-card" hidden>
+      <h2 class="report-card-title">Gastos compartidos</h2>
+      <p class="report-card-sub">Lo que te deben por gastos que pagaste vos</p>
+      <div id="shared-list"></div>
     </section>
 
     <section class="report-card" id="savings-card" hidden>
@@ -339,6 +376,36 @@
     </section>
 
     <section class="settings-card">
+      <h2 class="settings-card-title">Ahorro</h2>
+      <div class="settings-input-row stacked">
+        <span class="settings-input-label">Piso mensual, aparte del plan (opcional)</span>
+        <label class="settings-input-wrap">
+          <span class="visually-hidden">Piso de ahorro mensual, en dólares</span>
+          <span class="settings-input-unit" aria-hidden="true">USD</span>
+          <input type="number" inputmode="decimal" id="savings-floor-input" class="settings-input" placeholder="sin piso" step="1" min="0">
+        </label>
+      </div>
+      <div class="settings-input-row stacked">
+        <span class="settings-input-label">Ideal: porcentaje de tus ingresos</span>
+        <label class="settings-input-wrap">
+          <span class="visually-hidden">Porcentaje ideal de ahorro sobre los ingresos</span>
+          <input type="number" inputmode="decimal" id="savings-ideal-input" class="settings-input" placeholder="20" step="1" min="1" max="100">
+          <span class="settings-input-unit" aria-hidden="true">%</span>
+        </label>
+      </div>
+      <div class="settings-input-row stacked">
+        <span class="settings-input-label">Colchón: porcentaje de un mes de gastos que no se toca</span>
+        <label class="settings-input-wrap">
+          <span class="visually-hidden">Colchón de seguridad, en porcentaje de un mes de gastos</span>
+          <input type="number" inputmode="decimal" id="savings-cushion-input" class="settings-input" placeholder="15" step="1" min="0" max="100">
+          <span class="settings-input-unit" aria-hidden="true">%</span>
+        </label>
+        <button class="text-btn" id="btn-save-savings">Guardar</button>
+      </div>
+      <p class="settings-hint">Con esto la app avisa si en el mes no ahorraste y calcula cuánto podrías ahorrar sin complicarte. El plan de inversión no cuenta: es ahorro de largo plazo.</p>
+    </section>
+
+    <section class="settings-card">
       <h2 class="settings-card-title">Apariencia</h2>
       <div class="theme-selector" id="theme-selector" role="group" aria-label="Tema de la app">
         <button type="button" data-theme-option="light" aria-pressed="false">Claro</button>
@@ -349,6 +416,9 @@
 
     <section class="settings-card">
       <h2 class="settings-card-title">Datos</h2>
+      <button class="settings-row" id="btn-open-export-settings">
+        <span>Descargar reporte (PDF / Excel)</span>
+      </button>
       <button class="settings-row" id="btn-export">
         <span>Exportar datos (JSON)</span>
       </button>
@@ -476,6 +546,43 @@
       <div class="account-grid" id="account-grid"></div>
     </div>
 
+    <div class="field-group" id="tags-field">
+      <label class="field-label" for="input-tag">Etiquetas <span class="field-label-optional">(opcional)</span></label>
+      <div class="tag-chips" id="tag-chips" hidden></div>
+      <div class="tag-input-row">
+        <input type="text" id="input-tag" class="text-input" placeholder="ej: viaje bariloche" maxlength="30" autocomplete="off" enterkeyhint="done">
+        <button type="button" class="text-btn tag-add-btn" id="btn-add-tag" aria-label="Agregar etiqueta">+ Agregar</button>
+      </div>
+      <div class="tag-chips tag-suggestions" id="tag-suggestions" hidden></div>
+    </div>
+
+    <div class="field-group" id="split-field">
+      <button type="button" class="category-chip split-toggle" id="split-toggle" aria-pressed="false">Gasto compartido</button>
+      <div class="split-details" id="split-details" hidden>
+        <label class="field-label" for="split-name">Con quién</label>
+        <input type="text" id="split-name" class="text-input" placeholder="ej: Ana" list="split-name-options" autocomplete="off">
+        <datalist id="split-name-options"></datalist>
+
+        <label class="field-label split-label-gap">División</label>
+        <div class="account-type-selector">
+          <button type="button" class="account-type-btn selected" id="split-type-equal">50 / 50</button>
+          <button type="button" class="account-type-btn" id="split-type-custom">Montos personalizados</button>
+        </div>
+
+        <div class="split-custom-fields" id="split-custom-fields" hidden>
+          <div>
+            <label class="field-label" for="split-my-share">Tu parte</label>
+            <input type="number" inputmode="decimal" id="split-my-share" class="text-input" placeholder="0" step="any" min="0">
+          </div>
+          <div>
+            <label class="field-label" for="split-other-share">Su parte</label>
+            <input type="number" inputmode="decimal" id="split-other-share" class="text-input" placeholder="0" step="any" min="0">
+          </div>
+        </div>
+        <p class="field-hint split-preview" id="split-preview" aria-live="polite"></p>
+      </div>
+    </div>
+
     <div class="field-group">
       <label class="field-label" for="input-date">Fecha</label>
       <input type="date" id="input-date" class="text-input">
@@ -540,6 +647,62 @@
     </div>
     <button class="btn-save" id="btn-save-fund">sumar</button>
     <button class="btn-cancel" id="btn-cancel-fund">cancelar</button>
+  </div>
+</div>
+
+<!-- ===== MODAL: DESCARGAR REPORTE ===== -->
+<div class="modal-backdrop" id="export-modal-backdrop" hidden>
+  <div class="modal-sheet">
+    <div class="modal-handle"></div>
+    <h2 class="modal-title">Descargar reporte</h2>
+    <p class="report-card-sub">PDF con gráficos y estadísticas, o Excel con todos tus movimientos.</p>
+
+    <div class="field-group export-gap">
+      <label class="field-label">Período</label>
+      <div class="seg-control" id="export-period-type" role="group" aria-label="Período del reporte">
+        <button type="button" class="seg-btn" data-period="month" aria-pressed="true">Mes</button>
+        <button type="button" class="seg-btn" data-period="year" aria-pressed="false">Año</button>
+        <button type="button" class="seg-btn" data-period="all" aria-pressed="false">Todo</button>
+      </div>
+    </div>
+    <div class="export-selects">
+      <div class="field-group" id="export-month-field">
+        <label class="field-label" for="export-month">Mes</label>
+        <select id="export-month" class="text-input"></select>
+      </div>
+      <div class="field-group" id="export-year-field">
+        <label class="field-label" for="export-year">Año</label>
+        <select id="export-year" class="text-input"></select>
+      </div>
+    </div>
+    <p class="field-hint" id="export-summary" aria-live="polite"></p>
+
+    <button class="btn-save" id="btn-export-pdf">Descargar PDF</button>
+    <button class="btn-save btn-save-secondary" id="btn-export-xlsx">Descargar Excel</button>
+    <button class="btn-cancel" id="btn-cancel-export">Cerrar</button>
+  </div>
+</div>
+
+<!-- ===== MODAL: AHORRO DEL MES ===== -->
+<div class="modal-backdrop" id="savings-modal-backdrop" hidden>
+  <div class="modal-sheet">
+    <div class="modal-handle"></div>
+    <h2 class="modal-title">Tu ahorro del mes</h2>
+    <div id="savings-body"></div>
+    <p class="report-subtitle" id="savings-chips-label" hidden>Depositar en dólares</p>
+    <div class="tag-chips" id="savings-chips" hidden></div>
+    <button class="btn-cancel" id="btn-close-savings">Cerrar</button>
+  </div>
+</div>
+
+<!-- ===== MODAL: RESUMEN SEMANAL ===== -->
+<div class="modal-backdrop" id="weekly-modal-backdrop" hidden>
+  <div class="modal-sheet">
+    <div class="modal-handle"></div>
+    <h2 class="modal-title">Resumen de la semana</h2>
+    <p class="report-card-sub" id="weekly-range"></p>
+    <div id="weekly-body"></div>
+    <button class="btn-save" id="btn-close-weekly">Listo</button>
   </div>
 </div>
 
@@ -941,6 +1104,13 @@
 <script src="js/suggestions.js"></script>
 <script src="js/quickadd.js"></script>
 <script src="js/transfers.js"></script>
+<script src="js/split.js"></script>
+<script src="js/tags.js"></script>
+<script src="js/weekly.js"></script>
+<script src="js/savings.js"></script>
+<script src="js/report.js"></script>
+<script src="js/reportpdf.js"></script>
+<script src="js/reportxlsx.js"></script>
 <script src="js/main.js"></script>
 <script>
 if ('serviceWorker' in navigator) {

@@ -403,6 +403,9 @@ function handleImportFile(e) {
       smallExpenseThreshold:  parsed.smallExpenseThreshold ?? 5000,
       transfers:              parsed.transfers          || [],
       installmentPurchases:   parsed.installmentPurchases || [],
+      lastWeeklySummaryShown: parsed.lastWeeklySummaryShown || null,
+      savingsSettings:        Object.assign({ floorUSD: 0, idealPct: 20, cushionPct: 15 }, parsed.savingsSettings),
+      savingsNudgeDismissed:  parsed.savingsNudgeDismissed || null,
       settings:               { theme: ['light', 'dark'].includes(parsed.settings?.theme) ? parsed.settings.theme : 'auto' },
     };
 
@@ -468,6 +471,9 @@ function clearAllData() {
     smallExpenseThreshold: 5000,
     transfers: [],
     installmentPurchases: [],
+    lastWeeklySummaryShown: null,
+    savingsSettings: { floorUSD: 0, idealPct: 20, cushionPct: 15 },
+    savingsNudgeDismissed: null,
     settings: { theme: 'auto' },
   };
   saveState();
