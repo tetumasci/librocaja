@@ -5,7 +5,7 @@ Antes de implementar cualquiera: leer `REGLAS.md` y después la feature completa
 
 **Orden**: de arriba hacia abajo (respetar dependencias). Si una feature depende de otra pendiente, avisar al usuario en vez de implementarla fuera de orden.
 
-**Nota de estilo**: las specs de abajo se escribieron antes del rediseño. Donde dicen "terracota" leer `--expense`, donde dicen "oliva" leer `--income`, y "papel crema / serif" ya no existe (ver `rediseno/REDISENO_SPEC.md`).
+**Nota de estilo**: las specs de abajo se escribieron antes del rediseño. Donde dicen "terracota" leer `--expense`, donde dicen "oliva" leer `--income`, y "papel crema / serif" ya no existe (ver `docs/rediseno/REDISENO_SPEC.md`).
 
 **Estado de cada feature**: `pendiente` o `en progreso`. Al terminarla se **borra de este archivo** y se agrega al `CHANGELOG.md`.
 

@@ -11,7 +11,8 @@ Contexto: PWA de finanzas personales en HTML/CSS/JS vanilla, sin frameworks ni b
 | `docs/REGLAS.md` | Este archivo: cómo trabajar |
 | `docs/PENDIENTES.md` | Features por hacer, con su spec completa |
 | `docs/CHANGELOG.md` | Historial de lo hecho (una línea por cambio) |
-| `docs/rediseno/REDISENO_SPEC.md` | Identidad visual (estilo "E"), tokens y componentes |
+| `docs/rediseno/REDISENO_SPEC.md` | Identidad visual (marino + ámbar, Outfit), tokens y componentes |
+| `docs/rediseno/BACKLOG_REDISENO.md` | Backlog del rediseño (B0b, B1–B7) |
 | `docs/rediseno/mockups/` | Mockups HTML exactos de cada pantalla (claro y oscuro) |
 
 No hay documento de "features hechas" con specs viejas: si hace falta el detalle de algo ya hecho, está en el código y en el historial de git.
@@ -28,7 +29,7 @@ No hay documento de "features hechas" con specs viejas: si hace falta el detalle
 
 ## Reglas generales
 
-- **Identidad visual**: la define `docs/rediseno/REDISENO_SPEC.md` (estilo "E": verde, Plus Jakarta Sans, tokens semánticos, tema claro y oscuro). Todo lo nuevo usa esos tokens (`--bg`, `--surface`, `--text`, `--muted`, `--income`, `--expense`, `--link`, etc., definidos en `:root` y en los dos bloques oscuros de `styles.css`) y nunca colores fijos. El diseño anterior (papel crema, Source Serif 4, Inter, JetBrains Mono) ya no existe. Toda pantalla nueva debe verse bien en claro y en oscuro, con contraste AA y áreas táctiles de al menos 44 px.
+- **Identidad visual**: la define `docs/rediseno/REDISENO_SPEC.md` (marino + ámbar, Outfit, tokens semánticos, claro y oscuro). Todo lo nuevo usa esos tokens (`--bg`, `--surface`, `--text`, `--muted`, `--income`, `--expense`, `--link`, etc., definidos en `:root` y en los dos bloques oscuros de `styles.css`) y nunca colores fijos. El diseño anterior (papel crema, Source Serif 4, Inter, JetBrains Mono) ya no existe. Toda pantalla nueva debe verse bien en claro y en oscuro, con contraste AA y áreas táctiles de al menos 44 px.
 - **Sin frameworks ni build step**: HTML/CSS/JS vanilla servido como archivos estáticos, salvo que una feature diga lo contrario explícitamente.
 - **Modularización**: el código vive en `js/` (`state.js`, `ui.js`, `ledger.js`, `recurring.js`, `installments.js`, `accounts.js`, `budgets.js`, `goals.js`, `stats.js`, `settings.js`, `plan.js`, `suggestions.js`, `quickadd.js`, `transfers.js`, `main.js`), cargados como `<script>` en orden de dependencia desde `index.html`. Nunca volver a crear un `app.js` monolítico. Código nuevo: elegir el archivo por dominio, o crear uno nuevo con nombre de dominio.
 - **Persistencia**: todo campo nuevo en `state` debe tener un default sensato en `loadState()` para no romper instalaciones existentes, y resetearse en `clearAllData()` e incluirse en `handleImportFile()`.

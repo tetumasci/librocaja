@@ -6,6 +6,7 @@
 | [PENDIENTES.md](PENDIENTES.md) | Solo features por hacer, con spec completa, e ideas sin desarrollar. |
 | [CHANGELOG.md](CHANGELOG.md) | Historial de lo hecho, más nuevo arriba. |
 | [rediseno/REDISENO_SPEC.md](rediseno/REDISENO_SPEC.md) | Identidad visual: tokens, componentes, pantallas. |
+| [rediseno/BACKLOG_REDISENO.md](rediseno/BACKLOG_REDISENO.md) | Backlog del rediseño (B0b, B1–B7). |
 | [rediseno/mockups/](rediseno/mockups/) | Mockups HTML de cada pantalla (claro y oscuro). |
 
 Para saber qué falta: abrir `PENDIENTES.md`. Para saber qué hay hecho: `CHANGELOG.md`.
