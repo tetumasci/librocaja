@@ -1,9 +1,9 @@
-# Rediseño de Libro de caja — Especificación visual ("estilo E")
+# Rediseño de Libro de caja — Especificación visual ("Marino + ámbar")
 
 Documento de referencia para Claude Code. Describe **qué se ve** (tokens, componentes, pantallas).
-El **orden de trabajo** está en historial de git (commits "rediseño A1 … B7", ver `CHANGELOG.md`).
+El **orden de trabajo** está en `BACKLOG_REDISENO.md` (ítems REDISEÑO-A0 … B7).
 
-Referencia visual exacta: carpeta `mockups/` (HTML estáticos, abrir en el navegador). Cada archivo
+Referencia visual exacta: carpeta `mockups/` (v2, paleta marino + ámbar; **reemplaza** a los mockups verdes) (HTML estáticos, abrir en el navegador). Cada archivo
 es una pantalla a 390 px de ancho, en claro (`Real-L-*`) y en oscuro (`Real-D-*`). Los valores de
 este documento salen de esos archivos; si hay una duda de medida o color, **el mockup manda**.
 
@@ -14,12 +14,17 @@ este documento salen de esos archivos; si hay una duda de medida o color, **el m
 1. **Saldo principal del Inicio = "Tenés ahora (todas las cuentas)"** (`#total-balance`, suma de
    `getAccountBalance()` de todas las cuentas, no depende del mes). El **saldo del mes** pasa a ser
    información chica (en el Inicio) y se suma también arriba de Reportes.
-2. **Desglose por cuenta** en el Inicio: solo las cuentas con saldo distinto de cero.
-3. **Modo claro** verde (base) y **modo oscuro** (negro + el mismo verde). Existe también una
-   variante azul/celeste en el lienzo de diseño, **no se implementa** (queda como alternativa).
-4. Se abandona la identidad "papel crema + dorado + serif". Tipografía única: Plus Jakarta Sans.
+2. **Desglose por cuenta** en el Inicio: solo las cuentas con saldo distinto de cero, como **chips horizontales con scroll**
+   dentro de la tarjeta principal (así la tarjeta no crece con 4–5 cuentas). Al final de la fila hay un chip
+   "Transferir" (abre `#btn-open-transfer`).
+2b. **Inicio compacto (distribución B)**: barra superior → tarjeta principal → fila de 3 botones anchos
+   (Gasto / Ingreso / Rápida, de A3; **sin** botones flotantes ni menú desplegable) → tarjeta chica del mes →
+   banner → movimientos → barra inferior.
+3. **Identidad propia "Marino + ámbar"** (v2): modo claro = fondo crema + tarjeta principal azul marino + ámbar como
+   resaltado; modo oscuro = casi negro azulado + la misma tarjeta marino + ámbar. Reemplaza al verde de la v1
+   (se descartó para no parecerse a otras apps). Las demás paletas exploradas **no se implementan**.
+4. Se abandona la identidad "papel crema + dorado + serif". Tipografía única: **Outfit**.
 5. El modo oscuro es una opción en Ajustes: Claro / Oscuro / Automático (por defecto Automático).
-6. El Inicio tiene accesos directos Gasto / Ingreso / Carga rápida en el medio; no hay botones flotantes.
 
 ## 2. Tokens (variables CSS)
 
@@ -45,51 +50,48 @@ El `:root` actual usa `--paper`, `--paper-raised`, `--paper-line`, `--ink`, `--i
 
 | Token | Claro | Oscuro | Uso |
 |---|---|---|---|
-| `--bg` | `#EEF2EC` | `#0A0A0A` | fondo de la app |
-| `--surface` | `#FFFFFF` | `#161817` | tarjetas, hojas, barra inferior |
-| `--text` | `#14231F` | `#ECEEED` | texto principal |
-| `--muted` | `#55645E` | `#A2AAA6` | texto secundario (reemplaza `--ink-soft` y `--ink-faint`) |
-| `--line` | `#CBD6C8` | `#2E3231` | bordes de inputs, chips, handle de hojas |
-| `--divider` | `#EEF2EC` | `#232625` | líneas entre filas dentro de tarjetas |
-| `--input-bg` | `#F7FAF6` | `#1D201F` | fondo de inputs y chips sin seleccionar |
-| `--track` | `#DDE6DA` | `#262A29` | fondo de barras de progreso |
-| `--hero` | `#123B33` | `#123B33` | tarjeta principal ("Tenés ahora", "Saldo del mes") |
-| `--hero-text` | `#F4F7F1` | `#F2F7F4` | texto sobre `--hero` |
-| `--hero-divider` | `#2B5A50` | `#2A5A4F` | líneas dentro de la tarjeta hero |
-| `--hero-tile` | `#1E5148` | `#1B4D42` | mosaicos dentro de hero (Reportes) |
-| `--hero-border` | `#123B33` | `#1F5448` | borde 1 px de hero (en oscuro la despega del fondo) |
-| `--hero-icon` | `#D3F26A` | `#8FDCC0` | íconos y botón de transferir sobre hero |
-| `--hero-negative` | `#FF9A73` | `#FF9A73` | importes negativos sobre `--hero` (la tarjeta hero es igual en ambos temas) |
-| `--primary` | `#123B33` | `#8FDCC0` | botones primarios, botón + |
-| `--primary-text` | `#F4F7F1` | `#07231B` | texto sobre `--primary` |
-| `--highlight` | `#D3F26A` | `#8FDCC0` | chip de racha, botón "Sumar", badge USD |
-| `--highlight-text` | `#14231F` | `#07231B` | texto sobre `--highlight` |
-| `--nav-active-bg` | `#D3F26A` | `#1D3A32` | pestaña activa de la barra inferior |
-| `--nav-active-fg` | `#14231F` | `#8FDCC0` | ícono/texto de pestaña activa |
-| `--link` | `#0F5A4A` | `#8FDCC0` | botones de texto ("+ Agregar…", "editar") |
-| `--bar-fill` | `#123B33` | `#8FDCC0` | relleno de barras de progreso y gráficos |
-| `--income` | `#14532D` | `#7FD99B` | texto/monto de ingresos |
-| `--expense` | `#9A3412` | `#FF9A73` | texto/monto de gastos, "Borrar datos" |
-| `--income-tint` | `#DCEFD9` | `#183524` | fondo del avatar de ingresos y del banner |
-| `--expense-tint` | `#FBE3D6` | `#3A241C` | fondo del avatar de gastos |
-| `--neutral-tint` | `#E4EBE1` | `#262A29` | avatar de transferencias/ajustes, badge ARS, tag "pendiente" |
+| `--bg` | `#F6F1E9` | `#0B0F18` | fondo de la app |
+| `--surface` | `#FFFFFF` | `#141A27` | tarjetas, hojas, barra inferior |
+| `--text` | `#1B2236` | `#F1EEE6` | texto principal |
+| `--muted` | `#5B6477` | `#A5ADBD` | texto secundario (reemplaza `--ink-soft` y `--ink-faint`) |
+| `--line` | `#DED5C6` | `#27304A` | bordes de inputs, chips, handle de hojas |
+| `--divider` | `#EEE7DA` | `#1D2435` | líneas entre filas dentro de tarjetas |
+| `--input-bg` | `#FAF6EF` | `#192031` | fondo de inputs y chips sin seleccionar |
+| `--track` | `#E8DFCF` | `#252E45` | fondo de barras de progreso |
+| `--hero` | `#1B2B4B` | `#1B2B4B` | tarjeta principal ("Tenés ahora", "Saldo del mes") |
+| `--hero-text` | `#F7F4EC` | `#F7F4EC` | texto sobre `--hero` |
+| `--hero-divider` | `#37496E` | `#37496E` | líneas dentro de la tarjeta hero |
+| `--hero-tile` | `#26385F` | `#26385F` | mosaicos dentro de hero (Reportes) |
+| `--hero-border` | `#1B2B4B` | `#35507F` | borde 1 px de hero (en oscuro la despega del fondo) |
+| `--hero-icon` | `#F2B94B` | `#F2B94B` | íconos y botón de transferir sobre hero |
+| `--primary` | `#1B2B4B` | `#F2B94B` | botones primarios, botón + |
+| `--primary-text` | `#FFFFFF` | `#2B1D00` | texto sobre `--primary` |
+| `--highlight` | `#F2B94B` | `#F2B94B` | chip de racha, botón "Sumar", badge USD |
+| `--highlight-text` | `#2B1D00` | `#2B1D00` | texto sobre `--highlight` |
+| `--nav-active-bg` | `#F2B94B` | `#2A3556` | pestaña activa de la barra inferior |
+| `--nav-active-fg` | `#2B1D00` | `#F2B94B` | ícono/texto de pestaña activa |
+| `--link` | `#1B2B4B` | `#F2B94B` | botones de texto ("+ Agregar…", "editar") |
+| `--bar-fill` | `#1B2B4B` | `#F2B94B` | relleno de barras de progreso y gráficos |
+| `--income` | `#1E6B3C` | `#7FD99B` | texto/monto de ingresos |
+| `--expense` | `#B3361B` | `#FF9A73` | texto/monto de gastos, "Borrar datos" |
+| `--income-tint` | `#E0F0E3` | `#17352A` | fondo del avatar de ingresos y del banner |
+| `--expense-tint` | `#F8E3DC` | `#3A221B` | fondo del avatar de gastos |
+| `--neutral-tint` | `#EBE4D6` | `#222B42` | avatar de transferencias/ajustes, badge ARS, tag "pendiente" |
 | `--warn` | `#C2410C` | `#FF9A73` | barra de presupuesto al 90 % o más |
-| `--banner-bg` / `--banner-fg` | `#DCEFD9` / `#14532D` | `#183524` / `#7FD99B` | banner de sugerencias |
-| `--seg-selected-bg` / `-fg` | `#123B33` / `#F4F7F1` | `#123B33` / `#F2F7F4` | opción activa de controles segmentados |
-| `--chip-selected-bg` / `-fg` / `-border` | `#123B33` / `#F4F7F1` / `#123B33` | `#123B33` / `#F2F7F4` / `#2F6A5C` | chip seleccionado |
+| `--banner-bg` / `--banner-fg` | `#F6E7C6` / `#5A3E00` | `#2B2A1D` / `#F2D58A` | banner de sugerencias |
+| `--seg-selected-bg` / `-fg` | `#1B2B4B` / `#F7F4EC` | `#1B2B4B` / `#F7F4EC` | opción activa de controles segmentados |
+| `--chip-selected-bg` / `-fg` / `-border` | `#1B2B4B` / `#F7F4EC` / `#1B2B4B` | `#1B2B4B` / `#F7F4EC` / `#35507F` | chip seleccionado |
 | `--expense-solid` | `#B4451F` | `#B4451F` | botón "Gasto" activo en la hoja de carga (texto blanco) |
-| `--income-solid` | `#14532D` | `#2E7D4A` | botón "Ingreso" activo (texto blanco). *Derivado: no está dibujado.* |
-| `--overlay` | `rgba(18,35,31,.55)` | `rgba(0,0,0,.65)` | fondo oscurecido detrás de hojas |
-| `--shadow-card` | `0 8px 24px rgba(18,59,51,.14)` | `0 8px 24px rgba(0,0,0,.55)` | barra inferior, FABs |
-
-**Nombres definitivos (REDISEÑO-B7):** los tokens `--income`, `--expense` y `--shadow-card` de esta tabla usan sus nombres finales. Durante B0 a B6 se usaron con sufijo `-new` mientras los viejos seguían en uso; en B7 se borraron los viejos y se renombraron. `color-scheme` sigue al tema (claro / oscuro).
+| `--income-solid` | `#1E6B3C` | `#2E7D4A` | botón "Ingreso" activo (texto blanco). *Derivado: no está dibujado.* |
+| `--overlay` | `rgba(27,34,54,.55)` | `rgba(0,0,0,.65)` | fondo oscurecido detrás de hojas |
+| `--shadow-card` | `0 8px 24px rgba(27,43,75,.15)` | `0 8px 24px rgba(0,0,0,.55)` | barra inferior, FABs |
 
 Al implementar, verificar contraste WCAG AA (4,5:1 texto normal) en ambos temas.
 Ingresos y gastos **nunca se distinguen solo por color**: siempre signo (+/−) o flecha.
 
 ## 3. Tipografía
 
-- Una sola familia: **Plus Jakarta Sans** (pesos 400, 500, 600, 700, 800) desde Google Fonts, con
+- Una sola familia: **Outfit** (pesos 400, 500, 600, 700, 800) desde Google Fonts, con
   fallback `system-ui, sans-serif`. Reemplaza Source Serif 4, Inter y JetBrains Mono.
 - Números y montos: `font-variant-numeric: tabular-nums` (reemplaza la fuente mono).
 - Escala: monto hero 42/800 (−0.03em) · monto en Reportes hero 36/800 · monto de meta 24/800 ·
@@ -109,7 +111,8 @@ Ingresos y gastos **nunca se distinguen solo por color**: siempre signo (+/−) 
 - Barra inferior flotante: `left/right 20px`, `bottom 16px`, alto 68, radio 34, 5 pestañas
   (Libro, Reportes, Metas, Ajustes, Plan; mismo orden que hoy), ícono 20 + etiqueta 11. Pestaña
   activa: pastilla 64 × 54 con `--nav-active-bg`. El contenido necesita `padding-bottom ≥ 110px`.
-- Accesos directos (reemplazan a los botones flotantes): fila de 3 botones circulares de 56 px con etiqueta debajo (12/600), en columnas iguales, entre la tarjeta del mes y el banner. Gasto (`#btn-add-expense`, flecha ↗ en `--expense`), Ingreso (`#btn-add-income`, flecha ↙ en `--income`) y Carga rápida (`#btn-quick-add`, ícono ⚡ en `--text`). Círculo `--surface`; en oscuro con borde 1 px `--line`. Ya no hay botón + flotante.
+- **No hay botones flotantes** (A3 los reemplazó): los accesos Gasto / Ingreso / Rápida viven en el Inicio
+  (fila de 3 botones anchos, alto 48, pastilla). Conservar los ids `#btn-add` y `#btn-quick-add` en esos botones si el JS los usa.
 
 ## 5. Componentes
 
@@ -143,7 +146,7 @@ contenedores y clases, no ids.
 
 | Pantalla | Mockups | Ids / clases actuales a respetar | Cambios |
 |---|---|---|---|
-| Inicio (libro) | `Real-L-1-inicio`, `Real-D-1-inicio` | `#prev-month`, `#current-month-label`, `#next-month`, `#streak-bar`, `#streak-count`, `#streak-today-badge`, `#total-balance`, `#account-breakdown`, `#btn-open-transfer`, `#month-income`, `#month-expense`, `#month-balance`, `#suggestion-banner`, `#filter-pills` (`data-filter`), `#ledger-list`, `#empty-state`, `#btn-add-expense`, `#btn-add-income`, `#btn-quick-add`, `.bottom-nav .nav-item[data-view]` | navegación de mes y racha pasan a la barra superior (píldora + chip); hero con total + cuentas + transferir; tarjeta chica con ingresos/gastos/saldo del mes; filtro como control segmentado; filas nuevas; fila de accesos directos que reemplaza a los botones flotantes |
+| Inicio (libro, distribución B compacta) | `Real-L-1-inicio`, `Real-D-1-inicio` | `#prev-month`, `#current-month-label`, `#next-month`, `#streak-bar`, `#streak-count`, `#streak-today-badge`, `#total-balance`, `#account-breakdown`, `#btn-open-transfer`, `#month-income`, `#month-expense`, `#month-balance`, `#suggestion-banner`, `#filter-pills` (`data-filter`), `#ledger-list`, `#empty-state`, `#btn-add`, `#btn-quick-add`, `.bottom-nav .nav-item[data-view]` | navegación de mes y racha pasan a la barra superior (píldora + chip); hero con total + chips de cuentas (scroll horizontal) + chip "Transferir"; fila de 3 botones anchos Gasto/Ingreso/Rápida (sin flotantes); tarjeta chica con ingresos/gastos/saldo del mes; filtro como control segmentado; filas nuevas |
 | Reportes | `Real-L-2-reportes`, `Real-D-2-reportes` | `#stats-month-label`, `#metric-*`, `#category-bars`, `#trend-chart`, `#ants-section-label`, `#ants-category-bars` | hero "Saldo del mes" nuevo (`#stats-month-balance`); métricas en grilla de 2; barras con emoji; gráfico de 6 meses con mes actual resaltado |
 | Metas | `Real-L-3-metas`, `Real-D-3-metas` | `#goals-body`, `#btn-add-goal`, `.goal-card`, sección de ahorro en dólares (`renderDollarSavings`) | tarjeta por meta con badge ARS/USD, "Sumar", `≈ $ … (ref.)` en metas USD; sección de dólares con total, equivalente y depósitos |
 | Plan | `Real-L-4-plan`, `Real-D-4-plan` | `#plan-list`, `#btn-add-plan`, `.plan-card`, `#plan-chart-<id>` (canvas) | tarjeta con 3 datos, curva y botón de pago; **el canvas debe leer colores de las variables CSS y redibujarse al cambiar de tema** |
@@ -180,5 +183,13 @@ de racha. Los `confirm()` nativos se mantienen.
 
 ## 9. Fuera de alcance
 
-Variante azul/celeste, gráficos nuevos, cambios de datos o de lógica salvo los de REDISEÑO-A1, A2 y A3,
+Variante azul/celeste, gráficos nuevos, cambios de datos o de lógica salvo los dos de REDISEÑO-A1 y A2,
 nuevas pestañas, y reordenar la barra inferior.
+
+
+---
+## Anexo v2 — contraste verificado (WCAG AA)
+
+Muted sobre bg claro 5,3:1 · texto sobre bg 14:1 · ingreso/gasto sobre tarjeta ≥ 6:1 en claro y ≥ 8:1 en oscuro ·
+texto sobre hero 12,8:1 · ámbar sobre marino 7,9:1 · texto oscuro sobre ámbar 9,2:1 · blanco sobre `--expense-solid`
+5,5:1 y sobre `--income-solid` ≥ 5:1. Si al implementar algún par queda bajo 4,5:1, oscurecer/aclarar el token, no el texto.
