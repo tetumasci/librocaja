@@ -155,7 +155,7 @@ nueva, mecanismo de tema claro/oscuro y la opción en Ajustes. Seguir `REDISENO_
 
 ---
 ## FEATURE: REDISEÑO-B0b — Cambio de identidad: tokens y fuente "Marino + ámbar"
-**Estado: pendiente**
+**Estado: hecho**
 **Depende de:** REDISEÑO-B0 (hecho)
 
 ### Qué se pide

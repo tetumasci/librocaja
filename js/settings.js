@@ -239,7 +239,7 @@ function saveSmallExpenseThreshold() {
 
 /* ---------- Tema (claro / oscuro / automático) ---------- */
 
-const THEME_COLORS = { light: '#EEF2EC', dark: '#0A0A0A' };
+const THEME_COLORS = { light: '#F6F1E9', dark: '#0B0F18' };
 
 /* Aplica state.settings.theme al documento. En 'auto' no fija data-theme y
    manda el @media (prefers-color-scheme) de styles.css. Las dos metas
